@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   type CreateOrder201,
+  type CreateOrderBody,
   type MenuItem,
   type OrderStatus,
   type UpdateMenuItem200,
@@ -12,6 +13,19 @@ import {
   useUpdateOrderingSettings,
   useUpdateOrderStatus
 } from "@repo/api-client";
+
+export function buildCreateOrderBody(input: {
+  customerId: string;
+  menuItemIds: string[];
+}): CreateOrderBody {
+  return {
+    customerId: input.customerId,
+    items: input.menuItemIds.map((menuItemId) => ({
+      menuItemId,
+      quantity: 1
+    }))
+  };
+}
 
 export function useCreateRestaurantOrder(options?: {
   onCreated?: (order: CreateOrder201) => void;
@@ -30,13 +44,7 @@ export function useCreateRestaurantOrder(options?: {
     ...mutation,
     createOrder: (input: { customerId: string; menuItemIds: string[] }) =>
       mutation.mutate({
-        data: {
-          customerId: input.customerId,
-          items: input.menuItemIds.map((menuItemId) => ({
-            menuItemId,
-            quantity: 1
-          }))
-        }
+        data: buildCreateOrderBody(input)
       })
   };
 }
