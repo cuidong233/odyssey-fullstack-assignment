@@ -7,12 +7,14 @@ Telegraph style. Root rules only. This repo is an Odyssey fullstack assignment. 
 * Read this file before any code work.
 * Read `fullstack_developer_assignment_ody(1).md` before planning scope or changing architecture.
 * If a scoped `AGENTS.md` exists in a subtree, read it before touching that subtree.
+* If this directory is not a git repo yet, initialize git before project implementation begins.
 * Do not replace the required stack with alternatives.
 * Do not make the app look like a static mock. Product flows must be interactive and backend-backed where required.
 * Favor a small complete slice over broad unfinished screens.
 * Before implementing dependency-specific behavior, read current official docs/types/source. No guesses about Hono, Drizzle, Expo, Orval, Workers, or React Query defaults.
 * Keep generated artifacts generated. Do not hand-edit Orval output, OpenAPI output, Drizzle generated migrations, or lockfile chunks by hand.
 * Never print secrets. Never commit `.env`, database credentials, API keys, or live service tokens.
+* Every finished change must be reviewed and committed. Do not leave completed edits uncommitted.
 
 ## Assignment Truth
 
@@ -187,6 +189,11 @@ Telegraph style. Root rules only. This repo is an Odyssey fullstack assignment. 
 ## Validation
 
 * Before final handoff, prove touched surface.
+* Before every commit, review the diff for correctness, scope, generated artifacts, secrets, and accidental unrelated edits.
+* Code changes need at least one review pass before commit:
+  * self-review with `git diff`
+  * targeted command proof when practical
+  * explicit note of any unverified surface
 * Minimum useful proof:
   * `pnpm gen:contract`
   * `pnpm typecheck`
@@ -250,7 +257,21 @@ Telegraph style. Root rules only. This repo is an Odyssey fullstack assignment. 
 
 ## Git
 
-* Do not assume a git repo exists until `git status` succeeds.
+* Do not assume a git repo exists until `git status` succeeds. If the project is being implemented from scratch, initialize git first.
+* Every coherent modification must end in a commit.
+* Commit after each meaningful unit of work:
+  * project scaffold
+  * backend schema/API slice
+  * contract generation
+  * frontend feature/page
+  * tests/docs updates
+* Do not batch unrelated work into one commit.
+* Do not leave finished changes unstaged/uncommitted at handoff unless the user explicitly asks to pause before committing.
+* Before committing:
+  * inspect `git status --short`
+  * inspect `git diff`
+  * run targeted validation for the touched surface
+  * verify no secrets or unrelated files are included
 * Never revert user changes unless explicitly asked.
 * Stage intended files only.
 * Conventional-ish concise commits if asked to commit.
