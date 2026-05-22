@@ -75,4 +75,15 @@ describe("request schemas", () => {
     expect(idParamSchema.safeParse({ id: menuItemId }).success).toBe(true);
     expect(idParamSchema.safeParse({ id: "order-1" }).success).toBe(false);
   });
+
+  it("accepts uploaded menu images as data URLs", () => {
+    const result = createMenuItemRequestSchema.safeParse({
+      categoryId,
+      name: "Market Bowl",
+      imageUrl: `data:image/png;base64,${"a".repeat(2_000)}`,
+      priceCents: 1400
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

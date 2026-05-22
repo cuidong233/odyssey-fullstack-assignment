@@ -96,7 +96,7 @@ export const createMenuItemRequestSchema = insertMenuItemSchema
   .extend({
     name: z.string().min(1),
     description: z.string().max(500).nullish(),
-    imageUrl: z.string().max(1_000).nullish(),
+    imageUrl: z.string().max(1_500_000).nullish(),
     priceCents: z.number().int().positive()
   })
   .strict();

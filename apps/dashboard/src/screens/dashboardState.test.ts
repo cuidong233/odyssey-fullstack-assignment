@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Order } from "@repo/api-client";
-import { isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveSelectedOrder, toggleSelectedId } from "./dashboardState";
+import { defaultMenuImageUrl, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId } from "./dashboardState";
 
 describe("dashboard state helpers", () => {
   it("toggles selected ids without duplicating values", () => {
@@ -26,9 +26,15 @@ describe("dashboard state helpers", () => {
   });
 
   it("requires new menu items to have a category, name, and positive price", () => {
-    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: "cat-1", price: "9.5", available: true })).toBe(true);
-    expect(isMenuItemDraftValid({ name: "", description: "", categoryId: "cat-1", price: "9.5", available: true })).toBe(false);
-    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: undefined, price: "9.5", available: true })).toBe(false);
-    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: "cat-1", price: "0", available: true })).toBe(false);
+    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: "cat-1", imageUrl: "", price: "9.5", available: true })).toBe(true);
+    expect(isMenuItemDraftValid({ name: "", description: "", categoryId: "cat-1", imageUrl: "", price: "9.5", available: true })).toBe(false);
+    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: undefined, imageUrl: "", price: "9.5", available: true })).toBe(false);
+    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: "cat-1", imageUrl: "", price: "0", available: true })).toBe(false);
+  });
+
+  it("falls back to the default menu image when an item has no image", () => {
+    expect(resolveMenuImageUrl(null)).toBe(defaultMenuImageUrl);
+    expect(resolveMenuImageUrl("   ")).toBe(defaultMenuImageUrl);
+    expect(resolveMenuImageUrl("/menu-images/soup.png")).toBe("/menu-images/soup.png");
   });
 });

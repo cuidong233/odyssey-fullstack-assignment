@@ -303,7 +303,7 @@
                   "imageUrl": {
                     "type": "string",
                     "nullable": true,
-                    "maxLength": 1000
+                    "maxLength": 1500000
                   },
                   "priceCents": {
                     "type": "integer",
@@ -467,7 +467,7 @@
                   "imageUrl": {
                     "type": "string",
                     "nullable": true,
-                    "maxLength": 1000
+                    "maxLength": 1500000
                   },
                   "priceCents": {
                     "type": "integer",

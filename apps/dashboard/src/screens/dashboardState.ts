@@ -4,14 +4,18 @@ export type MenuItemDraft = {
   name: string;
   description: string;
   categoryId: string | undefined;
+  imageUrl: string;
   price: string;
   available: boolean;
 };
+
+export const defaultMenuImageUrl = "/menu-images/market-bowl.png";
 
 export const emptyMenuItemDraft: MenuItemDraft = {
   name: "",
   description: "",
   categoryId: undefined,
+  imageUrl: "",
   price: "",
   available: true
 };
@@ -31,6 +35,11 @@ export function resolveActiveCustomerId(selectedCustomerId: string | undefined, 
 
 export function resolveSelectedOrder(orders: Order[], selectedOrderId: string | undefined) {
   return orders.find((order) => order.id === selectedOrderId) ?? orders[0];
+}
+
+export function resolveMenuImageUrl(imageUrl: string | null | undefined) {
+  const trimmedImageUrl = imageUrl?.trim();
+  return trimmedImageUrl ? trimmedImageUrl : defaultMenuImageUrl;
 }
 
 export function isMenuItemDraftValid(draft: MenuItemDraft) {

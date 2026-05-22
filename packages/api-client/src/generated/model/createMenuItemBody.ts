@@ -15,7 +15,7 @@ export type CreateMenuItemBody = {
      */
   description?: string | null;
   /**
-     * @maxLength 1000
+     * @maxLength 1500000
      * @nullable
      */
   imageUrl?: string | null;

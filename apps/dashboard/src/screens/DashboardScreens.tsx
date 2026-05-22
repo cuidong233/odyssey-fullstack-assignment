@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal } from "lucide-react-native";
+import { useMemo, useState, type ChangeEvent, type CSSProperties } from "react";
+import { Image, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal, Upload } from "lucide-react-native";
 import {
   type MenuItem,
   type OrderStatus,
@@ -12,17 +12,17 @@ import {
   useListMenuItems,
   useListOrders
 } from "@repo/api-client";
-import { formatCurrency, formatMinutes } from "@repo/shared";
+import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SelectLike, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderTable, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
 import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
-import { statusText, useI18n } from "../lib/i18n";
+import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { c, layout, r, s, type } from "../lib/styles";
-import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
+import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
 import { demoCategories, demoCustomers, demoHomeSummary, demoMenuItems, demoOrders, demoOrdersForStatus, demoSettings } from "./demoData";
 
 export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { width } = useWindowDimensions();
   const compact = width < 900;
   const summary = useGetHomeSummary();
@@ -51,7 +51,7 @@ export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
         <SkeletonRows />
       ) : (
         <View style={[styles.kpiGrid, compact && styles.kpiGridCompact]}>
-          <Kpi icon={<BadgeDollarSign size={20} color={c.success} />} label={t.home.revenue} value={formatCurrency(summaryData?.revenueCents ?? 0)} note={t.home.revenueNote} />
+          <Kpi icon={<BadgeDollarSign size={20} color={c.success} />} label={t.home.revenue} value={formatCurrency(summaryData?.revenueCents ?? 0, intlLocale(locale))} note={t.home.revenueNote} />
           <Kpi icon={<ShoppingBag size={20} color={c.accent} />} label={t.home.totalOrders} value={`${summaryData?.totalOrders ?? 0}`} note={t.home.totalOrdersNote} />
           <Kpi icon={<Clock3 size={20} color={c.warning} />} label={t.home.pending} value={`${summaryData?.pendingOrders ?? 0}`} note={t.home.pendingNote} />
           <Kpi icon={<ChefHat size={20} color={c.info} />} label={t.home.popularItems} value={`${summaryData?.popularItems.length ?? 0}`} note={t.home.popularItemsNote} />
@@ -164,7 +164,7 @@ export function CrmScreen() {
 }
 
 export function MenuScreen() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const items = useListMenuItems();
   const categories = useListMenuCategories();
   const isPreview = isApiPreview(items) || isApiPreview(categories);
@@ -215,6 +215,7 @@ export function MenuScreen() {
       available: draft.available,
       categoryId: draft.categoryId,
       description: draft.description.trim() || null,
+      imageUrl: draft.imageUrl.trim() || null,
       name: draft.name.trim(),
       priceCents: priceInputToCents(draft.price),
       sortOrder: itemRows.length + 1
@@ -232,21 +233,19 @@ export function MenuScreen() {
         <SectionTitle eyebrow={t.menu.items} title={t.menu.availability} action={<Button disabled={categoryRows.length === 0} onPress={startCreating} variant="secondary">{t.menu.add}</Button>} />
         <View style={styles.menuGrid}>
           {itemRows.map((item) => {
-            const category = categoryRows.find((entry) => entry.id === item.categoryId)?.name ?? "Menu";
+            const category = categoryRows.find((entry) => entry.id === item.categoryId)?.name ?? t.common.menuFallback;
             return (
               <Pressable key={item.id} onPress={() => startEditing(item)} style={styles.menuRow}>
-                {item.imageUrl ? (
-                  <Image
-                    accessibilityLabel=""
-                    source={{ uri: item.imageUrl }}
-                    style={styles.menuImage}
-                  />
-                ) : null}
+                <Image
+                  accessibilityLabel=""
+                  source={{ uri: resolveMenuImageUrl(item.imageUrl) }}
+                  style={styles.menuImage}
+                />
                 <View style={{ flex: 1, gap: s[1] }}>
                   <Text style={type.body}>{item.name}</Text>
                   <Text style={type.tiny}>{category}</Text>
                 </View>
-                <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
+                <Text style={styles.price}>{formatCurrency(item.priceCents, intlLocale(locale))}</Text>
                 <Badge tone={item.available ? "success" : "danger"}>{item.available ? t.menu.available : t.menu.paused}</Badge>
               </Pressable>
             );
@@ -258,6 +257,7 @@ export function MenuScreen() {
         <View style={{ gap: s[4] }}>
           <Field label={t.menu.name} onChangeText={(name) => updateDraft({ name })} value={draft.name} />
           <Field label={t.menu.description} onChangeText={(description) => updateDraft({ description })} value={draft.description} />
+          <MenuImagePicker imageUrl={draft.imageUrl} onImageUrlChange={(imageUrl) => updateDraft({ imageUrl })} />
           <Field keyboardType="numeric" label={t.menu.price} onChangeText={(nextPrice) => updateDraft({ price: nextPrice })} value={draft.price} />
           <View style={styles.chipRow}>
             {categoryRows.map((category) => (
@@ -311,7 +311,7 @@ export function SettingsScreen() {
           <View style={styles.settingsGrid}>
             <Toggle label={t.settings.open} value={data.serviceAvailable} onValueChange={(serviceAvailable) => update.saveSettings({ serviceAvailable })} />
             <Toggle label={t.settings.autoAccept} value={data.autoAccept} onValueChange={(autoAccept) => update.saveSettings({ autoAccept })} />
-            <SettingMetric label={t.settings.prep} value={formatMinutes(data.prepTimeMinutes)} />
+            <SettingMetric label={t.settings.prep} value={t.common.minutes(data.prepTimeMinutes)} />
             <SettingMetric label={t.settings.tax} value={`${(data.taxRateBps / 100).toFixed(2)}%`} />
             <SettingMetric label={t.settings.hours} value={data.openingHoursJson} />
           </View>
@@ -391,7 +391,7 @@ export function LibraryScreen() {
 }
 
 export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const customers = useListCustomers();
   const menuItems = useListMenuItems();
   const isPreview = isApiPreview(customers) || isApiPreview(menuItems);
@@ -441,15 +441,13 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
               onPress={() => toggleItem(item.id)}
               style={[styles.menuRow, selectedItems.includes(item.id) && { backgroundColor: c.accentSoft }, !item.available && { opacity: 0.45 }]}
             >
-              {item.imageUrl ? (
-                <Image
-                  accessibilityLabel=""
-                  source={{ uri: item.imageUrl }}
-                  style={styles.menuImage}
-                />
-              ) : null}
+              <Image
+                accessibilityLabel=""
+                source={{ uri: resolveMenuImageUrl(item.imageUrl) }}
+                style={styles.menuImage}
+              />
               <Text style={[type.body, { flex: 1 }]}>{item.name}</Text>
-              <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
+              <Text style={styles.price}>{formatCurrency(item.priceCents, intlLocale(locale))}</Text>
             </Pressable>
           ))}
         </View>
@@ -471,9 +469,81 @@ function ApiPreviewNotice() {
   );
 }
 
+function MenuImagePicker({
+  imageUrl,
+  onImageUrlChange
+}: {
+  imageUrl: string;
+  onImageUrlChange: (imageUrl: string) => void;
+}) {
+  const { t } = useI18n();
+  const [fileName, setFileName] = useState<string | undefined>();
+
+  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    if (!file || !file.type.startsWith("image/")) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      if (typeof reader.result === "string") {
+        onImageUrlChange(reader.result);
+        setFileName(file.name);
+      }
+    });
+    reader.readAsDataURL(file);
+    event.currentTarget.value = "";
+  }
+
+  return (
+    <View style={styles.imagePicker}>
+      <Text style={type.tiny}>{t.menu.image}</Text>
+      <View style={styles.imagePickerRow}>
+        <Image
+          accessibilityLabel=""
+          source={{ uri: resolveMenuImageUrl(imageUrl) }}
+          style={styles.imagePickerPreview}
+        />
+        <View style={{ flex: 1, gap: s[2] }}>
+          {Platform.OS === "web" ? (
+            <label style={webUploadLabelStyle}>
+              <Upload size={16} color={c.inkMuted} />
+              <Text style={type.body}>{t.menu.uploadImage}</Text>
+              <input accept="image/*" aria-label={t.menu.uploadImage} onChange={handleImageChange} style={webFileInputStyle} type="file" />
+            </label>
+          ) : (
+            <Text style={type.muted}>{t.menu.uploadImage}</Text>
+          )}
+          <Text style={type.tiny}>{fileName ?? t.menu.defaultImage}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function isApiPreview(query: { data?: unknown; isError: boolean }) {
   return query.isError && query.data === undefined;
 }
+
+const webFileInputStyle = {
+  display: "none"
+} satisfies CSSProperties;
+
+const webUploadLabelStyle = {
+  alignItems: "center",
+  borderColor: c.lineStrong,
+  borderRadius: r.sm,
+  borderWidth: 1,
+  cursor: "pointer",
+  display: "flex",
+  flexDirection: "row",
+  gap: s[2],
+  justifyContent: "center",
+  minHeight: 38,
+  paddingLeft: s[4],
+  paddingRight: s[4]
+} satisfies CSSProperties;
 
 const styles = StyleSheet.create({
   actionStrip: {
@@ -526,6 +596,26 @@ const styles = StyleSheet.create({
     borderRadius: r.sm,
     height: 46,
     width: 62
+  },
+  imagePicker: {
+    gap: s[2]
+  },
+  imagePickerPreview: {
+    backgroundColor: c.surfaceMuted,
+    borderColor: c.line,
+    borderRadius: r.md,
+    borderWidth: 1,
+    height: 88,
+    width: 118
+  },
+  imagePickerRow: {
+    alignItems: "center",
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: s[4],
+    padding: s[3]
   },
   menuRow: {
     alignItems: "center",
