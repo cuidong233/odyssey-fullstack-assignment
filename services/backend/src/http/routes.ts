@@ -95,7 +95,8 @@ export const listMenuRoute = createRoute({
     query: listLimitQuerySchema
   },
   responses: {
-    200: jsonContent(z.array(menuItemResponseSchema), "Menu items")
+    200: jsonContent(z.array(menuItemResponseSchema), "Menu items"),
+    400: jsonContent(errorResponseSchema, "Validation error")
   }
 });
 
@@ -124,6 +125,7 @@ export const updateMenuItemRoute = createRoute({
   },
   responses: {
     200: jsonContent(menuItemResponseSchema, "Updated menu item"),
+    400: jsonContent(errorResponseSchema, "Validation error"),
     404: jsonContent(errorResponseSchema, "Menu item not found")
   }
 });
@@ -137,7 +139,8 @@ export const listOrdersRoute = createRoute({
     query: orderStatusQuerySchema
   },
   responses: {
-    200: jsonContent(z.array(orderResponseSchema), "Orders")
+    200: jsonContent(z.array(orderResponseSchema), "Orders"),
+    400: jsonContent(errorResponseSchema, "Validation error")
   }
 });
 
@@ -168,6 +171,7 @@ export const getOrderRoute = createRoute({
   },
   responses: {
     200: jsonContent(orderResponseSchema, "Order detail"),
+    400: jsonContent(errorResponseSchema, "Validation error"),
     404: jsonContent(errorResponseSchema, "Order not found")
   }
 });
@@ -183,6 +187,7 @@ export const updateOrderStatusRoute = createRoute({
   },
   responses: {
     200: jsonContent(orderResponseSchema, "Updated order"),
+    400: jsonContent(errorResponseSchema, "Validation error"),
     404: jsonContent(errorResponseSchema, "Order not found"),
     409: jsonContent(errorResponseSchema, "Invalid status transition")
   }
@@ -200,7 +205,8 @@ export const listCustomersRoute = createRoute({
     200: jsonContent(
       z.array(customerWithStatsResponseSchema),
       "Customers with ordering stats"
-    )
+    ),
+    400: jsonContent(errorResponseSchema, "Validation error")
   }
 });
 
@@ -223,7 +229,8 @@ export const updateSettingsRoute = createRoute({
     body: jsonContent(updateOrderingSettingsRequestSchema, "Settings update")
   },
   responses: {
-    200: jsonContent(orderingSettingsResponseSchema, "Updated settings")
+    200: jsonContent(orderingSettingsResponseSchema, "Updated settings"),
+    400: jsonContent(errorResponseSchema, "Validation error")
   }
 });
 

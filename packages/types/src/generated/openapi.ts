@@ -291,6 +291,20 @@ export interface operations {
                     }[];
                 };
             };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
         };
     };
     createMenuItem: {
@@ -401,6 +415,20 @@ export interface operations {
                     };
                 };
             };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
             /** @description Menu item not found */
             404: {
                 headers: {
@@ -475,6 +503,20 @@ export interface operations {
                         }[];
                         nextStatuses: ("pending" | "accepted" | "preparing" | "ready" | "completed" | "cancelled")[];
                     }[];
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
                 };
             };
         };
@@ -667,6 +709,20 @@ export interface operations {
                     };
                 };
             };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
             /** @description Order not found */
             404: {
                 headers: {
@@ -750,6 +806,20 @@ export interface operations {
                     };
                 };
             };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
             /** @description Order not found */
             404: {
                 headers: {
@@ -828,6 +898,20 @@ export interface operations {
                     }[];
                 };
             };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
         };
     };
     getOrderingSettings: {
@@ -894,6 +978,20 @@ export interface operations {
                         openingHoursJson: string;
                         /** Format: date-time */
                         updatedAt: string;
+                    };
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
                     };
                 };
             };
