@@ -84,9 +84,9 @@ pnpm --filter @repo/backend seed
 
 ## Current Build Notes
 
-Implemented pieces include the Expo web dashboard shell, shared design tokens, reusable UI primitives, seeded client hooks, Drizzle schema, and backend order-domain tests for order creation and status rules.
+Implemented pieces include the Expo web dashboard shell, shared design tokens, reusable UI primitives, Drizzle schema, backend OpenAPI generation, generated contract types, Orval-generated React Query hooks, and backend order-domain tests for order creation and status rules.
 
-Still in progress: Worker route wiring, OpenAPI file generation, the final Orval generation step, and the persistent database adapter. The README keeps those tradeoffs visible so reviewers can quickly understand the current edge of the build.
+Still in progress: production database seeding/persistence polish and broader frontend test coverage. The README keeps those tradeoffs visible so reviewers can quickly understand the current edge of the build.
 
 <p align="center">
   <a href="#english">English</a> | <a href="#简体中文">简体中文</a>
@@ -174,6 +174,6 @@ pnpm --filter @repo/backend seed
 
 ## 当前状态
 
-已经完成的部分包括 Expo Web dashboard shell、共享 design tokens、可复用 UI primitives、带种子数据的 client hooks、Drizzle schema，以及覆盖订单创建和状态规则的后端领域测试。
+已经完成的部分包括 Expo Web dashboard shell、共享 design tokens、可复用 UI primitives、Drizzle schema、后端 OpenAPI 生成、生成式契约类型、Orval 生成的 React Query hooks，以及覆盖订单创建和状态规则的后端领域测试。
 
-仍在推进的部分包括 Worker routes 接入、OpenAPI 文件生成、最终 Orval 生成步骤，以及持久化数据库 adapter。这里保留这些取舍，方便 reviewer 快速理解当前项目边界。
+仍在推进的部分包括生产数据库 seed/持久化细节打磨，以及更完整的前端测试覆盖。这里保留这些取舍，方便 reviewer 快速理解当前项目边界。
