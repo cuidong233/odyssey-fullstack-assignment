@@ -50,7 +50,7 @@ class TestStore implements RestaurantStore {
       categoryId: "category-1",
       name: "Market Bowl",
       description: "Grains, greens, seasonal vegetables",
-      imageUrl: "/menu-images/restaurant-ops-preview.png",
+      imageUrl: "/menu-images/market-bowl.png",
       priceCents: 1400,
       available: true,
       sortOrder: 0,

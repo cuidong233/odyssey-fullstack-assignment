@@ -37,7 +37,14 @@ if (!bowls || !drinks || !sides) {
   throw new Error("Failed to seed menu categories.");
 }
 
-const previewImageUrl = "/menu-images/restaurant-ops-preview.png";
+const menuImageUrls = {
+  marketBowl: "/menu-images/market-bowl.png",
+  chickenBowl: "/menu-images/charred-chicken-bowl.png",
+  salmonPlate: "/menu-images/miso-salmon-plate.png",
+  gingerTea: "/menu-images/ginger-lime-tea.png",
+  espressoTonic: "/menu-images/espresso-tonic.png",
+  soup: "/menu-images/roasted-tomato-soup.png"
+};
 
 const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
   await db
@@ -47,7 +54,7 @@ const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
       categoryId: bowls.id,
       name: "Market Bowl",
       description: "Grains, greens, seasonal vegetables",
-      imageUrl: previewImageUrl,
+      imageUrl: menuImageUrls.marketBowl,
       priceCents: 1400,
       available: true,
       sortOrder: 1
@@ -56,7 +63,7 @@ const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
       categoryId: bowls.id,
       name: "Charred Chicken Bowl",
       description: "Chicken, rice, pickled vegetables, herb sauce",
-      imageUrl: previewImageUrl,
+      imageUrl: menuImageUrls.chickenBowl,
       priceCents: 1650,
       available: true,
       sortOrder: 2
@@ -65,7 +72,7 @@ const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
       categoryId: bowls.id,
       name: "Miso Salmon Plate",
       description: "Salmon, cucumber salad, brown rice, sesame",
-      imageUrl: previewImageUrl,
+      imageUrl: menuImageUrls.salmonPlate,
       priceCents: 1950,
       available: true,
       sortOrder: 3
@@ -74,7 +81,7 @@ const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
       categoryId: drinks.id,
       name: "Ginger Lime Tea",
       description: "House brewed tea with lime",
-      imageUrl: previewImageUrl,
+      imageUrl: menuImageUrls.gingerTea,
       priceCents: 450,
       available: true,
       sortOrder: 1
@@ -83,7 +90,7 @@ const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
       categoryId: drinks.id,
       name: "Espresso Tonic",
       description: "Sparkling tonic with a double espresso",
-      imageUrl: previewImageUrl,
+      imageUrl: menuImageUrls.espressoTonic,
       priceCents: 575,
       available: true,
       sortOrder: 2
@@ -92,7 +99,7 @@ const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
       categoryId: sides.id,
       name: "Roasted Tomato Soup",
       description: "Currently sold out",
-      imageUrl: previewImageUrl,
+      imageUrl: menuImageUrls.soup,
       priceCents: 900,
       available: false,
       sortOrder: 1

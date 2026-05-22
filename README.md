@@ -13,7 +13,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/restaurant-ops-preview.png" width="720" alt="Generated preview of the Odyssey Restaurant Ops dashboard and restaurant workflow" />
+  <img src="docs/assets/menu-images/market-bowl.png" width="340" alt="Generated Market Bowl menu photo" />
+  <img src="docs/assets/menu-images/miso-salmon-plate.png" width="340" alt="Generated Miso Salmon Plate menu photo" />
 </p>
 
 ## Product
@@ -89,7 +90,7 @@ pnpm db:push
 pnpm db:seed
 ```
 
-The seed is reset-style by design: it clears restaurant operations tables, then inserts menu categories, menu items with generated image URLs, customers, settings, and several orders across different statuses. This makes Home, Orders, CRM, Menu, and Settings interesting immediately after setup.
+The seed is reset-style by design: it clears restaurant operations tables, then inserts menu categories, menu items with generated dish image URLs, customers, settings, and several orders across different statuses. This makes Home, Orders, CRM, Menu, and Settings interesting immediately after setup.
 
 Useful root scripts:
 
@@ -130,7 +131,8 @@ Tradeoff: the Worker-oriented database path is optimized for a Neon/PostgreSQL U
 </p>
 
 <p align="center">
-  <img src="docs/assets/restaurant-ops-preview.png" width="720" alt="Odyssey Restaurant Ops dashboard 与餐厅工作流生成预览图" />
+  <img src="docs/assets/menu-images/market-bowl.png" width="340" alt="生成的 Market Bowl 菜品图" />
+  <img src="docs/assets/menu-images/miso-salmon-plate.png" width="340" alt="生成的 Miso Salmon Plate 菜品图" />
 </p>
 
 ## 产品介绍
@@ -206,7 +208,7 @@ pnpm db:push
 pnpm db:seed
 ```
 
-seed 是 reset-style：会清空餐厅运营相关表，然后写入菜单分类、带生成图片 URL 的菜品、客户、设置，以及覆盖不同状态的多笔订单。初始化后 Home、Orders、CRM、Menu、Settings 都会立刻有数据可看。
+seed 是 reset-style：会清空餐厅运营相关表，然后写入菜单分类、带生成菜品图片 URL 的菜品、客户、设置，以及覆盖不同状态的多笔订单。初始化后 Home、Orders、CRM、Menu、Settings 都会立刻有数据可看。
 
 常用根命令：
 
