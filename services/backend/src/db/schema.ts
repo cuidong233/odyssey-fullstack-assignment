@@ -8,8 +8,12 @@ import {
   timestamp,
   uuid
 } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { createSchemaFactory } from "drizzle-zod";
+import { z } from "zod/v4";
+
+const { createInsertSchema, createSelectSchema } = createSchemaFactory({
+  zodInstance: z
+});
 
 export const orderStatusEnum = pgEnum("order_status", [
   "pending",
@@ -140,6 +144,7 @@ export const selectOrderingSettingsSchema = createSelectSchema(orderingSettings)
 export const insertOrderingSettingsSchema = createInsertSchema(orderingSettings);
 
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
+export type MenuCategory = typeof menuCategories.$inferSelect;
 export type MenuItem = typeof menuItems.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Order = typeof orders.$inferSelect;

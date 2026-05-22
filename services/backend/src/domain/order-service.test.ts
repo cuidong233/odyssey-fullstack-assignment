@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type {
   Customer,
+  MenuCategory,
   MenuItem,
   OrderingSettings,
   Order,
@@ -92,6 +93,18 @@ class TestStore implements RestaurantStore {
       spendCents: 0,
       recentOrders: []
     }));
+  }
+
+  async listMenuCategories(): Promise<MenuCategory[]> {
+    return [
+      {
+        id: "category-1",
+        name: "Mains",
+        sortOrder: 0,
+        createdAt: now,
+        updatedAt: now
+      }
+    ];
   }
 
   async listMenuItems(): Promise<MenuItem[]> {

@@ -1,5 +1,6 @@
 import type {
   Customer,
+  MenuCategory,
   MenuItem,
   OrderingSettings,
   Order,
@@ -85,6 +86,7 @@ export type RestaurantStore = {
   ): Promise<OrderingSettings>;
   findCustomerById(id: string): Promise<Customer | null>;
   listCustomers(): Promise<CustomerWithStats[]>;
+  listMenuCategories(): Promise<MenuCategory[]>;
   listMenuItems(): Promise<MenuItem[]>;
   findMenuItemsByIds(ids: string[]): Promise<MenuItem[]>;
   createMenuItem(input: CreateMenuItemInput): Promise<MenuItem>;
