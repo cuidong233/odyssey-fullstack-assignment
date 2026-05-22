@@ -1,5 +1,21 @@
 import type { Order } from "@repo/api-client";
 
+export type MenuItemDraft = {
+  name: string;
+  description: string;
+  categoryId: string | undefined;
+  price: string;
+  available: boolean;
+};
+
+export const emptyMenuItemDraft: MenuItemDraft = {
+  name: "",
+  description: "",
+  categoryId: undefined,
+  price: "",
+  available: true
+};
+
 export function toggleSelectedId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
 }
@@ -15,4 +31,8 @@ export function resolveActiveCustomerId(selectedCustomerId: string | undefined, 
 
 export function resolveSelectedOrder(orders: Order[], selectedOrderId: string | undefined) {
   return orders.find((order) => order.id === selectedOrderId) ?? orders[0];
+}
+
+export function isMenuItemDraftValid(draft: MenuItemDraft) {
+  return Boolean(draft.name.trim() && draft.categoryId && priceInputToCents(draft.price) > 0);
 }

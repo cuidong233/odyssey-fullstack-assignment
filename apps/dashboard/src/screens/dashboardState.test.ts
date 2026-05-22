@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Order } from "@repo/api-client";
-import { priceInputToCents, resolveActiveCustomerId, resolveSelectedOrder, toggleSelectedId } from "./dashboardState";
+import { isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveSelectedOrder, toggleSelectedId } from "./dashboardState";
 
 describe("dashboard state helpers", () => {
   it("toggles selected ids without duplicating values", () => {
@@ -23,5 +23,12 @@ describe("dashboard state helpers", () => {
 
     expect(resolveSelectedOrder(orders, "order-2")?.id).toBe("order-2");
     expect(resolveSelectedOrder(orders, undefined)?.id).toBe("order-1");
+  });
+
+  it("requires new menu items to have a category, name, and positive price", () => {
+    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: "cat-1", price: "9.5", available: true })).toBe(true);
+    expect(isMenuItemDraftValid({ name: "", description: "", categoryId: "cat-1", price: "9.5", available: true })).toBe(false);
+    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: undefined, price: "9.5", available: true })).toBe(false);
+    expect(isMenuItemDraftValid({ name: "Soup", description: "", categoryId: "cat-1", price: "0", available: true })).toBe(false);
   });
 });

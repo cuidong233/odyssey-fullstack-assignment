@@ -15,10 +15,10 @@ import {
 import { formatCurrency, formatMinutes } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SelectLike, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderTable, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
-import { useCreateRestaurantOrder, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
+import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
 import { statusText, useI18n } from "../lib/i18n";
 import { c, layout, r, s, type } from "../lib/styles";
-import { priceInputToCents, resolveActiveCustomerId, resolveSelectedOrder, toggleSelectedId } from "./dashboardState";
+import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
 import { demoCategories, demoCustomers, demoHomeSummary, demoMenuItems, demoOrders, demoOrdersForStatus, demoSettings } from "./demoData";
 
 export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
@@ -171,7 +171,15 @@ export function MenuScreen() {
   const itemRows = items.data ?? (isApiPreview(items) ? demoMenuItems : []);
   const categoryRows = categories.data ?? (isApiPreview(categories) ? demoCategories : []);
   const [editing, setEditing] = useState<MenuItem | undefined>();
+  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState<MenuItemDraft>(emptyMenuItemDraft);
   const [price, setPrice] = useState("");
+  const createItem = useMenuItemCreator({
+    onCreated: () => {
+      setCreating(false);
+      setDraft(emptyMenuItemDraft);
+    }
+  });
   const updateItem = useMenuItemEditor({ onSaved: () => setEditing(undefined) });
 
   function startEditing(item: MenuItem) {
@@ -189,6 +197,30 @@ export function MenuScreen() {
     });
   }
 
+  function startCreating() {
+    setDraft({ ...emptyMenuItemDraft, categoryId: categoryRows[0]?.id });
+    setCreating(true);
+  }
+
+  function updateDraft(input: Partial<MenuItemDraft>) {
+    setDraft((current) => ({ ...current, ...input }));
+  }
+
+  function createMenuItem() {
+    if (!draft.categoryId || !isMenuItemDraftValid(draft)) {
+      return;
+    }
+
+    createItem.createMenuItem({
+      available: draft.available,
+      categoryId: draft.categoryId,
+      description: draft.description.trim() || null,
+      name: draft.name.trim(),
+      priceCents: priceInputToCents(draft.price),
+      sortOrder: itemRows.length + 1
+    });
+  }
+
   return (
     <View style={styles.screenStack}>
       <View>
@@ -197,7 +229,7 @@ export function MenuScreen() {
       </View>
       <Panel>
         {isPreview ? <ApiPreviewNotice /> : null}
-        <SectionTitle eyebrow={t.menu.items} title={t.menu.availability} action={<Button variant="secondary">{t.menu.add}</Button>} />
+        <SectionTitle eyebrow={t.menu.items} title={t.menu.availability} action={<Button disabled={categoryRows.length === 0} onPress={startCreating} variant="secondary">{t.menu.add}</Button>} />
         <View style={styles.menuGrid}>
           {itemRows.map((item) => {
             const category = categoryRows.find((entry) => entry.id === item.categoryId)?.name ?? "Menu";
@@ -221,6 +253,27 @@ export function MenuScreen() {
           })}
         </View>
       </Panel>
+
+      <AppModal title={t.menu.create} visible={creating} onClose={() => setCreating(false)}>
+        <View style={{ gap: s[4] }}>
+          <Field label={t.menu.name} onChangeText={(name) => updateDraft({ name })} value={draft.name} />
+          <Field label={t.menu.description} onChangeText={(description) => updateDraft({ description })} value={draft.description} />
+          <Field keyboardType="numeric" label={t.menu.price} onChangeText={(nextPrice) => updateDraft({ price: nextPrice })} value={draft.price} />
+          <View style={styles.chipRow}>
+            {categoryRows.map((category) => (
+              <Chip key={category.id} active={category.id === draft.categoryId} onPress={() => updateDraft({ categoryId: category.id })}>
+                {category.name}
+              </Chip>
+            ))}
+          </View>
+          <Toggle label={t.menu.availableForOrdering} value={draft.available} onValueChange={(available) => updateDraft({ available })} />
+          {!isMenuItemDraftValid(draft) ? <Text style={[type.muted, { color: c.warning }]}>{t.menu.validation}</Text> : null}
+          {createItem.error ? <Text style={[type.muted, { color: c.danger }]}>{createItem.error.message}</Text> : null}
+          <Button disabled={isPreview || !isMenuItemDraftValid(draft)} loading={createItem.isPending} onPress={createMenuItem}>
+            {t.menu.createSave}
+          </Button>
+        </View>
+      </AppModal>
 
       <AppModal title={t.menu.edit} visible={Boolean(editing)} onClose={() => setEditing(undefined)}>
         {editing ? (

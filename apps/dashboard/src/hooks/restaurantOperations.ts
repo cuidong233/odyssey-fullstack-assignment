@@ -1,5 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  type CreateMenuItem201,
+  type CreateMenuItemBody,
   type CreateOrder201,
   type CreateOrderBody,
   type MenuItem,
@@ -8,6 +10,7 @@ import {
   type UpdateMenuItemBody,
   type UpdateOrderingSettings200,
   type UpdateOrderingSettingsBody,
+  useCreateMenuItem,
   useCreateOrder,
   useUpdateMenuItem,
   useUpdateOrderingSettings,
@@ -86,6 +89,26 @@ export function useMenuItemEditor(options?: {
     ...mutation,
     saveMenuItem: (id: MenuItem["id"], data: UpdateMenuItemBody) =>
       mutation.mutate({ id, data })
+  };
+}
+
+export function useMenuItemCreator(options?: {
+  onCreated?: (item: CreateMenuItem201) => void;
+}) {
+  const queryClient = useQueryClient();
+  const mutation = useCreateMenuItem({
+    mutation: {
+      onSuccess: (item) => {
+        void queryClient.invalidateQueries();
+        options?.onCreated?.(item);
+      }
+    }
+  });
+
+  return {
+    ...mutation,
+    createMenuItem: (data: CreateMenuItemBody) =>
+      mutation.mutate({ data })
   };
 }
 
