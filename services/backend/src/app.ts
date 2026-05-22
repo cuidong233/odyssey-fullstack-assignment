@@ -2,6 +2,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { createDb } from "./db/client";
 import { DrizzleRestaurantStore } from "./db/drizzle-store";
+import { createSeededMemoryStore } from "./db/memory-store";
 import type { RestaurantStore } from "./domain/order-service";
 import {
   createMenuItemRoute,
@@ -36,6 +37,7 @@ export type CreateAppOptions = {
 };
 
 export function createApp(options: CreateAppOptions = {}) {
+  let memoryStore: RestaurantStore | undefined;
   const app = new OpenAPIHono<AppEnv>({
     defaultHook: (result, c) => {
       if (result.success) {
@@ -83,6 +85,13 @@ export function createApp(options: CreateAppOptions = {}) {
         },
         500
       );
+    }
+
+    if (databaseUrl === "memory://seed") {
+      memoryStore ??= createSeededMemoryStore();
+      c.set("store", memoryStore);
+      await next();
+      return;
     }
 
     c.set("store", new DrizzleRestaurantStore(createDb(databaseUrl)));
