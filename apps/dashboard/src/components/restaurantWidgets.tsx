@@ -4,7 +4,7 @@ import { BookOpen } from "lucide-react-native";
 import type { Customer, Order, OrderStatus } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
 import { Badge, Panel, SectionTitle } from "@repo/shared/ui";
-import { statusText, useI18n } from "../lib/i18n";
+import { formatLocalizedDateTime, intlLocale, statusText, useI18n } from "../lib/i18n";
 import { c, layout, r, s, type } from "../lib/styles";
 
 export function Kpi({ icon, label, note, value }: { icon: ReactNode; label: string; note: string; value: string }) {
@@ -24,7 +24,7 @@ export function Kpi({ icon, label, note, value }: { icon: ReactNode; label: stri
 }
 
 export function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Order[]; selectedOrderId?: string | undefined; onSelect?: (id: string) => void }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   if (orders.length === 0) {
     return (
       <View style={styles.emptyState}>
@@ -41,16 +41,16 @@ export function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Orde
         <Pressable key={order.id} onPress={() => onSelect?.(order.id)} style={[styles.tableRow, selectedOrderId === order.id && styles.tableRowActive]}>
           <View style={{ flex: 0.8 }}>
             <Text style={styles.tableStrong}>{order.id}</Text>
-            <Text style={type.tiny}>{formatDateTime(order.createdAt)}</Text>
+            <Text style={type.tiny}>{formatLocalizedDateTime(order.createdAt, locale)}</Text>
           </View>
           <View style={{ flex: 1.1 }}>
             <Text style={type.body}>{order.customer.name}</Text>
-            <Text style={type.tiny}>{order.items.length} items</Text>
+            <Text style={type.tiny}>{t.common.itemCount(order.items.length)}</Text>
           </View>
           <View style={{ flex: 1 }}>
             <LocalizedStatusBadge status={order.status} />
           </View>
-          <Text style={[styles.price, { flex: 0.7 }]}>{formatCurrency(order.totalCents)}</Text>
+          <Text style={[styles.price, { flex: 0.7 }]}>{formatCurrency(order.totalCents, intlLocale(locale))}</Text>
         </Pressable>
       ))}
     </View>
@@ -80,7 +80,7 @@ export function PopularItemsPanel({ items }: { items: Array<{ name: string; quan
 }
 
 export function OrderInspector({ order }: { order: Order }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   return (
     <Panel>
       <SectionTitle eyebrow={t.common.detail} title={order.id} action={<LocalizedStatusBadge status={order.status} />} />
@@ -91,13 +91,13 @@ export function OrderInspector({ order }: { order: Order }) {
             <Text style={type.muted}>
               {item.quantity} x {item.menuItemName}
             </Text>
-            <Text style={styles.price}>{formatCurrency(item.unitPriceCents)}</Text>
+            <Text style={styles.price}>{formatCurrency(item.unitPriceCents, intlLocale(locale))}</Text>
           </View>
         ))}
         <View style={layout.divider} />
         <View style={layout.between}>
           <Text style={type.body}>{t.common.total}</Text>
-          <Text style={styles.price}>{formatCurrency(order.totalCents)}</Text>
+          <Text style={styles.price}>{formatCurrency(order.totalCents, intlLocale(locale))}</Text>
         </View>
       </View>
     </Panel>
@@ -105,7 +105,7 @@ export function OrderInspector({ order }: { order: Order }) {
 }
 
 export function CustomerRow({ customer }: { customer: Customer }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   return (
     <View style={styles.customerRow}>
       <View style={styles.avatar}>
@@ -114,12 +114,12 @@ export function CustomerRow({ customer }: { customer: Customer }) {
       <View style={{ flex: 1 }}>
         <Text style={type.body}>{customer.name}</Text>
         <Text style={type.tiny}>
-          {customer.email ?? "No email"} · {customer.phone ?? "No phone"}
+          {customer.email ?? t.common.noEmail} · {customer.phone ?? t.common.noPhone}
         </Text>
       </View>
       <SettingMetric label={t.common.orders} value={`${customer.orderCount}`} />
-      <SettingMetric label={t.crm.spend} value={formatCurrency(customer.spendCents)} />
-      <SettingMetric label={t.crm.lastOrder} value={customer.recentOrders[0] ? formatDateTime(customer.recentOrders[0].createdAt) : "None"} />
+      <SettingMetric label={t.crm.spend} value={formatCurrency(customer.spendCents, intlLocale(locale))} />
+      <SettingMetric label={t.crm.lastOrder} value={customer.recentOrders[0] ? formatLocalizedDateTime(customer.recentOrders[0].createdAt, locale) : t.common.none} />
     </View>
   );
 }
@@ -136,15 +136,6 @@ export function SettingMetric({ label, value }: { label: string; value: string }
       <Text style={styles.metricValue}>{value}</Text>
     </View>
   );
-}
-
-export function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  }).format(new Date(value));
 }
 
 const styles = StyleSheet.create({

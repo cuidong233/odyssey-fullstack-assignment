@@ -53,7 +53,7 @@ function DashboardApp() {
           </View>
           <View>
             <Text style={styles.brandTitle}>Odyssey</Text>
-            <Text style={styles.brandMeta}>Restaurant Ops</Text>
+            <Text style={styles.brandMeta}>{t.brand.restaurantOps}</Text>
           </View>
         </View>
 
