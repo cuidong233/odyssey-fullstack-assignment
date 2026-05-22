@@ -6,7 +6,6 @@
  */
 
 export type CreateOrderBodyItemsItem = {
-  /** @minLength 1 */
   menuItemId: string;
   /** @exclusiveMinimum 0 */
   quantity: number;

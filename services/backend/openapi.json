@@ -753,7 +753,12 @@
                 "properties": {
                   "customerId": {
                     "type": "string",
-                    "minLength": 1
+                    "format": "uuid"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "nullable": true,
+                    "maxLength": 500
                   },
                   "items": {
                     "type": "array",
@@ -762,7 +767,7 @@
                       "properties": {
                         "menuItemId": {
                           "type": "string",
-                          "minLength": 1
+                          "format": "uuid"
                         },
                         "quantity": {
                           "type": "integer",
@@ -776,11 +781,6 @@
                       ]
                     },
                     "minItems": 1
-                  },
-                  "notes": {
-                    "type": "string",
-                    "nullable": true,
-                    "maxLength": 500
                   }
                 },
                 "required": [

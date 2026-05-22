@@ -7,13 +7,12 @@
 import type { CreateOrderBodyItemsItem } from './createOrderBodyItemsItem';
 
 export type CreateOrderBody = {
-  /** @minLength 1 */
   customerId: string;
-  /** @minItems 1 */
-  items: CreateOrderBodyItemsItem[];
   /**
      * @maxLength 500
      * @nullable
      */
   notes?: string | null;
+  /** @minItems 1 */
+  items: CreateOrderBodyItemsItem[];
 };

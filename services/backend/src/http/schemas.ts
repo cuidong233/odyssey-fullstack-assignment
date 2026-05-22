@@ -1,6 +1,8 @@
 import { z } from "zod/v4";
 import {
   insertMenuItemSchema,
+  insertOrderItemSchema,
+  insertOrderSchema,
   insertOrderingSettingsSchema,
   orderStatusSchema,
   selectCustomerSchema,
@@ -60,18 +62,24 @@ export const orderingSettingsResponseSchema = selectOrderingSettingsSchema.exten
   updatedAt: dateTimeSchema
 });
 
-export const createOrderRequestSchema = z.object({
-  customerId: z.string().min(1),
-  items: z
-    .array(
-      z.object({
-        menuItemId: z.string().min(1),
-        quantity: z.number().int().positive()
-      })
-    )
-    .min(1),
-  notes: z.string().max(500).nullish()
-});
+const createOrderItemRequestSchema = insertOrderItemSchema
+  .pick({
+    menuItemId: true,
+    quantity: true
+  })
+  .extend({
+    quantity: z.number().int().positive()
+  });
+
+export const createOrderRequestSchema = insertOrderSchema
+  .pick({
+    customerId: true,
+    notes: true
+  })
+  .extend({
+    items: z.array(createOrderItemRequestSchema).min(1),
+    notes: z.string().max(500).nullish()
+  });
 
 export const createMenuItemRequestSchema = insertMenuItemSchema
   .pick({

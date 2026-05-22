@@ -490,12 +490,14 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** Format: uuid */
                     customerId: string;
+                    notes?: string | null;
                     items: {
+                        /** Format: uuid */
                         menuItemId: string;
                         quantity: number;
                     }[];
-                    notes?: string | null;
                 };
             };
         };
