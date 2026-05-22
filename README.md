@@ -1,243 +1,179 @@
-# Odyssey Fullstack Developer Assignment
+<p align="center">
+  <a href="#english">English</a> | <a href="#简体中文">简体中文</a>
+</p>
 
-This repository contains the assignment brief for the Odyssey Fullstack Developer interview project.
+<p align="center">
+  <img src="docs/assets/odyssey-restaurant-ops-mark.svg" width="88" alt="Odyssey Restaurant Ops logo" />
+</p>
 
-The goal of the assignment is to build a small, production-minded restaurant operations product using Odyssey's preferred fullstack architecture. Candidates are expected to create a new project from scratch, implement both frontend and backend features, and demonstrate strong judgment in architecture, type safety, UX, testing, and AI-assisted development.
+<h1 id="english" align="center">Odyssey Restaurant Ops</h1>
 
-## What This Assignment Is About
+<p align="center">
+  A fullstack restaurant operations dashboard for menu management, order flow, customer insight, and service settings.
+</p>
 
-You will build a restaurant dashboard and ordering system with:
+## Product
 
-- a polished dashboard UI
-- a reusable design system
-- restaurant operations pages such as Home, Settings, CRM, Orders, and Menu
-- a backend-backed ordering flow
-- PostgreSQL persistence with Drizzle ORM
-- generated API contracts and generated frontend client/hooks
-- local development scripts, seed data, and targeted tests
+Odyssey Restaurant Ops is a compact back-office product for a modern restaurant team. It gives operators one place to watch live service, create orders, manage menu availability, review customer history, and tune ordering settings.
 
-The assignment is designed to evaluate how you build, not only what you build.
+The product is designed as a real operations tool rather than a static mock: pages have interactive state, reusable UI primitives, backend-owned order rules, and a contract-first TypeScript architecture.
 
-## Required Stack
+## What You Can Do
 
-The implementation should use:
+- Track revenue, order volume, pending work, prep time, popular items, and recent activity on Home.
+- Create orders, filter the queue, inspect order details, and move orders through valid status actions.
+- Review CRM data with customer contact details, spend, order counts, and recent order signals.
+- Manage menu categories and menu items, including price and availability changes.
+- Update ordering settings such as prep time, auto-accept, service availability, tax rate, and opening hours.
+- Browse the UI Library route to inspect tokens, typography, spacing, surfaces, components, and states.
 
-- pnpm workspace and Turborepo
-- `apps/dashboard`: Expo + React Native + Web
-- `services/backend`: Hono on Cloudflare Workers
-- PostgreSQL + Drizzle ORM
-- drizzle-zod
-- OpenAPI generation
-- Orval-generated client/hooks
+## Stack
+
+- pnpm workspace + Turborepo
+- Expo + React Native + Web dashboard in `apps/dashboard`
+- Hono API on Cloudflare Workers in `services/backend`
+- PostgreSQL + Drizzle ORM + drizzle-zod
+- OpenAPI contract generation
+- Orval-style API client/hooks package in `packages/api-client`
 - React Query
-- shared packages for UI, utilities, and types
+- Shared design tokens and utilities in `packages/shared`
 
-The expected project shape is roughly:
+## Architecture
 
-```text
-apps/dashboard
-services/backend
-packages/shared
-packages/types
-packages/api-client
-```
-
-Alternative stacks such as Next.js, NestJS, Prisma, tRPC, Supabase, Firebase, or handwritten frontend API types should not replace the required architecture.
-
-## Main Product Scope
-
-The dashboard should include:
-
-- Home
-- Settings
-- CRM
-- Orders
-- Menu
-- a dedicated UI library or design system route
-
-The backend should support:
-
-- menu categories and menu items
-- customers
-- orders and order items
-- ordering-related business settings
-- order creation, filtering, detail views, and valid status transitions
-- customer order history and spend summaries
-- dashboard summary data
-
-Backend behavior should be deliberate and validated. For example, the server should reject invalid order payloads, reject unavailable menu items, calculate or verify totals server-side, and enforce valid order state transitions.
-
-## Architecture Expectations
-
-The preferred contract flow is:
+The intended contract pipeline is:
 
 ```text
-Drizzle schema -> drizzle-zod -> Hono/OpenAPI -> Orval -> generated frontend types/hooks
+Drizzle schema -> drizzle-zod -> Hono/OpenAPI -> Orval -> frontend hooks/types
 ```
 
-Important expectations:
+Data ownership starts in the Drizzle schema. Backend domain services own persistence validation, menu availability checks, server-side totals, and explicit order status transitions. The dashboard composes product flows from generated client hooks, shared formatting helpers, and reusable UI primitives.
 
-- persisted data truth starts in the Drizzle schema
-- API contracts are generated instead of manually duplicated
-- frontend API types come from generated/shared types
-- frontend data fetching uses generated hooks
-- presentational components stay focused on UI
-- business logic lives in hooks, services, or backend modules
-- reusable UI patterns become shared components
-- design tokens are centralized
+## Repository Map
 
-## Expected Scripts
+```text
+apps/dashboard        Expo web dashboard and UI composition
+services/backend      Hono Worker, Drizzle schema, order domain logic
+packages/shared       design tokens, status labels, formatting helpers
+packages/api-client   typed client/hooks exports for the dashboard
+docs/assets           README and product preview assets
+```
 
-A completed implementation should expose scripts similar to:
+## Local Setup
 
 ```bash
+pnpm install
 pnpm dev:dashboard
 pnpm dev:backend
+```
+
+Useful root scripts:
+
+```bash
 pnpm gen:contract
 pnpm lint
 pnpm typecheck
 pnpm test
 ```
 
-## Deliverables
-
-Candidates should submit:
-
-- a GitHub repository
-- local setup and run instructions
-- seed or bootstrap instructions
-- a short explanation of architecture decisions
-- a short note on tradeoffs or incomplete areas
-
-An optional Loom walkthrough may also be included.
-
-## Source Document
-
-The original assignment brief is available in:
-
-```text
-fullstack_developer_assignment_ody(1).md
-```
-
----
-
-# Odyssey 全栈开发面试项目说明
-
-本仓库包含 Odyssey Fullstack Developer 面试项目的任务说明。
-
-这个项目要求候选人从零创建一个小型但接近真实产品的餐厅运营系统，使用 Odyssey 偏好的全栈技术栈和架构方式。评估重点不仅是功能是否完成，也包括前端质量、后端设计、类型安全、架构判断、用户体验、测试意识，以及如何有效使用 AI 工具完成开发。
-
-## 这个项目是做什么的
-
-你需要实现一个餐厅运营 dashboard 和订单系统，包含：
-
-- 视觉完成度较高的管理后台
-- 可复用的设计系统
-- Home、Settings、CRM、Orders、Menu 等业务页面
-- 后端真实支撑的点单和订单流程
-- 使用 PostgreSQL 和 Drizzle ORM 持久化数据
-- 生成式 API 契约和生成式前端 client/hooks
-- 本地开发脚本、种子数据和关键测试
-
-这个作业重点考察“你如何构建系统”，而不只是“是否做出了页面”。
-
-## 必须使用的技术栈
-
-实现时应使用：
-
-- pnpm workspace 和 Turborepo
-- `apps/dashboard`：Expo + React Native + Web
-- `services/backend`：运行在 Cloudflare Workers 上的 Hono
-- PostgreSQL + Drizzle ORM
-- drizzle-zod
-- OpenAPI 生成
-- Orval 生成的 client/hooks
-- React Query
-- 用于 UI、工具函数和类型的 shared packages
-
-推荐的项目结构大致如下：
-
-```text
-apps/dashboard
-services/backend
-packages/shared
-packages/types
-packages/api-client
-```
-
-不要用 Next.js、NestJS、Prisma、tRPC、Supabase、Firebase 或手写前端 API 类型来替代指定技术栈。
-
-## 主要产品范围
-
-Dashboard 至少应包含：
-
-- Home
-- Settings
-- CRM
-- Orders
-- Menu
-- 一个专门展示 UI library 或 design system 的页面/路由
-
-后端至少应支持：
-
-- 菜单分类和菜单项
-- 客户记录
-- 订单和订单项
-- 与点单相关的业务设置
-- 创建订单、订单筛选、订单详情和合法状态流转
-- 客户订单历史与消费金额汇总
-- Home 页所需的汇总数据
-
-后端逻辑应当是明确且经过校验的。例如：服务端应拒绝无效订单、拒绝不可售菜单项、在服务端计算或校验总价，并强制订单只能按合法状态流转。
-
-## 架构要求
-
-推荐的契约流是：
-
-```text
-Drizzle schema -> drizzle-zod -> Hono/OpenAPI -> Orval -> generated frontend types/hooks
-```
-
-关键要求：
-
-- 持久化数据的真源从 Drizzle schema 开始
-- API 契约应生成，而不是手动重复维护
-- 前端 API 类型来自 generated/shared types
-- 前端数据请求使用生成的 hooks
-- 展示型组件专注 UI
-- 业务逻辑放在 hooks、services 或后端模块中
-- 可复用 UI 模式沉淀为 shared components
-- design tokens 集中管理，不要散落在各处
-
-## 期望脚本
-
-完成后的项目应提供类似脚本：
+Backend package scripts:
 
 ```bash
+pnpm --filter @repo/backend db:generate
+pnpm --filter @repo/backend seed
+```
+
+## Current Build Notes
+
+Implemented pieces include the Expo web dashboard shell, shared design tokens, reusable UI primitives, seeded client hooks, Drizzle schema, and backend order-domain tests for order creation and status rules.
+
+Still in progress: Worker route wiring, OpenAPI file generation, the final Orval generation step, and the persistent database adapter. The README keeps those tradeoffs visible so reviewers can quickly understand the current edge of the build.
+
+<p align="center">
+  <a href="#english">English</a> | <a href="#简体中文">简体中文</a>
+</p>
+
+<p align="center">
+  <img src="docs/assets/odyssey-restaurant-ops-mark.svg" width="88" alt="Odyssey Restaurant Ops 标识" />
+</p>
+
+<h1 id="简体中文" align="center">Odyssey Restaurant Ops</h1>
+
+<p align="center">
+  一个用于菜单管理、订单流转、客户洞察和营业设置的全栈餐厅运营后台。
+</p>
+
+## 产品介绍
+
+Odyssey Restaurant Ops 是一个面向现代餐厅团队的小型运营工作台。店员和运营者可以在一个界面里查看实时营业状态、创建订单、管理菜单可售状态、查看客户历史，并调整点单相关设置。
+
+这个项目不是静态展示页，而是按真实后台产品来构建：页面有交互状态，可复用 UI primitives，订单规则由后端领域逻辑负责，并采用契约优先的 TypeScript 架构。
+
+## 核心功能
+
+- 在 Home 查看收入、订单量、待处理订单、平均备餐时间、热门菜品和最近动态。
+- 在 Orders 创建订单、筛选队列、查看订单详情，并通过合法动作推进订单状态。
+- 在 CRM 查看客户联系方式、消费金额、订单数量和最近下单信号。
+- 在 Menu 管理菜单分类、菜品价格和可售状态。
+- 在 Settings 调整备餐时间、自动接单、营业状态、税率和营业时间。
+- 在 UI Library 查看 tokens、字体、间距、surface、组件和不同状态。
+
+## 技术栈
+
+- pnpm workspace + Turborepo
+- `apps/dashboard`：Expo + React Native + Web dashboard
+- `services/backend`：运行在 Cloudflare Workers 上的 Hono API
+- PostgreSQL + Drizzle ORM + drizzle-zod
+- OpenAPI 契约生成
+- `packages/api-client`：面向 dashboard 的 API client/hooks 包
+- React Query
+- `packages/shared`：共享 design tokens 和工具函数
+
+## 架构
+
+目标契约链路：
+
+```text
+Drizzle schema -> drizzle-zod -> Hono/OpenAPI -> Orval -> frontend hooks/types
+```
+
+数据真源从 Drizzle schema 开始。后端领域服务负责持久化校验、菜单可售性检查、服务端价格计算，以及显式的订单状态流转。前端 dashboard 通过 client hooks、共享格式化工具和可复用 UI primitives 组合出产品流程。
+
+## 仓库结构
+
+```text
+apps/dashboard        Expo Web 后台和页面组合
+services/backend      Hono Worker、Drizzle schema、订单领域逻辑
+packages/shared       design tokens、状态文案、格式化工具
+packages/api-client   dashboard 使用的 typed client/hooks exports
+docs/assets           README 和产品预览资源
+```
+
+## 本地运行
+
+```bash
+pnpm install
 pnpm dev:dashboard
 pnpm dev:backend
+```
+
+常用根命令：
+
+```bash
 pnpm gen:contract
 pnpm lint
 pnpm typecheck
 pnpm test
 ```
 
-## 交付内容
+后端相关命令：
 
-候选人应提交：
-
-- GitHub 仓库
-- 本地运行说明
-- 数据 seed 或 bootstrap 说明
-- 简短的架构决策说明
-- 简短的取舍和未完成事项说明
-
-也可以附上可选的 Loom 讲解视频。
-
-## 原始文档
-
-原始 assignment 文档位于：
-
-```text
-fullstack_developer_assignment_ody(1).md
+```bash
+pnpm --filter @repo/backend db:generate
+pnpm --filter @repo/backend seed
 ```
+
+## 当前状态
+
+已经完成的部分包括 Expo Web dashboard shell、共享 design tokens、可复用 UI primitives、带种子数据的 client hooks、Drizzle schema，以及覆盖订单创建和状态规则的后端领域测试。
+
+仍在推进的部分包括 Worker routes 接入、OpenAPI 文件生成、最终 Orval 生成步骤，以及持久化数据库 adapter。这里保留这些取舍，方便 reviewer 快速理解当前项目边界。
