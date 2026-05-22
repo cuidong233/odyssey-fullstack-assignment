@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Odyssey Restaurant Ops",
+    "slug": "odyssey-restaurant-ops",
+    "version": "0.1.0",
+    "platforms": ["web"],
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

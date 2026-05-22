@@ -6,7 +6,7 @@
   "scripts": {
     "dev:backend": "pnpm --filter @repo/backend dev",
     "dev:dashboard": "pnpm --filter @repo/dashboard dev",
-    "gen:contract": "pnpm --filter @repo/backend gen:openapi && pnpm --filter @repo/api-client gen",
+    "gen:contract": "pnpm --filter @repo/backend gen:openapi && pnpm --filter @repo/types gen && pnpm --filter @repo/api-client gen",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test"

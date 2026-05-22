@@ -1,0 +1,29 @@
+{
+  "name": "@repo/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "dev": "expo start --web",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No dashboard tests yet\""
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "^5.0.4",
+    "@repo/api-client": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "@tanstack/react-query": "^5.80.7",
+    "expo": "^53.0.11",
+    "lucide-react-native": "^1.16.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.6",
+    "react-native-svg": "15.11.2",
+    "react-native-web": "^0.20.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.0.10",
+    "typescript": "~5.8.3"
+  }
+}
