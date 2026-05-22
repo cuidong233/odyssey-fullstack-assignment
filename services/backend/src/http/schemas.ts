@@ -1,5 +1,7 @@
 import { z } from "zod/v4";
 import {
+  insertMenuItemSchema,
+  insertOrderingSettingsSchema,
   orderStatusSchema,
   selectCustomerSchema,
   selectMenuCategorySchema,
@@ -71,14 +73,20 @@ export const createOrderRequestSchema = z.object({
   notes: z.string().max(500).nullish()
 });
 
-export const createMenuItemRequestSchema = z.object({
-  categoryId: z.string().min(1),
-  name: z.string().min(1),
-  description: z.string().max(500).nullish(),
-  priceCents: z.number().int().positive(),
-  available: z.boolean().optional(),
-  sortOrder: z.number().int().optional()
-});
+export const createMenuItemRequestSchema = insertMenuItemSchema
+  .pick({
+    categoryId: true,
+    name: true,
+    description: true,
+    priceCents: true,
+    available: true,
+    sortOrder: true
+  })
+  .extend({
+    name: z.string().min(1),
+    description: z.string().max(500).nullish(),
+    priceCents: z.number().int().positive()
+  });
 
 export const updateMenuItemRequestSchema =
   createMenuItemRequestSchema.partial();
@@ -87,13 +95,19 @@ export const updateOrderStatusRequestSchema = z.object({
   nextStatus: orderStatusSchema
 });
 
-export const updateOrderingSettingsRequestSchema = z.object({
-  prepTimeMinutes: z.number().int().positive().max(240).optional(),
-  autoAccept: z.boolean().optional(),
-  serviceAvailable: z.boolean().optional(),
-  taxRateBps: z.number().int().min(0).max(2500).optional(),
-  openingHoursJson: z.string().optional()
-});
+export const updateOrderingSettingsRequestSchema = insertOrderingSettingsSchema
+  .pick({
+    prepTimeMinutes: true,
+    autoAccept: true,
+    serviceAvailable: true,
+    taxRateBps: true,
+    openingHoursJson: true
+  })
+  .partial()
+  .extend({
+    prepTimeMinutes: z.number().int().positive().max(240).optional(),
+    taxRateBps: z.number().int().min(0).max(2500).optional()
+  });
 
 export const homeSummaryResponseSchema = z.object({
   totalOrders: z.number().int().nonnegative(),

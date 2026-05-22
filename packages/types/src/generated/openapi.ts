@@ -304,6 +304,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** Format: uuid */
                     categoryId: string;
                     name: string;
                     description?: string | null;
@@ -366,6 +367,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** Format: uuid */
                     categoryId?: string;
                     name?: string;
                     description?: string | null;

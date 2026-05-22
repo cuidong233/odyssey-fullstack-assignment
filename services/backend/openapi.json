@@ -254,7 +254,7 @@
                 "properties": {
                   "categoryId": {
                     "type": "string",
-                    "minLength": 1
+                    "format": "uuid"
                   },
                   "name": {
                     "type": "string",
@@ -274,7 +274,9 @@
                     "type": "boolean"
                   },
                   "sortOrder": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
                   }
                 },
                 "required": [
@@ -405,7 +407,7 @@
                 "properties": {
                   "categoryId": {
                     "type": "string",
-                    "minLength": 1
+                    "format": "uuid"
                   },
                   "name": {
                     "type": "string",
@@ -425,7 +427,9 @@
                     "type": "boolean"
                   },
                   "sortOrder": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
                   }
                 }
               }

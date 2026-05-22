@@ -6,7 +6,6 @@
  */
 
 export type UpdateMenuItemBody = {
-  /** @minLength 1 */
   categoryId?: string;
   /** @minLength 1 */
   name?: string;
@@ -18,5 +17,9 @@ export type UpdateMenuItemBody = {
   /** @exclusiveMinimum 0 */
   priceCents?: number;
   available?: boolean;
+  /**
+     * @minimum -2147483648
+     * @maximum 2147483647
+     */
   sortOrder?: number;
 };
