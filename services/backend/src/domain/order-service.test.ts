@@ -86,8 +86,8 @@ class TestStore implements RestaurantStore {
     return this.customers.find((customer) => customer.id === id) ?? null;
   }
 
-  async listCustomers(): Promise<CustomerWithStats[]> {
-    return this.customers.map((customer) => ({
+  async listCustomers(filters: { limit?: number } = {}): Promise<CustomerWithStats[]> {
+    return this.customers.slice(0, filters.limit).map((customer) => ({
       ...customer,
       orderCount: 0,
       spendCents: 0,
@@ -107,8 +107,8 @@ class TestStore implements RestaurantStore {
     ];
   }
 
-  async listMenuItems(): Promise<MenuItem[]> {
-    return this.menuItems;
+  async listMenuItems(filters: { limit?: number } = {}): Promise<MenuItem[]> {
+    return this.menuItems.slice(0, filters.limit);
   }
 
   async findMenuItemsByIds(ids: string[]): Promise<MenuItem[]> {
@@ -178,11 +178,14 @@ class TestStore implements RestaurantStore {
     return created;
   }
 
-  async listOrders(filters: { status?: OrderStatus }): Promise<OrderWithItems[]> {
-    if (!filters.status) {
-      return this.orders;
-    }
-    return this.orders.filter((order) => order.status === filters.status);
+  async listOrders(filters: {
+    status?: OrderStatus;
+    limit?: number;
+  }): Promise<OrderWithItems[]> {
+    const filtered = filters.status
+      ? this.orders.filter((order) => order.status === filters.status)
+      : this.orders;
+    return filtered.slice(0, filters.limit);
   }
 
   async findOrderById(id: string): Promise<OrderWithItems | null> {

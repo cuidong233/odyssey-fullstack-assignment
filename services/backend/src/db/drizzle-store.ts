@@ -79,9 +79,15 @@ export class DrizzleRestaurantStore implements RestaurantStore {
     return customer ?? null;
   }
 
-  async listCustomers(): Promise<CustomerWithStats[]> {
+  async listCustomers(filters: { limit?: number } = {}): Promise<CustomerWithStats[]> {
     const [customerRows, orderRows] = await Promise.all([
-      this.db.select().from(customers).orderBy(desc(customers.createdAt)),
+      filters.limit !== undefined
+        ? this.db
+            .select()
+            .from(customers)
+            .orderBy(desc(customers.createdAt))
+            .limit(filters.limit)
+        : this.db.select().from(customers).orderBy(desc(customers.createdAt)),
       this.db.select().from(orders).orderBy(desc(orders.createdAt))
     ]);
 
@@ -105,7 +111,15 @@ export class DrizzleRestaurantStore implements RestaurantStore {
     return this.db.select().from(menuCategories).orderBy(menuCategories.sortOrder);
   }
 
-  async listMenuItems(): Promise<MenuItem[]> {
+  async listMenuItems(filters: { limit?: number } = {}): Promise<MenuItem[]> {
+    if (filters.limit !== undefined) {
+      return this.db
+        .select()
+        .from(menuItems)
+        .orderBy(menuItems.sortOrder)
+        .limit(filters.limit);
+    }
+
     return this.db.select().from(menuItems).orderBy(menuItems.sortOrder);
   }
 
@@ -169,14 +183,31 @@ export class DrizzleRestaurantStore implements RestaurantStore {
     return created;
   }
 
-  async listOrders(filters: { status?: OrderStatus }): Promise<OrderWithItems[]> {
-    const orderRows = filters.status
-      ? await this.db
-          .select()
-          .from(orders)
-          .where(eq(orders.status, filters.status))
-          .orderBy(desc(orders.createdAt))
-      : await this.db.select().from(orders).orderBy(desc(orders.createdAt));
+  async listOrders(filters: {
+    status?: OrderStatus;
+    limit?: number;
+  }): Promise<OrderWithItems[]> {
+    const orderRows =
+      filters.status && filters.limit !== undefined
+        ? await this.db
+            .select()
+            .from(orders)
+            .where(eq(orders.status, filters.status))
+            .orderBy(desc(orders.createdAt))
+            .limit(filters.limit)
+        : filters.status
+          ? await this.db
+              .select()
+              .from(orders)
+              .where(eq(orders.status, filters.status))
+              .orderBy(desc(orders.createdAt))
+          : filters.limit !== undefined
+            ? await this.db
+                .select()
+                .from(orders)
+                .orderBy(desc(orders.createdAt))
+                .limit(filters.limit)
+            : await this.db.select().from(orders).orderBy(desc(orders.createdAt));
 
     return this.hydrateOrders(orderRows);
   }

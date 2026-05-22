@@ -85,14 +85,17 @@ export type RestaurantStore = {
     >
   ): Promise<OrderingSettings>;
   findCustomerById(id: string): Promise<Customer | null>;
-  listCustomers(): Promise<CustomerWithStats[]>;
+  listCustomers(filters?: { limit?: number }): Promise<CustomerWithStats[]>;
   listMenuCategories(): Promise<MenuCategory[]>;
-  listMenuItems(): Promise<MenuItem[]>;
+  listMenuItems(filters?: { limit?: number }): Promise<MenuItem[]>;
   findMenuItemsByIds(ids: string[]): Promise<MenuItem[]>;
   createMenuItem(input: CreateMenuItemInput): Promise<MenuItem>;
   updateMenuItem(id: string, input: UpdateMenuItemInput): Promise<MenuItem>;
   createOrder(input: PersistOrderInput): Promise<OrderWithItems>;
-  listOrders(filters: { status?: OrderStatus }): Promise<OrderWithItems[]>;
+  listOrders(filters: {
+    status?: OrderStatus;
+    limit?: number;
+  }): Promise<OrderWithItems[]>;
   findOrderById(id: string): Promise<OrderWithItems | null>;
   updateOrderStatus(id: string, status: OrderStatus): Promise<OrderWithItems>;
   getHomeSummary(): Promise<OrderSummary>;

@@ -259,7 +259,9 @@ export interface operations {
     };
     listMenuItems: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -417,6 +419,7 @@ export interface operations {
         parameters: {
             query?: {
                 status?: "pending" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -775,7 +778,9 @@ export interface operations {
     };
     listCustomers: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;

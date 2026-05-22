@@ -100,7 +100,7 @@ export function createApp(options: CreateAppOptions = {}) {
   );
 
   app.openapi(listMenuRoute, async (c) =>
-    c.json(await handlers.listMenu(c.get("store")), 200)
+    c.json(await handlers.listMenu(c.get("store"), c.req.valid("query")), 200)
   );
 
   app.openapi(createMenuItemRoute, async (c) =>
@@ -157,7 +157,10 @@ export function createApp(options: CreateAppOptions = {}) {
   );
 
   app.openapi(listCustomersRoute, async (c) =>
-    c.json(await handlers.listCustomers(c.get("store")), 200)
+    c.json(
+      await handlers.listCustomers(c.get("store"), c.req.valid("query")),
+      200
+    )
   );
 
   app.openapi(getSettingsRoute, async (c) =>

@@ -109,7 +109,12 @@ export const homeSummaryResponseSchema = z.object({
 });
 
 export const orderStatusQuerySchema = z.object({
-  status: orderStatusSchema.optional()
+  status: orderStatusSchema.optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50)
+});
+
+export const listLimitQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50)
 });
 
 export const idParamSchema = z.object({

@@ -39,8 +39,10 @@ import type {
   GetOrder404,
   GetOrderingSettings200,
   ListCustomers200Item,
+  ListCustomersParams,
   ListMenuCategories200Item,
   ListMenuItems200Item,
+  ListMenuItemsParams,
   ListOrders200Item,
   ListOrdersParams,
   UpdateMenuItem200,
@@ -345,17 +347,24 @@ export function useListMenuCategories<TData = Awaited<ReturnType<typeof listMenu
 
 
 
-export const getListMenuItemsUrl = () => {
+export const getListMenuItemsUrl = (params?: ListMenuItemsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/menu/items`
+  return stringifiedParams.length > 0 ? `/menu/items?${stringifiedParams}` : `/menu/items`
 }
 
-export const listMenuItems = async ( options?: RequestInit): Promise<ListMenuItems200Item[]> => {
+export const listMenuItems = async (params?: ListMenuItemsParams, options?: RequestInit): Promise<ListMenuItems200Item[]> => {
 
-  return apiFetch<ListMenuItems200Item[]>(getListMenuItemsUrl(),
+  return apiFetch<ListMenuItems200Item[]>(getListMenuItemsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -368,23 +377,23 @@ export const listMenuItems = async ( options?: RequestInit): Promise<ListMenuIte
 
 
 
-export const getListMenuItemsQueryKey = () => {
+export const getListMenuItemsQueryKey = (params?: ListMenuItemsParams,) => {
     return [
-    `/menu/items`
+    `/menu/items`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListMenuItemsQueryOptions = <TData = Awaited<ReturnType<typeof listMenuItems>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+export const getListMenuItemsQueryOptions = <TData = Awaited<ReturnType<typeof listMenuItems>>, TError = ErrorType<unknown>>(params?: ListMenuItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListMenuItemsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListMenuItemsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMenuItems>>> = ({ signal }) => listMenuItems({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMenuItems>>> = ({ signal }) => listMenuItems(params, { signal, ...requestOptions });
 
 
 
@@ -398,7 +407,7 @@ export type ListMenuItemsQueryError = ErrorType<unknown>
 
 
 export function useListMenuItems<TData = Awaited<ReturnType<typeof listMenuItems>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>> & Pick<
+ params: undefined |  ListMenuItemsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listMenuItems>>,
           TError,
@@ -408,7 +417,7 @@ export function useListMenuItems<TData = Awaited<ReturnType<typeof listMenuItems
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListMenuItems<TData = Awaited<ReturnType<typeof listMenuItems>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>> & Pick<
+ params?: ListMenuItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listMenuItems>>,
           TError,
@@ -418,16 +427,16 @@ export function useListMenuItems<TData = Awaited<ReturnType<typeof listMenuItems
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListMenuItems<TData = Awaited<ReturnType<typeof listMenuItems>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: ListMenuItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useListMenuItems<TData = Awaited<ReturnType<typeof listMenuItems>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: ListMenuItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMenuItems>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListMenuItemsQueryOptions(options)
+  const queryOptions = getListMenuItemsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -895,17 +904,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUpdateOrderStatusMutationOptions(options), queryClient);
     }
 
-export const getListCustomersUrl = () => {
+export const getListCustomersUrl = (params?: ListCustomersParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/customers`
+  return stringifiedParams.length > 0 ? `/customers?${stringifiedParams}` : `/customers`
 }
 
-export const listCustomers = async ( options?: RequestInit): Promise<ListCustomers200Item[]> => {
+export const listCustomers = async (params?: ListCustomersParams, options?: RequestInit): Promise<ListCustomers200Item[]> => {
 
-  return apiFetch<ListCustomers200Item[]>(getListCustomersUrl(),
+  return apiFetch<ListCustomers200Item[]>(getListCustomersUrl(params),
   {
     ...options,
     method: 'GET'
@@ -918,23 +934,23 @@ export const listCustomers = async ( options?: RequestInit): Promise<ListCustome
 
 
 
-export const getListCustomersQueryKey = () => {
+export const getListCustomersQueryKey = (params?: ListCustomersParams,) => {
     return [
-    `/customers`
+    `/customers`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListCustomersQueryOptions = <TData = Awaited<ReturnType<typeof listCustomers>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+export const getListCustomersQueryOptions = <TData = Awaited<ReturnType<typeof listCustomers>>, TError = ErrorType<unknown>>(params?: ListCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListCustomersQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListCustomersQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCustomers>>> = ({ signal }) => listCustomers({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCustomers>>> = ({ signal }) => listCustomers(params, { signal, ...requestOptions });
 
 
 
@@ -948,7 +964,7 @@ export type ListCustomersQueryError = ErrorType<unknown>
 
 
 export function useListCustomers<TData = Awaited<ReturnType<typeof listCustomers>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>> & Pick<
+ params: undefined |  ListCustomersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listCustomers>>,
           TError,
@@ -958,7 +974,7 @@ export function useListCustomers<TData = Awaited<ReturnType<typeof listCustomers
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListCustomers<TData = Awaited<ReturnType<typeof listCustomers>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>> & Pick<
+ params?: ListCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listCustomers>>,
           TError,
@@ -968,16 +984,16 @@ export function useListCustomers<TData = Awaited<ReturnType<typeof listCustomers
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListCustomers<TData = Awaited<ReturnType<typeof listCustomers>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: ListCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useListCustomers<TData = Awaited<ReturnType<typeof listCustomers>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: ListCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListCustomersQueryOptions(options)
+  const queryOptions = getListCustomersQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

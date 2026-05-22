@@ -16,6 +16,7 @@ import {
   errorResponseSchema,
   homeSummaryResponseSchema,
   idParamSchema,
+  listLimitQuerySchema,
   menuCategoryResponseSchema,
   menuItemResponseSchema,
   orderingSettingsResponseSchema,
@@ -90,6 +91,9 @@ export const listMenuRoute = createRoute({
   tags: ["menu"],
   method: "get",
   path: "/menu/items",
+  request: {
+    query: listLimitQuerySchema
+  },
   responses: {
     200: jsonContent(z.array(menuItemResponseSchema), "Menu items")
   }
@@ -189,6 +193,9 @@ export const listCustomersRoute = createRoute({
   tags: ["customers"],
   method: "get",
   path: "/customers",
+  request: {
+    query: listLimitQuerySchema
+  },
   responses: {
     200: jsonContent(
       z.array(customerWithStatsResponseSchema),
@@ -308,8 +315,10 @@ export const handlers = {
     serializeHomeSummary(await store.getHomeSummary()),
   listMenuCategories: async (store: RestaurantStore) =>
     (await store.listMenuCategories()).map(serializeMenuCategory),
-  listMenu: async (store: RestaurantStore) =>
-    (await store.listMenuItems()).map(serializeMenuItem),
+  listMenu: async (
+    store: RestaurantStore,
+    query: z.infer<typeof listLimitQuerySchema>
+  ) => (await store.listMenuItems({ limit: query.limit })).map(serializeMenuItem),
   createMenuItem: async (
     store: RestaurantStore,
     input: z.infer<typeof createMenuItemRequestSchema>
@@ -324,7 +333,9 @@ export const handlers = {
     filters: z.infer<typeof orderStatusQuerySchema>
   ) =>
     (await store.listOrders(
-      filters.status !== undefined ? { status: filters.status } : {}
+      filters.status !== undefined
+        ? { status: filters.status, limit: filters.limit }
+        : { limit: filters.limit }
     )).map(serializeOrderWithItems),
   createOrder: async (
     store: RestaurantStore,
@@ -342,8 +353,10 @@ export const handlers = {
     id: string,
     input: z.infer<typeof updateOrderStatusRequestSchema>
   ) => serializeOrderWithItems(await updateOrderStatus(store, id, input.nextStatus)),
-  listCustomers: async (store: RestaurantStore) =>
-    (await store.listCustomers()).map(serializeCustomerWithStats),
+  listCustomers: async (
+    store: RestaurantStore,
+    query: z.infer<typeof listLimitQuerySchema>
+  ) => (await store.listCustomers({ limit: query.limit })).map(serializeCustomerWithStats),
   getSettings: async (store: RestaurantStore) =>
     serializeOrderingSettings(await store.getOrderingSettings()),
   updateSettings: async (
