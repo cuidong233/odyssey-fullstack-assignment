@@ -283,7 +283,8 @@
                   "categoryId",
                   "name",
                   "priceCents"
-                ]
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -391,7 +392,7 @@
           {
             "schema": {
               "type": "string",
-              "minLength": 1
+              "format": "uuid"
             },
             "required": true,
             "name": "id",
@@ -431,7 +432,8 @@
                     "minimum": -2147483648,
                     "maximum": 2147483647
                   }
-                }
+                },
+                "additionalProperties": false
               }
             }
           }
@@ -1096,7 +1098,7 @@
           {
             "schema": {
               "type": "string",
-              "minLength": 1
+              "format": "uuid"
             },
             "required": true,
             "name": "id",
@@ -1316,7 +1318,7 @@
           {
             "schema": {
               "type": "string",
-              "minLength": 1
+              "format": "uuid"
             },
             "required": true,
             "name": "id",
@@ -1344,7 +1346,8 @@
                 },
                 "required": [
                   "nextStatus"
-                ]
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -1815,7 +1818,8 @@
                   "openingHoursJson": {
                     "type": "string"
                   }
-                }
+                },
+                "additionalProperties": false
               }
             }
           }

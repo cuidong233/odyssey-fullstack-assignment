@@ -96,14 +96,15 @@ export const createMenuItemRequestSchema = insertMenuItemSchema
     name: z.string().min(1),
     description: z.string().max(500).nullish(),
     priceCents: z.number().int().positive()
-  });
+  })
+  .strict();
 
 export const updateMenuItemRequestSchema =
-  createMenuItemRequestSchema.partial();
+  createMenuItemRequestSchema.partial().strict();
 
 export const updateOrderStatusRequestSchema = z.object({
   nextStatus: orderStatusSchema
-});
+}).strict();
 
 export const updateOrderingSettingsRequestSchema = insertOrderingSettingsSchema
   .pick({
@@ -117,7 +118,8 @@ export const updateOrderingSettingsRequestSchema = insertOrderingSettingsSchema
   .extend({
     prepTimeMinutes: z.number().int().positive().max(240).optional(),
     taxRateBps: z.number().int().min(0).max(2500).optional()
-  });
+  })
+  .strict();
 
 export const homeSummaryResponseSchema = z.object({
   totalOrders: z.number().int().nonnegative(),
@@ -142,5 +144,5 @@ export const listLimitQuerySchema = z.object({
 });
 
 export const idParamSchema = z.object({
-  id: z.string().min(1)
-});
+  id: z.string().uuid()
+}).strict();
