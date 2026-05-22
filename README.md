@@ -92,6 +92,8 @@ pnpm db:seed
 
 The seed is reset-style by design: it clears restaurant operations tables, then inserts menu categories, menu items with generated dish image URLs, customers, settings, and several orders across different statuses. This makes Home, Orders, CRM, Menu, and Settings interesting immediately after setup.
 
+Generated menu photos are available in `docs/assets/menu-images` and served by the dashboard from `apps/dashboard/public/menu-images`.
+
 Useful root scripts:
 
 ```bash
@@ -209,6 +211,8 @@ pnpm db:seed
 ```
 
 seed 是 reset-style：会清空餐厅运营相关表，然后写入菜单分类、带生成菜品图片 URL 的菜品、客户、设置，以及覆盖不同状态的多笔订单。初始化后 Home、Orders、CRM、Menu、Settings 都会立刻有数据可看。
+
+生成的完整菜品图在 `docs/assets/menu-images`，dashboard 运行时从 `apps/dashboard/public/menu-images` 提供这些图片。
 
 常用根命令：
 
