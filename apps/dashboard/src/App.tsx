@@ -31,32 +31,36 @@ import {
   useUpdateMenuItem,
   useUpdateOrderStatus
 } from "@repo/api-client";
-import { formatCurrency, formatMinutes, orderStatuses, statusLabels, type OrderStatus, tokens } from "@repo/shared";
-import { AppModal, Badge, Button, Chip, Field, Panel, SectionTitle, SelectLike, SkeletonRows, StatusBadge, Toggle } from "./components/ui";
+import { formatCurrency, formatMinutes, orderStatuses, type OrderStatus } from "@repo/shared";
+import { AppModal, Badge, Button, Chip, Field, Panel, SectionTitle, SelectLike, SkeletonRows, Toggle } from "./components/ui";
+import { I18nProvider, statusText, useI18n, type Locale } from "./lib/i18n";
 import { c, layout, r, s, type } from "./lib/styles";
 
 type Page = "home" | "orders" | "crm" | "menu" | "settings" | "library";
 
 const queryClient = new QueryClient();
 
-const navItems: Array<{ id: Page; label: string; icon: typeof Home }> = [
-  { id: "home", label: "Home", icon: Home },
-  { id: "orders", label: "Orders", icon: ShoppingBag },
-  { id: "crm", label: "CRM", icon: Users },
-  { id: "menu", label: "Menu", icon: MenuIcon },
-  { id: "settings", label: "Settings", icon: Settings },
-  { id: "library", label: "UI Library", icon: Library }
+const navItems: Array<{ id: Page; icon: typeof Home }> = [
+  { id: "home", icon: Home },
+  { id: "orders", icon: ShoppingBag },
+  { id: "crm", icon: Users },
+  { id: "menu", icon: MenuIcon },
+  { id: "settings", icon: Settings },
+  { id: "library", icon: Library }
 ];
 
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <DashboardApp />
+      <I18nProvider>
+        <DashboardApp />
+      </I18nProvider>
     </QueryClientProvider>
   );
 }
 
 function DashboardApp() {
+  const { t } = useI18n();
   const [page, setPage] = useState<Page>("home");
   const [createOrderOpen, setCreateOrderOpen] = useState(false);
 
@@ -80,16 +84,16 @@ function DashboardApp() {
             return (
               <Pressable key={item.id} onPress={() => setPage(item.id)} style={[styles.navItem, active && styles.navItemActive]}>
                 <Icon size={18} color={active ? c.accent : c.inkMuted} />
-                <Text style={[styles.navText, active && { color: c.ink }]}>{item.label}</Text>
+                <Text style={[styles.navText, active && { color: c.ink }]}>{t.nav[item.id]}</Text>
               </Pressable>
             );
           })}
         </View>
 
         <Panel style={styles.sidebarPanel}>
-          <Text style={type.eyebrow}>Service</Text>
-          <Text style={styles.sidebarNumber}>Open</Text>
-          <Text style={type.tiny}>Average prep time holds at 14 minutes.</Text>
+          <Text style={type.eyebrow}>{t.service.label}</Text>
+          <Text style={styles.sidebarNumber}>{t.service.open}</Text>
+          <Text style={type.tiny}>{t.service.note}</Text>
         </Panel>
       </View>
 
@@ -97,12 +101,13 @@ function DashboardApp() {
         <View style={styles.topbar}>
           <View style={styles.searchBox}>
             <Search size={18} color={c.inkSubtle} />
-            <Text style={styles.searchText}>Search orders, guests, menu items</Text>
+            <Text style={styles.searchText}>{t.topbar.search}</Text>
           </View>
           <View style={[layout.row, { gap: s[3] }]}>
-            <SelectLike label="Today" />
+            <LanguageToggle />
+            <SelectLike label={t.topbar.today} />
             <Button icon={<Plus size={16} color={c.surface} />} onPress={() => setCreateOrderOpen(true)}>
-              Create order
+              {t.topbar.createOrder}
             </Button>
           </View>
         </View>
@@ -122,7 +127,26 @@ function DashboardApp() {
   );
 }
 
+function LanguageToggle() {
+  const { locale, setLocale } = useI18n();
+  const options: Array<{ id: Locale; label: string }> = [
+    { id: "en", label: "English" },
+    { id: "zh", label: "简体中文" }
+  ];
+
+  return (
+    <View style={styles.languageToggle}>
+      {options.map((option) => (
+        <Pressable key={option.id} onPress={() => setLocale(option.id)} style={[styles.languageOption, locale === option.id && styles.languageOptionActive]}>
+          <Text style={[styles.languageText, locale === option.id && { color: c.accent }]}>{option.label}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
+  const { t } = useI18n();
   const summary = useGetHomeSummary();
   const orders = useListOrders();
   const [selectedOrderId, setSelectedOrderId] = useState<string | undefined>();
@@ -135,11 +159,11 @@ function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
     <View style={styles.screenStack}>
       <View style={layout.between}>
         <View>
-          <Text style={type.eyebrow}>Live operations</Text>
-          <Text style={type.h1}>Today&apos;s floor</Text>
+          <Text style={type.eyebrow}>{t.home.eyebrow}</Text>
+          <Text style={type.h1}>{t.home.title}</Text>
         </View>
         <Button icon={<Plus size={16} color={c.surface} />} onPress={onCreateOrder}>
-          New order
+          {t.home.newOrder}
         </Button>
       </View>
 
@@ -147,16 +171,16 @@ function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
         <SkeletonRows />
       ) : (
         <View style={styles.kpiGrid}>
-          <Kpi icon={<BadgeDollarSign size={20} color={c.success} />} label="Revenue" value={formatCurrency(summary.data?.revenueCents ?? 0)} note="Net of cancelled orders" />
-          <Kpi icon={<ShoppingBag size={20} color={c.accent} />} label="Total orders" value={`${summary.data?.totalOrders ?? 0}`} note="Across all channels" />
-          <Kpi icon={<Clock3 size={20} color={c.warning} />} label="Pending" value={`${summary.data?.pendingOrders ?? 0}`} note="Needs action" />
-          <Kpi icon={<ChefHat size={20} color={c.info} />} label="Popular items" value={`${summary.data?.popularItems.length ?? 0}`} note="Tracked from completed orders" />
+          <Kpi icon={<BadgeDollarSign size={20} color={c.success} />} label={t.home.revenue} value={formatCurrency(summary.data?.revenueCents ?? 0)} note={t.home.revenueNote} />
+          <Kpi icon={<ShoppingBag size={20} color={c.accent} />} label={t.home.totalOrders} value={`${summary.data?.totalOrders ?? 0}`} note={t.home.totalOrdersNote} />
+          <Kpi icon={<Clock3 size={20} color={c.warning} />} label={t.home.pending} value={`${summary.data?.pendingOrders ?? 0}`} note={t.home.pendingNote} />
+          <Kpi icon={<ChefHat size={20} color={c.info} />} label={t.home.popularItems} value={`${summary.data?.popularItems.length ?? 0}`} note={t.home.popularItemsNote} />
         </View>
       )}
 
       <View style={styles.homeGrid}>
         <Panel style={{ flex: 1.35 }}>
-          <SectionTitle eyebrow="Queue" title="Recent orders" action={<SelectLike label="All channels" />} />
+          <SectionTitle eyebrow={t.home.queue} title={t.home.recentOrders} action={<SelectLike label={t.home.allChannels} />} />
           <OrderTable orders={orders.data ?? []} selectedOrderId={selectedOrder?.id} onSelect={setSelectedOrderId} />
         </Panel>
         <View style={styles.sideStack}>
@@ -169,6 +193,7 @@ function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
 }
 
 function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
+  const { t } = useI18n();
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const orders = useListOrders(filter === "all" ? undefined : { status: filter });
   const updateStatus = useUpdateOrderStatus();
@@ -178,11 +203,11 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
     <View style={styles.screenStack}>
       <View style={layout.between}>
         <View>
-          <Text style={type.eyebrow}>Order management</Text>
-          <Text style={type.h1}>Orders</Text>
+          <Text style={type.eyebrow}>{t.orders.eyebrow}</Text>
+          <Text style={type.h1}>{t.orders.title}</Text>
         </View>
         <Button icon={<Plus size={16} color={c.surface} />} onPress={onCreateOrder}>
-          Create order
+          {t.topbar.createOrder}
         </Button>
       </View>
 
@@ -190,16 +215,16 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
         <View style={[layout.between, { marginBottom: s[5] }]}>
           <View style={styles.chipRow}>
             <Chip active={filter === "all"} onPress={() => setFilter("all")}>
-              All
+              {t.orders.all}
             </Chip>
             {orderStatuses.slice(0, 5).map((status) => (
               <Chip key={status} active={filter === status} onPress={() => setFilter(status)}>
-                {statusLabels[status]}
+                {statusText(status, t)}
               </Chip>
             ))}
           </View>
           <Button icon={<SlidersHorizontal size={16} color={c.inkMuted} />} variant="secondary">
-            Filters
+            {t.orders.filters}
           </Button>
         </View>
         {orders.isLoading ? <SkeletonRows count={5} /> : <OrderTable orders={orders.data ?? []} />}
@@ -207,17 +232,17 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
 
       {selected ? (
         <Panel>
-          <SectionTitle eyebrow="Status actions" title={`${selected.id} next steps`} />
+          <SectionTitle eyebrow={t.orders.actions} title={`${selected.id} ${t.orders.nextSteps}`} />
           <View style={styles.actionStrip}>
             {(["accepted", "preparing", "ready", "completed", "cancelled"] as OrderStatus[]).map((nextStatus) => (
               <Button
                 key={nextStatus}
                 disabled={updateStatus.isPending}
                 loading={updateStatus.isPending && updateStatus.variables?.data?.nextStatus === nextStatus}
-                onPress={() => updateStatus.mutate({ id: selected.id, data: { nextStatus } })}
+                onPress={() => updateStatus.mutate({ id: selected.id, data: { nextStatus } }, { onSuccess: () => void queryClient.invalidateQueries() })}
                 variant={nextStatus === "cancelled" ? "danger" : "secondary"}
               >
-                Mark {statusLabels[nextStatus]}
+                {t.orders.mark} {statusText(nextStatus, t)}
               </Button>
             ))}
           </View>
@@ -229,16 +254,17 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
 }
 
 function CrmScreen() {
+  const { t } = useI18n();
   const customers = useListCustomers();
 
   return (
     <View style={styles.screenStack}>
       <View>
-        <Text style={type.eyebrow}>Guest intelligence</Text>
-        <Text style={type.h1}>CRM</Text>
+        <Text style={type.eyebrow}>{t.crm.eyebrow}</Text>
+        <Text style={type.h1}>{t.crm.title}</Text>
       </View>
       <Panel>
-        <SectionTitle eyebrow="Customers" title="Spend and order history" action={<SelectLike label="Highest spend" />} />
+        <SectionTitle eyebrow={t.crm.customers} title={t.crm.stats} action={<SelectLike label={t.crm.sort} />} />
         <View style={styles.customerList}>
           {(customers.data ?? []).map((customer) => (
             <CustomerRow key={customer.id} customer={customer} />
@@ -250,6 +276,7 @@ function CrmScreen() {
 }
 
 function MenuScreen() {
+  const { t } = useI18n();
   const items = useListMenuItems();
   const categories = useListMenuCategories();
   const updateItem = useUpdateMenuItem();
@@ -267,18 +294,23 @@ function MenuScreen() {
     }
     updateItem.mutate(
       { id: editing.id, data: { available: editing.available, priceCents: Math.round(Number(price) * 100) } },
-      { onSuccess: () => setEditing(undefined) }
+      {
+        onSuccess: () => {
+          setEditing(undefined);
+          void queryClient.invalidateQueries();
+        }
+      }
     );
   }
 
   return (
     <View style={styles.screenStack}>
       <View>
-        <Text style={type.eyebrow}>Catalog</Text>
-        <Text style={type.h1}>Menu</Text>
+        <Text style={type.eyebrow}>{t.menu.eyebrow}</Text>
+        <Text style={type.h1}>{t.menu.title}</Text>
       </View>
       <Panel>
-        <SectionTitle eyebrow="Items" title="Availability and pricing" action={<Button variant="secondary">Add item</Button>} />
+        <SectionTitle eyebrow={t.menu.items} title={t.menu.availability} action={<Button variant="secondary">{t.menu.add}</Button>} />
         <View style={styles.menuGrid}>
           {(items.data ?? []).map((item) => {
             const category = categories.data?.find((entry) => entry.id === item.categoryId)?.name ?? "Menu";
@@ -291,21 +323,21 @@ function MenuScreen() {
                   </Text>
                 </View>
                 <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
-                <Badge tone={item.available ? "success" : "danger"}>{item.available ? "Available" : "Paused"}</Badge>
+                <Badge tone={item.available ? "success" : "danger"}>{item.available ? t.menu.available : t.menu.paused}</Badge>
               </Pressable>
             );
           })}
         </View>
       </Panel>
 
-      <AppModal title="Edit menu item" visible={Boolean(editing)} onClose={() => setEditing(undefined)}>
+      <AppModal title={t.menu.edit} visible={Boolean(editing)} onClose={() => setEditing(undefined)}>
         {editing ? (
           <View style={{ gap: s[4] }}>
             <Text style={type.body}>{editing.name}</Text>
-            <Field keyboardType="numeric" label="Price" onChangeText={setPrice} value={price} />
-            <Toggle label="Available for ordering" value={editing.available} onValueChange={(available) => setEditing({ ...editing, available })} />
+            <Field keyboardType="numeric" label={t.menu.price} onChangeText={setPrice} value={price} />
+            <Toggle label={t.menu.availableForOrdering} value={editing.available} onValueChange={(available) => setEditing({ ...editing, available })} />
             <Button loading={updateItem.isPending} onPress={saveItem}>
-              Save item
+              {t.menu.save}
             </Button>
           </View>
         ) : null}
@@ -315,6 +347,7 @@ function MenuScreen() {
 }
 
 function SettingsScreen() {
+  const { t } = useI18n();
   const settings = useGetOrderingSettings();
   const update = useUpdateOrderingSettings();
   const data = settings.data;
@@ -322,18 +355,18 @@ function SettingsScreen() {
   return (
     <View style={styles.screenStack}>
       <View>
-        <Text style={type.eyebrow}>Business controls</Text>
-        <Text style={type.h1}>Settings</Text>
+        <Text style={type.eyebrow}>{t.settings.eyebrow}</Text>
+        <Text style={type.h1}>{t.settings.title}</Text>
       </View>
       <Panel>
-        <SectionTitle eyebrow="Ordering" title="Service rules" />
+        <SectionTitle eyebrow={t.settings.ordering} title={t.settings.rules} />
         {data ? (
           <View style={styles.settingsGrid}>
-            <Toggle label="Ordering is open" value={data.serviceAvailable} onValueChange={(serviceAvailable) => update.mutate({ data: { serviceAvailable } })} />
-            <Toggle label="Auto-accept new orders" value={data.autoAccept} onValueChange={(autoAccept) => update.mutate({ data: { autoAccept } })} />
-            <SettingMetric label="Default prep time" value={formatMinutes(data.prepTimeMinutes)} />
-            <SettingMetric label="Tax rate" value={`${(data.taxRateBps / 100).toFixed(2)}%`} />
-            <SettingMetric label="Opening hours" value={data.openingHoursJson} />
+            <Toggle label={t.settings.open} value={data.serviceAvailable} onValueChange={(serviceAvailable) => update.mutate({ data: { serviceAvailable } }, { onSuccess: () => void queryClient.invalidateQueries() })} />
+            <Toggle label={t.settings.autoAccept} value={data.autoAccept} onValueChange={(autoAccept) => update.mutate({ data: { autoAccept } }, { onSuccess: () => void queryClient.invalidateQueries() })} />
+            <SettingMetric label={t.settings.prep} value={formatMinutes(data.prepTimeMinutes)} />
+            <SettingMetric label={t.settings.tax} value={`${(data.taxRateBps / 100).toFixed(2)}%`} />
+            <SettingMetric label={t.settings.hours} value={data.openingHoursJson} />
           </View>
         ) : (
           <SkeletonRows />
@@ -344,15 +377,16 @@ function SettingsScreen() {
 }
 
 function LibraryScreen() {
+  const { t } = useI18n();
   return (
     <View style={styles.screenStack}>
       <View>
-        <Text style={type.eyebrow}>Design system</Text>
-        <Text style={type.h1}>UI Library</Text>
+        <Text style={type.eyebrow}>{t.library.eyebrow}</Text>
+        <Text style={type.h1}>{t.library.title}</Text>
       </View>
       <View style={styles.libraryGrid}>
         <Panel>
-          <SectionTitle eyebrow="Tokens" title="Color and spacing" />
+          <SectionTitle eyebrow={t.library.tokens} title={t.library.colorSpacing} />
           <View style={styles.swatchGrid}>
             {[c.ink, c.accent, c.success, c.warning, c.danger, c.info, c.surfaceMuted, c.lineStrong].map((color) => (
               <View key={color} style={[styles.swatch, { backgroundColor: color }]} />
@@ -365,17 +399,17 @@ function LibraryScreen() {
           </View>
         </Panel>
         <Panel>
-          <SectionTitle eyebrow="Components" title="States" />
+          <SectionTitle eyebrow={t.library.components} title={t.library.states} />
           <View style={styles.actionStrip}>
-            <Button>Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button disabled>Disabled</Button>
+            <Button>{t.library.primary}</Button>
+            <Button variant="secondary">{t.library.secondary}</Button>
+            <Button disabled>{t.library.disabled}</Button>
           </View>
           <View style={styles.actionStrip}>
-            <Badge tone="success">Success</Badge>
-            <Badge tone="warning">Warning</Badge>
-            <Badge tone="danger">Error</Badge>
-            <Badge tone="info">Info</Badge>
+            <Badge tone="success">{t.library.success}</Badge>
+            <Badge tone="warning">{t.library.warning}</Badge>
+            <Badge tone="danger">{t.library.error}</Badge>
+            <Badge tone="info">{t.library.info}</Badge>
           </View>
           <SkeletonRows count={2} />
         </Panel>
@@ -385,6 +419,7 @@ function LibraryScreen() {
 }
 
 function CreateOrderModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { t } = useI18n();
   const customers = useListCustomers();
   const menuItems = useListMenuItems();
   const createOrder = useCreateOrder();
@@ -411,6 +446,7 @@ function CreateOrderModal({ visible, onClose }: { visible: boolean; onClose: () 
       {
         onSuccess: () => {
           setSelectedItems([]);
+          void queryClient.invalidateQueries();
           onClose();
         }
       }
@@ -418,7 +454,7 @@ function CreateOrderModal({ visible, onClose }: { visible: boolean; onClose: () 
   }
 
   return (
-    <AppModal title="Create order" visible={visible} onClose={onClose}>
+    <AppModal title={t.create.title} visible={visible} onClose={onClose}>
       <View style={{ gap: s[4] }}>
         <View style={styles.chipRow}>
           {(customers.data ?? []).map((customer) => (
@@ -442,7 +478,7 @@ function CreateOrderModal({ visible, onClose }: { visible: boolean; onClose: () 
         </View>
         {createOrder.error ? <Text style={[type.muted, { color: c.danger }]}>{createOrder.error.message}</Text> : null}
         <Button disabled={selectedItems.length === 0 || !activeCustomerId} loading={createOrder.isPending} onPress={submit}>
-          Submit order
+          {t.create.submit}
         </Button>
       </View>
     </AppModal>
@@ -463,12 +499,13 @@ function Kpi({ icon, label, note, value }: { icon: React.ReactNode; label: strin
 }
 
 function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Order[]; selectedOrderId?: string | undefined; onSelect?: (id: string) => void }) {
+  const { t } = useI18n();
   if (orders.length === 0) {
     return (
       <View style={styles.emptyState}>
         <BookOpen size={26} color={c.inkSubtle} />
-        <Text style={type.body}>No orders match this view.</Text>
-        <Text style={type.tiny}>Try clearing filters or creating a new order.</Text>
+        <Text style={type.body}>{t.common.noOrders}</Text>
+        <Text style={type.tiny}>{t.common.clearFilters}</Text>
       </View>
     );
   }
@@ -486,7 +523,7 @@ function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Order[]; se
             <Text style={type.tiny}>{order.items.length} items</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <StatusBadge status={order.status} />
+            <LocalizedStatusBadge status={order.status} />
           </View>
           <Text style={[styles.price, { flex: 0.7 }]}>{formatCurrency(order.totalCents)}</Text>
         </Pressable>
@@ -496,15 +533,16 @@ function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Order[]; se
 }
 
 function PopularItemsPanel({ items }: { items: Array<{ name: string; quantity: number }> }) {
+  const { t } = useI18n();
   return (
     <Panel>
-      <SectionTitle eyebrow="Menu" title="Popular items" />
+      <SectionTitle eyebrow={t.common.menuSection} title={t.common.popularItems} />
       <View style={{ gap: s[3] }}>
         {items.map((item) => (
           <View key={item.name} style={layout.between}>
             <View>
               <Text style={type.body}>{item.name}</Text>
-              <Text style={type.tiny}>{item.quantity} sold</Text>
+              <Text style={type.tiny}>{item.quantity} {t.common.soldToday}</Text>
             </View>
             <Text style={styles.price}>#{item.quantity}</Text>
           </View>
@@ -515,9 +553,10 @@ function PopularItemsPanel({ items }: { items: Array<{ name: string; quantity: n
 }
 
 function OrderInspector({ order }: { order: Order }) {
+  const { t } = useI18n();
   return (
     <Panel>
-      <SectionTitle eyebrow="Detail" title={order.id} action={<StatusBadge status={order.status} />} />
+      <SectionTitle eyebrow={t.common.detail} title={order.id} action={<LocalizedStatusBadge status={order.status} />} />
       <View style={{ gap: s[3] }}>
         <Text style={type.body}>{order.customer.name}</Text>
         {order.items.map((item) => (
@@ -530,7 +569,7 @@ function OrderInspector({ order }: { order: Order }) {
         ))}
         <View style={layout.divider} />
         <View style={layout.between}>
-          <Text style={type.body}>Total</Text>
+          <Text style={type.body}>{t.common.total}</Text>
           <Text style={styles.price}>{formatCurrency(order.totalCents)}</Text>
         </View>
       </View>
@@ -539,6 +578,7 @@ function OrderInspector({ order }: { order: Order }) {
 }
 
 function CustomerRow({ customer }: { customer: Customer }) {
+  const { t } = useI18n();
   return (
     <View style={styles.customerRow}>
       <View style={styles.avatar}>
@@ -550,11 +590,16 @@ function CustomerRow({ customer }: { customer: Customer }) {
           {customer.email ?? "No email"} · {customer.phone ?? "No phone"}
         </Text>
       </View>
-      <SettingMetric label="Orders" value={`${customer.orderCount}`} />
-      <SettingMetric label="Spend" value={formatCurrency(customer.spendCents)} />
-      <SettingMetric label="Last order" value={customer.recentOrders[0] ? formatDateTime(customer.recentOrders[0].createdAt) : "None"} />
+      <SettingMetric label={t.common.orders} value={`${customer.orderCount}`} />
+      <SettingMetric label={t.crm.spend} value={formatCurrency(customer.spendCents)} />
+      <SettingMetric label={t.crm.lastOrder} value={customer.recentOrders[0] ? formatDateTime(customer.recentOrders[0].createdAt) : "None"} />
     </View>
   );
+}
+
+function LocalizedStatusBadge({ status }: { status: OrderStatus }) {
+  const { t } = useI18n();
+  return <Badge tone={status === "cancelled" ? "danger" : status === "completed" || status === "ready" ? "success" : status === "pending" ? "warning" : status === "preparing" ? "accent" : "info"}>{statusText(status, t)}</Badge>;
 }
 
 function SettingMetric({ label, value }: { label: string; value: string }) {
@@ -671,6 +716,28 @@ const styles = StyleSheet.create({
     color: c.inkSubtle,
     fontSize: 14,
     fontWeight: "600"
+  },
+  languageToggle: {
+    alignItems: "center",
+    backgroundColor: c.surface,
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    minHeight: 38,
+    overflow: "hidden"
+  },
+  languageOption: {
+    paddingHorizontal: s[3],
+    paddingVertical: s[2]
+  },
+  languageOptionActive: {
+    backgroundColor: c.accentSoft
+  },
+  languageText: {
+    color: c.inkMuted,
+    fontSize: 13,
+    fontWeight: "700"
   },
   content: {
     padding: s[6]
