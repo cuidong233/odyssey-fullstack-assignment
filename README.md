@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="#english">English</a> | <a href="#简体中文">简体中文</a>
+  <a href="#english">English</a> | <a href="#simplified-chinese">简体中文</a>
 </p>
 
 <p align="center">
@@ -89,14 +89,14 @@ Implemented pieces include the Expo web dashboard shell, shared design tokens, r
 Still in progress: production database seeding/persistence polish and broader frontend test coverage. The README keeps those tradeoffs visible so reviewers can quickly understand the current edge of the build.
 
 <p align="center">
-  <a href="#english">English</a> | <a href="#简体中文">简体中文</a>
+  <a href="#english">English</a> | <a href="#simplified-chinese">简体中文</a>
 </p>
 
 <p align="center">
   <img src="docs/assets/odyssey-restaurant-ops-mark.svg" width="88" alt="Odyssey Restaurant Ops 标识" />
 </p>
 
-<h1 id="简体中文" align="center">Odyssey Restaurant Ops</h1>
+<h1 id="simplified-chinese" align="center">Odyssey Restaurant Ops</h1>
 
 <p align="center">
   一个用于菜单管理、订单流转、客户洞察和营业设置的全栈餐厅运营后台。
