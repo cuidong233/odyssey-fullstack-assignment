@@ -10,6 +10,7 @@ import type {
   OrderSummary,
   OrderWithItems
 } from "../domain/order-service";
+import { getNextOrderStatuses } from "../domain/order-status";
 
 function iso(date: Date): string {
   return date.toISOString();
@@ -51,7 +52,8 @@ export function serializeOrderWithItems(order: OrderWithItems) {
   return {
     ...serializeOrder(order),
     customer: serializeCustomer(order.customer),
-    items: order.items
+    items: order.items,
+    nextStatuses: getNextOrderStatuses(order.status)
   };
 }
 

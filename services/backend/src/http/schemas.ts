@@ -39,7 +39,8 @@ export const orderResponseSchema = selectOrderSchema.extend({
   createdAt: dateTimeSchema,
   updatedAt: dateTimeSchema,
   customer: customerResponseSchema,
-  items: z.array(orderItemResponseSchema)
+  items: z.array(orderItemResponseSchema),
+  nextStatuses: z.array(orderStatusSchema)
 });
 
 export const customerWithStatsResponseSchema = customerResponseSchema.extend({

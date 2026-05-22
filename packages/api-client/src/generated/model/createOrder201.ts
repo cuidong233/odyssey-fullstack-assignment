@@ -6,6 +6,7 @@
  */
 import type { CreateOrder201Customer } from './createOrder201Customer';
 import type { CreateOrder201ItemsItem } from './createOrder201ItemsItem';
+import type { CreateOrder201NextStatusesItem } from './createOrder201NextStatusesItem';
 import type { CreateOrder201Status } from './createOrder201Status';
 
 export type CreateOrder201 = {
@@ -33,4 +34,5 @@ export type CreateOrder201 = {
   updatedAt: string;
   customer: CreateOrder201Customer;
   items: CreateOrder201ItemsItem[];
+  nextStatuses: CreateOrder201NextStatusesItem[];
 };

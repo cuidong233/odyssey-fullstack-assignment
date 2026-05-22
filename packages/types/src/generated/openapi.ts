@@ -468,6 +468,7 @@ export interface operations {
                             unitPriceCents: number;
                             lineTotalCents: number;
                         }[];
+                        nextStatuses: ("pending" | "accepted" | "preparing" | "ready" | "completed" | "cancelled")[];
                     }[];
                 };
             };
@@ -538,6 +539,7 @@ export interface operations {
                             unitPriceCents: number;
                             lineTotalCents: number;
                         }[];
+                        nextStatuses: ("pending" | "accepted" | "preparing" | "ready" | "completed" | "cancelled")[];
                     };
                 };
             };
@@ -654,6 +656,7 @@ export interface operations {
                             unitPriceCents: number;
                             lineTotalCents: number;
                         }[];
+                        nextStatuses: ("pending" | "accepted" | "preparing" | "ready" | "completed" | "cancelled")[];
                     };
                 };
             };
@@ -736,6 +739,7 @@ export interface operations {
                             unitPriceCents: number;
                             lineTotalCents: number;
                         }[];
+                        nextStatuses: ("pending" | "accepted" | "preparing" | "ready" | "completed" | "cancelled")[];
                     };
                 };
             };

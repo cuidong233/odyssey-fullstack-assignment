@@ -219,7 +219,7 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
             <Chip active={filter === "all"} onPress={() => setFilter("all")}>
               {t.orders.all}
             </Chip>
-            {orderStatuses.slice(0, 5).map((status) => (
+            {orderStatuses.map((status) => (
               <Chip key={status} active={filter === status} onPress={() => setFilter(status)}>
                 {statusText(status, t)}
               </Chip>
@@ -236,7 +236,7 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
         <Panel>
           <SectionTitle eyebrow={t.orders.actions} title={`${selected.id} ${t.orders.nextSteps}`} />
           <View style={styles.actionStrip}>
-            {(["accepted", "preparing", "ready", "completed", "cancelled"] as OrderStatus[]).map((nextStatus) => (
+            {selected.nextStatuses.map((nextStatus) => (
               <Button
                 key={nextStatus}
                 disabled={updateStatus.isPending}

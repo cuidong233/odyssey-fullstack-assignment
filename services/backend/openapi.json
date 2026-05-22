@@ -674,6 +674,20 @@
                             "lineTotalCents"
                           ]
                         }
+                      },
+                      "nextStatuses": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "accepted",
+                            "preparing",
+                            "ready",
+                            "completed",
+                            "cancelled"
+                          ]
+                        }
                       }
                     },
                     "required": [
@@ -687,7 +701,8 @@
                       "createdAt",
                       "updatedAt",
                       "customer",
-                      "items"
+                      "items",
+                      "nextStatuses"
                     ]
                   }
                 }
@@ -884,6 +899,20 @@
                           "lineTotalCents"
                         ]
                       }
+                    },
+                    "nextStatuses": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "pending",
+                          "accepted",
+                          "preparing",
+                          "ready",
+                          "completed",
+                          "cancelled"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -897,7 +926,8 @@
                     "createdAt",
                     "updatedAt",
                     "customer",
-                    "items"
+                    "items",
+                    "nextStatuses"
                   ]
                 }
               }
@@ -1179,6 +1209,20 @@
                           "lineTotalCents"
                         ]
                       }
+                    },
+                    "nextStatuses": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "pending",
+                          "accepted",
+                          "preparing",
+                          "ready",
+                          "completed",
+                          "cancelled"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -1192,7 +1236,8 @@
                     "createdAt",
                     "updatedAt",
                     "customer",
-                    "items"
+                    "items",
+                    "nextStatuses"
                   ]
                 }
               }
@@ -1410,6 +1455,20 @@
                           "lineTotalCents"
                         ]
                       }
+                    },
+                    "nextStatuses": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "pending",
+                          "accepted",
+                          "preparing",
+                          "ready",
+                          "completed",
+                          "cancelled"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -1423,7 +1482,8 @@
                     "createdAt",
                     "updatedAt",
                     "customer",
-                    "items"
+                    "items",
+                    "nextStatuses"
                   ]
                 }
               }

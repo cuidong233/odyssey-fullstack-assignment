@@ -6,6 +6,7 @@
  */
 import type { UpdateOrderStatus200Customer } from './updateOrderStatus200Customer';
 import type { UpdateOrderStatus200ItemsItem } from './updateOrderStatus200ItemsItem';
+import type { UpdateOrderStatus200NextStatusesItem } from './updateOrderStatus200NextStatusesItem';
 import type { UpdateOrderStatus200Status } from './updateOrderStatus200Status';
 
 export type UpdateOrderStatus200 = {
@@ -33,4 +34,5 @@ export type UpdateOrderStatus200 = {
   updatedAt: string;
   customer: UpdateOrderStatus200Customer;
   items: UpdateOrderStatus200ItemsItem[];
+  nextStatuses: UpdateOrderStatus200NextStatusesItem[];
 };

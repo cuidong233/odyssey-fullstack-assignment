@@ -6,6 +6,7 @@
  */
 import type { ListOrders200ItemCustomer } from './listOrders200ItemCustomer';
 import type { ListOrders200ItemItemsItem } from './listOrders200ItemItemsItem';
+import type { ListOrders200ItemNextStatusesItem } from './listOrders200ItemNextStatusesItem';
 import type { ListOrders200ItemStatus } from './listOrders200ItemStatus';
 
 export type ListOrders200Item = {
@@ -33,4 +34,5 @@ export type ListOrders200Item = {
   updatedAt: string;
   customer: ListOrders200ItemCustomer;
   items: ListOrders200ItemItemsItem[];
+  nextStatuses: ListOrders200ItemNextStatusesItem[];
 };
