@@ -46,10 +46,7 @@ export function getApiBaseUrl() {
 export async function apiFetch<T>(url: string, options: RequestInit): Promise<T> {
   const response = await fetch(`${getApiBaseUrl()}${url}`, {
     ...options,
-    headers: {
-      "content-type": "application/json",
-      ...options.headers
-    }
+    headers: withJsonContentType(options.headers)
   });
 
   const body = await readResponseBody(response);
@@ -58,6 +55,14 @@ export async function apiFetch<T>(url: string, options: RequestInit): Promise<T>
   }
 
   return body as T;
+}
+
+function withJsonContentType(headers: HeadersInit | undefined): Headers {
+  const nextHeaders = new Headers(headers);
+  if (!nextHeaders.has("content-type")) {
+    nextHeaders.set("content-type", "application/json");
+  }
+  return nextHeaders;
 }
 
 async function readResponseBody(response: Response): Promise<unknown> {

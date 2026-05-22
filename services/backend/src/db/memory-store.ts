@@ -19,6 +19,21 @@ import type {
 import { DomainError } from "../domain/errors";
 
 const now = new Date("2026-05-22T13:20:00.000Z");
+const ids = {
+  categorySignatures: "11111111-1111-4111-8111-111111111111",
+  categoryBowls: "11111111-1111-4111-8111-111111111112",
+  categoryDrinks: "11111111-1111-4111-8111-111111111113",
+  customerMaya: "22222222-2222-4222-8222-222222222221",
+  customerNoah: "22222222-2222-4222-8222-222222222222",
+  customerAva: "22222222-2222-4222-8222-222222222223",
+  itemSalmon: "33333333-3333-4333-8333-333333333331",
+  itemBowl: "33333333-3333-4333-8333-333333333332",
+  itemShortRib: "33333333-3333-4333-8333-333333333333",
+  itemSpritz: "33333333-3333-4333-8333-333333333334",
+  order1048: "44444444-4444-4444-8444-444444441048",
+  order1047: "44444444-4444-4444-8444-444444441047",
+  order1046: "44444444-4444-4444-8444-444444441046"
+} as const;
 
 export function createSeededMemoryStore() {
   const store = new MemoryRestaurantStore();
@@ -44,28 +59,28 @@ class MemoryRestaurantStore implements RestaurantStore {
 
   seed() {
     this.categories = [
-      makeCategory("cat-signatures", "Signatures", 1),
-      makeCategory("cat-bowls", "Bowls", 2),
-      makeCategory("cat-drinks", "Drinks", 3)
+      makeCategory(ids.categorySignatures, "Signatures", 1),
+      makeCategory(ids.categoryBowls, "Bowls", 2),
+      makeCategory(ids.categoryDrinks, "Drinks", 3)
     ];
 
     this.customers = [
-      makeCustomer("cust-1", "Maya Chen", "maya@example.test", "(555) 010-1188"),
-      makeCustomer("cust-2", "Noah Patel", "noah@example.test", "(555) 010-2234"),
-      makeCustomer("cust-3", "Ava Johnson", "ava@example.test", "(555) 010-7731")
+      makeCustomer(ids.customerMaya, "Maya Chen", "maya@example.test", "(555) 010-1188"),
+      makeCustomer(ids.customerNoah, "Noah Patel", "noah@example.test", "(555) 010-2234"),
+      makeCustomer(ids.customerAva, "Ava Johnson", "ava@example.test", "(555) 010-7731")
     ];
 
     this.menuItems = [
-      makeMenuItem("item-1", "cat-signatures", "Charred Citrus Salmon", 2450, true, 1),
-      makeMenuItem("item-2", "cat-bowls", "Market Grain Bowl", 1680, true, 2),
-      makeMenuItem("item-3", "cat-signatures", "Smoked Short Rib Plate", 2860, true, 3),
-      makeMenuItem("item-4", "cat-drinks", "Yuzu Mint Spritz", 760, false, 4)
+      makeMenuItem(ids.itemSalmon, ids.categorySignatures, "Charred Citrus Salmon", 2450, true, 1),
+      makeMenuItem(ids.itemBowl, ids.categoryBowls, "Market Grain Bowl", 1680, true, 2),
+      makeMenuItem(ids.itemShortRib, ids.categorySignatures, "Smoked Short Rib Plate", 2860, true, 3),
+      makeMenuItem(ids.itemSpritz, ids.categoryDrinks, "Yuzu Mint Spritz", 760, false, 4)
     ];
 
     this.orders = [
-      this.makeOrder("order-1048", "cust-1", "pending", ["item-1", "item-2"], new Date("2026-05-22T12:58:00.000Z")),
-      this.makeOrder("order-1047", "cust-2", "preparing", ["item-3"], new Date("2026-05-22T12:42:00.000Z")),
-      this.makeOrder("order-1046", "cust-3", "ready", ["item-2", "item-4"], new Date("2026-05-22T12:18:00.000Z"))
+      this.makeOrder(ids.order1048, ids.customerMaya, "pending", [ids.itemSalmon, ids.itemBowl], new Date("2026-05-22T12:58:00.000Z")),
+      this.makeOrder(ids.order1047, ids.customerNoah, "preparing", [ids.itemShortRib], new Date("2026-05-22T12:42:00.000Z")),
+      this.makeOrder(ids.order1046, ids.customerAva, "ready", [ids.itemBowl, ids.itemSpritz], new Date("2026-05-22T12:18:00.000Z"))
     ];
   }
 
