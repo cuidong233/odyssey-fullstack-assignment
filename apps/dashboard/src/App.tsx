@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Home, Library, Menu as MenuIcon, Plus, Search, Settings, ShoppingBag, Users } from "lucide-react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Button, Panel, SelectLike } from "@repo/shared/ui";
@@ -10,7 +10,13 @@ import { c, layout, r, s, type } from "./lib/styles";
 
 type Page = "home" | "orders" | "crm" | "menu" | "settings" | "library";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false
+    }
+  }
+});
 
 const navItems: Array<{ id: Page; icon: typeof Home }> = [
   { id: "home", icon: Home },
@@ -33,12 +39,14 @@ export function App() {
 
 function DashboardApp() {
   const { t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 760;
   const [page, setPage] = useState<Page>("home");
   const [createOrderOpen, setCreateOrderOpen] = useState(false);
 
   return (
-    <View style={styles.app}>
-      <View style={styles.sidebar}>
+    <View style={[styles.app, compact && styles.appCompact]}>
+      <View style={[styles.sidebar, compact && styles.sidebarCompact]}>
         <View style={styles.brand}>
           <View style={styles.brandMark}>
             <OdysseyLogoMark />
@@ -49,13 +57,13 @@ function DashboardApp() {
           </View>
         </View>
 
-        <View style={styles.nav}>
+        <View style={[styles.nav, compact && styles.navCompact]}>
           {navItems.map((item) => {
-            return <NavButton key={item.id} active={item.id === page} item={item} label={t.nav[item.id]} onPress={() => setPage(item.id)} />;
+            return <NavButton key={item.id} active={item.id === page} compact={compact} item={item} label={t.nav[item.id]} onPress={() => setPage(item.id)} />;
           })}
         </View>
 
-        <Panel style={styles.sidebarPanel}>
+        <Panel style={[styles.sidebarPanel, compact && styles.sidebarPanelCompact]}>
           <Text style={type.eyebrow}>{t.service.label}</Text>
           <Text style={styles.sidebarNumber}>{t.service.open}</Text>
           <Text style={type.tiny}>{t.service.note}</Text>
@@ -63,12 +71,12 @@ function DashboardApp() {
       </View>
 
       <View style={styles.main}>
-        <View style={styles.topbar}>
-          <View style={styles.searchBox}>
+        <View style={[styles.topbar, compact && styles.topbarCompact]}>
+          <View style={[styles.searchBox, compact && styles.searchBoxCompact]}>
             <Search size={18} color={c.inkSubtle} />
             <Text style={styles.searchText}>{t.topbar.search}</Text>
           </View>
-          <View style={[layout.row, { gap: s[3] }]}>
+          <View style={[layout.row, compact && styles.topbarActionsCompact, { gap: s[3] }]}>
             <LanguageToggle />
             <SelectLike label={t.topbar.today} />
             <Button icon={<Plus size={16} color={c.surface} />} onPress={() => setCreateOrderOpen(true)}>
@@ -77,7 +85,7 @@ function DashboardApp() {
           </View>
         </View>
 
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>
           {page === "home" ? <HomeScreen onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
           {page === "orders" ? <OrdersScreen onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
           {page === "crm" ? <CrmScreen /> : null}
@@ -92,7 +100,7 @@ function DashboardApp() {
   );
 }
 
-function NavButton({ active, item, label, onPress }: { active: boolean; item: { id: Page; icon: typeof Home }; label: string; onPress: () => void }) {
+function NavButton({ active, compact, item, label, onPress }: { active: boolean; compact: boolean; item: { id: Page; icon: typeof Home }; label: string; onPress: () => void }) {
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const Icon = item.icon;
@@ -104,7 +112,7 @@ function NavButton({ active, item, label, onPress }: { active: boolean; item: { 
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
       onPress={onPress}
-      style={({ pressed }) => [styles.navItem, active && styles.navItemActive, hovered && styles.navItemHover, focused && styles.navItemFocus, pressed && { opacity: 0.78 }]}
+      style={({ pressed }) => [styles.navItem, compact && styles.navItemCompact, active && styles.navItemActive, hovered && styles.navItemHover, focused && styles.navItemFocus, pressed && { opacity: 0.78 }]}
     >
       <Icon size={18} color={active ? c.accent : c.inkMuted} />
       <Text style={[styles.navText, active && { color: c.ink }]}>{label}</Text>
@@ -149,6 +157,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     minHeight: "100%"
   },
+  appCompact: {
+    flexDirection: "column"
+  },
   brand: {
     alignItems: "center",
     flexDirection: "row",
@@ -174,6 +185,9 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: s[6]
+  },
+  contentCompact: {
+    padding: s[4]
   },
   languageOption: {
     paddingHorizontal: s[3],
@@ -203,6 +217,11 @@ const styles = StyleSheet.create({
   nav: {
     gap: s[2]
   },
+  navCompact: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    width: "100%"
+  },
   navItem: {
     alignItems: "center",
     borderColor: "transparent",
@@ -212,6 +231,11 @@ const styles = StyleSheet.create({
     gap: s[3],
     minHeight: 42,
     paddingHorizontal: s[3]
+  },
+  navItemCompact: {
+    flexBasis: 104,
+    flexGrow: 0,
+    maxWidth: 104
   },
   navItemActive: {
     backgroundColor: c.accentSoft
@@ -245,6 +269,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600"
   },
+  searchBoxCompact: {
+    maxWidth: "100%",
+    width: "100%"
+  },
   sidebar: {
     backgroundColor: "#fbfcf7",
     borderRightColor: c.line,
@@ -253,6 +281,14 @@ const styles = StyleSheet.create({
     padding: s[5],
     width: 254
   },
+  sidebarCompact: {
+    borderBottomColor: c.line,
+    borderBottomWidth: 1,
+    borderRightWidth: 0,
+    gap: s[4],
+    padding: s[4],
+    width: "100%"
+  },
   sidebarNumber: {
     color: c.success,
     fontSize: 28,
@@ -260,6 +296,9 @@ const styles = StyleSheet.create({
   },
   sidebarPanel: {
     marginTop: "auto"
+  },
+  sidebarPanelCompact: {
+    display: "none"
   },
   topbar: {
     alignItems: "center",
@@ -271,5 +310,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: s[6],
     paddingVertical: s[4]
+  },
+  topbarActionsCompact: {
+    alignItems: "flex-start",
+    flexDirection: "column",
+    flexWrap: "nowrap",
+    maxWidth: "100%"
+  },
+  topbarCompact: {
+    alignItems: "stretch",
+    flexDirection: "column",
+    paddingHorizontal: s[4]
   }
 });

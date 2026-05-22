@@ -30,6 +30,7 @@ const dictionaries = {
     settings: { eyebrow: "Business controls", title: "Settings", ordering: "Ordering", rules: "Service rules", open: "Ordering is open", autoAccept: "Auto-accept new orders", prep: "Default prep time", tax: "Tax rate", hours: "Opening hours" },
     library: { eyebrow: "Design system", title: "UI Library", tokens: "Tokens", colorSpacing: "Color and spacing", typography: "Typography", typeScale: "Type scale", surfaces: "Surfaces", elevation: "Elevation", feedback: "Feedback", toast: "Toast pattern", toastBody: "Menu item saved and ordering surfaces refreshed.", components: "Components", states: "States", primary: "Primary", secondary: "Secondary", disabled: "Disabled", success: "Success", warning: "Warning", error: "Error", info: "Info" },
     create: { title: "Create order", submit: "Submit order" },
+    preview: { title: "API offline preview", body: "Start the backend on localhost:8787 to switch these views from seeded preview data to live API data." },
     common: { noOrders: "No orders match this view.", clearFilters: "Try clearing filters or creating a new order.", menuSection: "Menu", popularItems: "Popular items", soldToday: "sold today", detail: "Detail", total: "Total", orders: "Orders" },
     status: { pending: "Pending", accepted: "Accepted", preparing: "Preparing", ready: "Ready", completed: "Completed", cancelled: "Cancelled" }
   },
@@ -59,6 +60,7 @@ const dictionaries = {
     settings: { eyebrow: "业务控制", title: "设置", ordering: "点单", rules: "服务规则", open: "开放点单", autoAccept: "自动接单", prep: "默认备餐时间", tax: "税率", hours: "营业时间" },
     library: { eyebrow: "设计系统", title: "组件库", tokens: "设计变量", colorSpacing: "颜色与间距", typography: "字体", typeScale: "字号层级", surfaces: "界面层级", elevation: "边框与阴影", feedback: "反馈", toast: "提示模式", toastBody: "菜品已保存，点单界面已刷新。", components: "组件", states: "状态", primary: "主按钮", secondary: "次按钮", disabled: "禁用", success: "成功", warning: "警告", error: "错误", info: "信息" },
     create: { title: "创建订单", submit: "提交订单" },
+    preview: { title: "API 离线预览", body: "启动 localhost:8787 后端后，这些页面会从预览数据切换为真实 API 数据。" },
     common: { noOrders: "当前视图没有匹配订单。", clearFilters: "可以清除筛选或创建新订单。", menuSection: "菜单", popularItems: "热门菜品", soldToday: "今日售出", detail: "详情", total: "总计", orders: "订单" },
     status: { pending: "待处理", accepted: "已接单", preparing: "制作中", ready: "待取餐", completed: "已完成", cancelled: "已取消" }
   }

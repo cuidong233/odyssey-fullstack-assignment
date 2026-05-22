@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal } from "lucide-react-native";
 import {
   type MenuItem,
@@ -19,19 +19,25 @@ import { useCreateRestaurantOrder, useMenuItemEditor, useOrderingSettingsEditor,
 import { statusText, useI18n } from "../lib/i18n";
 import { c, layout, r, s, type } from "../lib/styles";
 import { priceInputToCents, resolveActiveCustomerId, resolveSelectedOrder, toggleSelectedId } from "./dashboardState";
+import { demoCategories, demoCustomers, demoHomeSummary, demoMenuItems, demoOrders, demoOrdersForStatus, demoSettings } from "./demoData";
 
 export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
   const { t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 900;
   const summary = useGetHomeSummary();
   const orders = useListOrders();
+  const isPreview = isApiPreview(summary) || isApiPreview(orders);
+  const summaryData = summary.data ?? (isApiPreview(summary) ? demoHomeSummary : undefined);
+  const orderRows = orders.data ?? (isApiPreview(orders) ? demoOrders : []);
   const [selectedOrderId, setSelectedOrderId] = useState<string | undefined>();
   const selectedOrder = useMemo(() => {
-    return resolveSelectedOrder(orders.data ?? [], selectedOrderId);
-  }, [orders.data, selectedOrderId]);
+    return resolveSelectedOrder(orderRows, selectedOrderId);
+  }, [orderRows, selectedOrderId]);
 
   return (
     <View style={styles.screenStack}>
-      <View style={layout.between}>
+      <View style={[layout.between, compact && styles.headerCompact]}>
         <View>
           <Text style={type.eyebrow}>{t.home.eyebrow}</Text>
           <Text style={type.h1}>{t.home.title}</Text>
@@ -44,21 +50,23 @@ export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
       {summary.isLoading ? (
         <SkeletonRows />
       ) : (
-        <View style={styles.kpiGrid}>
-          <Kpi icon={<BadgeDollarSign size={20} color={c.success} />} label={t.home.revenue} value={formatCurrency(summary.data?.revenueCents ?? 0)} note={t.home.revenueNote} />
-          <Kpi icon={<ShoppingBag size={20} color={c.accent} />} label={t.home.totalOrders} value={`${summary.data?.totalOrders ?? 0}`} note={t.home.totalOrdersNote} />
-          <Kpi icon={<Clock3 size={20} color={c.warning} />} label={t.home.pending} value={`${summary.data?.pendingOrders ?? 0}`} note={t.home.pendingNote} />
-          <Kpi icon={<ChefHat size={20} color={c.info} />} label={t.home.popularItems} value={`${summary.data?.popularItems.length ?? 0}`} note={t.home.popularItemsNote} />
+        <View style={[styles.kpiGrid, compact && styles.kpiGridCompact]}>
+          <Kpi icon={<BadgeDollarSign size={20} color={c.success} />} label={t.home.revenue} value={formatCurrency(summaryData?.revenueCents ?? 0)} note={t.home.revenueNote} />
+          <Kpi icon={<ShoppingBag size={20} color={c.accent} />} label={t.home.totalOrders} value={`${summaryData?.totalOrders ?? 0}`} note={t.home.totalOrdersNote} />
+          <Kpi icon={<Clock3 size={20} color={c.warning} />} label={t.home.pending} value={`${summaryData?.pendingOrders ?? 0}`} note={t.home.pendingNote} />
+          <Kpi icon={<ChefHat size={20} color={c.info} />} label={t.home.popularItems} value={`${summaryData?.popularItems.length ?? 0}`} note={t.home.popularItemsNote} />
         </View>
       )}
 
-      <View style={styles.homeGrid}>
+      {isPreview ? <ApiPreviewNotice /> : null}
+
+      <View style={[styles.homeGrid, compact && styles.homeGridCompact]}>
         <Panel style={{ flex: 1.35 }}>
           <SectionTitle eyebrow={t.home.queue} title={t.home.recentOrders} action={<SelectLike label={t.home.allChannels} />} />
-          <OrderTable orders={orders.data ?? []} selectedOrderId={selectedOrder?.id} onSelect={setSelectedOrderId} />
+          <OrderTable orders={orderRows} selectedOrderId={selectedOrder?.id} onSelect={setSelectedOrderId} />
         </Panel>
-        <View style={styles.sideStack}>
-          <PopularItemsPanel items={summary.data?.popularItems ?? []} />
+        <View style={[styles.sideStack, compact && styles.sideStackCompact]}>
+          <PopularItemsPanel items={summaryData?.popularItems ?? []} />
           {selectedOrder ? <OrderInspector order={selectedOrder} /> : null}
         </View>
       </View>
@@ -71,7 +79,9 @@ export function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const orders = useListOrders(filter === "all" ? undefined : { status: filter });
   const updateStatus = useOrderStatusAction();
-  const selected = orders.data?.[0];
+  const isPreview = isApiPreview(orders);
+  const orderRows = orders.data ?? (isPreview ? demoOrdersForStatus(filter) : []);
+  const selected = orderRows[0];
 
   return (
     <View style={styles.screenStack}>
@@ -86,6 +96,7 @@ export function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
       </View>
 
       <Panel>
+        {isPreview ? <ApiPreviewNotice /> : null}
         <View style={[layout.between, { marginBottom: s[5] }]}>
           <View style={styles.chipRow}>
             <Chip active={filter === "all"} onPress={() => setFilter("all")}>
@@ -101,7 +112,7 @@ export function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
             {t.orders.filters}
           </Button>
         </View>
-        {orders.isLoading ? <SkeletonRows count={5} /> : <OrderTable orders={orders.data ?? []} />}
+        {orders.isLoading ? <SkeletonRows count={5} /> : <OrderTable orders={orderRows} />}
       </Panel>
 
       {selected ? (
@@ -111,7 +122,7 @@ export function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
             {selected.nextStatuses.map((nextStatus) => (
               <Button
                 key={nextStatus}
-                disabled={updateStatus.isPending}
+                disabled={isPreview || updateStatus.isPending}
                 loading={updateStatus.isPending && updateStatus.variables?.data?.nextStatus === nextStatus}
                 onPress={() => updateStatus.moveOrderTo(selected.id, nextStatus)}
                 variant={nextStatus === "cancelled" ? "danger" : "secondary"}
@@ -130,6 +141,8 @@ export function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
 export function CrmScreen() {
   const { t } = useI18n();
   const customers = useListCustomers();
+  const isPreview = isApiPreview(customers);
+  const customerRows = customers.data ?? (isPreview ? demoCustomers : []);
 
   return (
     <View style={styles.screenStack}>
@@ -138,9 +151,10 @@ export function CrmScreen() {
         <Text style={type.h1}>{t.crm.title}</Text>
       </View>
       <Panel>
+        {isPreview ? <ApiPreviewNotice /> : null}
         <SectionTitle eyebrow={t.crm.customers} title={t.crm.stats} action={<SelectLike label={t.crm.sort} />} />
         <View style={styles.customerList}>
-          {(customers.data ?? []).map((customer) => (
+          {customerRows.map((customer) => (
             <CustomerRow key={customer.id} customer={customer} />
           ))}
         </View>
@@ -153,6 +167,9 @@ export function MenuScreen() {
   const { t } = useI18n();
   const items = useListMenuItems();
   const categories = useListMenuCategories();
+  const isPreview = isApiPreview(items) || isApiPreview(categories);
+  const itemRows = items.data ?? (isApiPreview(items) ? demoMenuItems : []);
+  const categoryRows = categories.data ?? (isApiPreview(categories) ? demoCategories : []);
   const [editing, setEditing] = useState<MenuItem | undefined>();
   const [price, setPrice] = useState("");
   const updateItem = useMenuItemEditor({ onSaved: () => setEditing(undefined) });
@@ -179,10 +196,11 @@ export function MenuScreen() {
         <Text style={type.h1}>{t.menu.title}</Text>
       </View>
       <Panel>
+        {isPreview ? <ApiPreviewNotice /> : null}
         <SectionTitle eyebrow={t.menu.items} title={t.menu.availability} action={<Button variant="secondary">{t.menu.add}</Button>} />
         <View style={styles.menuGrid}>
-          {(items.data ?? []).map((item) => {
-            const category = categories.data?.find((entry) => entry.id === item.categoryId)?.name ?? "Menu";
+          {itemRows.map((item) => {
+            const category = categoryRows.find((entry) => entry.id === item.categoryId)?.name ?? "Menu";
             return (
               <Pressable key={item.id} onPress={() => startEditing(item)} style={styles.menuRow}>
                 {item.imageUrl ? (
@@ -210,7 +228,7 @@ export function MenuScreen() {
             <Text style={type.body}>{editing.name}</Text>
             <Field keyboardType="numeric" label={t.menu.price} onChangeText={setPrice} value={price} />
             <Toggle label={t.menu.availableForOrdering} value={editing.available} onValueChange={(available) => setEditing({ ...editing, available })} />
-            <Button loading={updateItem.isPending} onPress={saveItem}>
+            <Button disabled={isPreview} loading={updateItem.isPending} onPress={saveItem}>
               {t.menu.save}
             </Button>
           </View>
@@ -224,7 +242,8 @@ export function SettingsScreen() {
   const { t } = useI18n();
   const settings = useGetOrderingSettings();
   const update = useOrderingSettingsEditor();
-  const data = settings.data;
+  const isPreview = isApiPreview(settings);
+  const data = settings.data ?? (isPreview ? demoSettings : undefined);
 
   return (
     <View style={styles.screenStack}>
@@ -233,6 +252,7 @@ export function SettingsScreen() {
         <Text style={type.h1}>{t.settings.title}</Text>
       </View>
       <Panel>
+        {isPreview ? <ApiPreviewNotice /> : null}
         <SectionTitle eyebrow={t.settings.ordering} title={t.settings.rules} />
         {data ? (
           <View style={styles.settingsGrid}>
@@ -321,6 +341,9 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
   const { t } = useI18n();
   const customers = useListCustomers();
   const menuItems = useListMenuItems();
+  const isPreview = isApiPreview(customers) || isApiPreview(menuItems);
+  const customerRows = customers.data ?? (isApiPreview(customers) ? demoCustomers : []);
+  const menuRows = menuItems.data ?? (isApiPreview(menuItems) ? demoMenuItems : []);
   const [customerId, setCustomerId] = useState<string | undefined>();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const createOrder = useCreateRestaurantOrder({
@@ -329,7 +352,7 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
       onClose();
     }
   });
-  const activeCustomerId = resolveActiveCustomerId(customerId, customers.data?.[0]?.id);
+  const activeCustomerId = resolveActiveCustomerId(customerId, customerRows[0]?.id);
 
   function toggleItem(id: string) {
     setSelectedItems((items) => toggleSelectedId(items, id));
@@ -349,15 +372,16 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
   return (
     <AppModal title={t.create.title} visible={visible} onClose={onClose}>
       <View style={{ gap: s[4] }}>
+        {isPreview ? <ApiPreviewNotice /> : null}
         <View style={styles.chipRow}>
-          {(customers.data ?? []).map((customer) => (
+          {customerRows.map((customer) => (
             <Chip key={customer.id} active={customer.id === activeCustomerId} onPress={() => setCustomerId(customer.id)}>
               {customer.name}
             </Chip>
           ))}
         </View>
         <View style={styles.menuGrid}>
-          {(menuItems.data ?? []).map((item) => (
+          {menuRows.map((item) => (
             <Pressable
               key={item.id}
               disabled={!item.available}
@@ -377,12 +401,25 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
           ))}
         </View>
         {createOrder.error ? <Text style={[type.muted, { color: c.danger }]}>{createOrder.error.message}</Text> : null}
-        <Button disabled={selectedItems.length === 0 || !activeCustomerId} loading={createOrder.isPending} onPress={submit}>
+        <Button disabled={isPreview || selectedItems.length === 0 || !activeCustomerId} loading={createOrder.isPending} onPress={submit}>
           {t.create.submit}
         </Button>
       </View>
     </AppModal>
   );
+}
+
+function ApiPreviewNotice() {
+  const { t } = useI18n();
+  return (
+    <Notice title={t.preview.title} tone="warning">
+      {t.preview.body}
+    </Notice>
+  );
+}
+
+function isApiPreview(query: { data?: unknown; isError: boolean }) {
+  return query.isError && query.data === undefined;
 }
 
 const styles = StyleSheet.create({
@@ -406,10 +443,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: s[4]
   },
+  homeGridCompact: {
+    flexDirection: "column"
+  },
+  headerCompact: {
+    alignItems: "flex-start",
+    flexDirection: "column",
+    gap: s[3]
+  },
   kpiGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: s[4]
+  },
+  kpiGridCompact: {
+    flexDirection: "column"
   },
   libraryGrid: {
     flexDirection: "row",
@@ -455,6 +503,11 @@ const styles = StyleSheet.create({
     flex: 0.78,
     gap: s[4],
     minWidth: 320
+  },
+  sideStackCompact: {
+    flex: undefined,
+    minWidth: 0,
+    width: "100%"
   },
   spacingBar: {
     backgroundColor: c.accent,

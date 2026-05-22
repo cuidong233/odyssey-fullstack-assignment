@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { BookOpen } from "lucide-react-native";
 import type { Customer, Order, OrderStatus } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
@@ -8,9 +8,12 @@ import { statusText, useI18n } from "../lib/i18n";
 import { c, layout, r, s, type } from "../lib/styles";
 
 export function Kpi({ icon, label, note, value }: { icon: ReactNode; label: string; note: string; value: string }) {
+  const { width } = useWindowDimensions();
+  const compact = width < 760;
+
   return (
-    <Panel style={styles.kpi}>
-      <View style={layout.between}>
+    <Panel style={[styles.kpi, compact && styles.kpiCompact]}>
+      <View style={[layout.between, compact && styles.kpiHeaderCompact]}>
         <View style={styles.kpiIcon}>{icon}</View>
         <Text style={type.tiny}>{label}</Text>
       </View>
@@ -180,6 +183,15 @@ const styles = StyleSheet.create({
     flexBasis: 220,
     flexGrow: 1,
     gap: s[3]
+  },
+  kpiCompact: {
+    flexBasis: "auto",
+    width: "100%"
+  },
+  kpiHeaderCompact: {
+    alignItems: "flex-start",
+    flexDirection: "column",
+    gap: s[2]
   },
   kpiIcon: {
     alignItems: "center",
