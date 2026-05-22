@@ -1,18 +1,50 @@
 import type { ReactNode } from "react";
 import { Modal as NativeModal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Check, ChevronDown, LoaderCircle, X } from "lucide-react-native";
-import { tokens } from "@repo/shared";
-import { c, layout, r, s, type } from "../lib/styles";
+import { tokens } from "./index";
 
 type Tone = "accent" | "success" | "warning" | "danger" | "info" | "muted";
 
+const c = tokens.color;
+const s = tokens.space;
+const r = tokens.radius;
+
+const type = StyleSheet.create({
+  h2: {
+    color: c.ink,
+    fontSize: tokens.font.size.lg,
+    fontWeight: "700",
+    letterSpacing: 0
+  },
+  body: {
+    color: c.ink,
+    fontSize: tokens.font.size.base,
+    lineHeight: 22
+  },
+  eyebrow: {
+    color: c.inkSubtle,
+    fontSize: tokens.font.size.xs,
+    fontWeight: "700",
+    letterSpacing: 0,
+    textTransform: "uppercase"
+  }
+});
+
+const layout = StyleSheet.create({
+  between: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  }
+});
+
 const toneMap: Record<Tone, { bg: string; fg: string; border: string }> = {
-  accent: { bg: tokens.color.accentSoft, fg: tokens.color.accent, border: "#ffd5bf" },
-  success: { bg: tokens.color.successSoft, fg: tokens.color.success, border: "#bfe6d1" },
-  warning: { bg: tokens.color.warningSoft, fg: tokens.color.warning, border: "#f2d48d" },
-  danger: { bg: tokens.color.dangerSoft, fg: tokens.color.danger, border: "#f2baba" },
-  info: { bg: tokens.color.infoSoft, fg: tokens.color.info, border: "#b9dde6" },
-  muted: { bg: tokens.color.surfaceMuted, fg: tokens.color.inkMuted, border: tokens.color.line }
+  accent: { bg: c.accentSoft, fg: c.accent, border: "#ffd5bf" },
+  success: { bg: c.successSoft, fg: c.success, border: "#bfe6d1" },
+  warning: { bg: c.warningSoft, fg: c.warning, border: "#f2d48d" },
+  danger: { bg: c.dangerSoft, fg: c.danger, border: "#f2baba" },
+  info: { bg: c.infoSoft, fg: c.info, border: "#b9dde6" },
+  muted: { bg: c.surfaceMuted, fg: c.inkMuted, border: c.line }
 };
 
 export function Panel({ children, style }: { children: ReactNode; style?: object }) {
@@ -72,6 +104,16 @@ export function Badge({ children, tone = "muted" }: { children: ReactNode; tone?
   return (
     <View style={[ui.badge, { backgroundColor: colors.bg, borderColor: colors.border }]}>
       <Text style={[ui.badgeText, { color: colors.fg }]}>{children}</Text>
+    </View>
+  );
+}
+
+export function Notice({ children, title, tone = "info" }: { children: ReactNode; title: string; tone?: Tone }) {
+  const colors = toneMap[tone];
+  return (
+    <View style={[ui.notice, { backgroundColor: colors.bg, borderColor: colors.border }]}>
+      <Text style={[ui.noticeTitle, { color: colors.fg }]}>{title}</Text>
+      <Text style={ui.noticeText}>{children}</Text>
     </View>
   );
 }
@@ -215,6 +257,21 @@ const ui = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: "700"
+  },
+  notice: {
+    borderRadius: r.md,
+    borderWidth: 1,
+    gap: s[1],
+    padding: s[4]
+  },
+  noticeText: {
+    color: c.inkMuted,
+    fontSize: 13,
+    lineHeight: 18
+  },
+  noticeTitle: {
+    fontSize: 14,
+    fontWeight: "800"
   },
   label: {
     color: c.inkMuted,
