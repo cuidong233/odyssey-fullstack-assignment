@@ -24,16 +24,18 @@ await db.delete(menuCategories);
 await db.delete(customers);
 await db.delete(orderingSettings);
 
-const [bowls, drinks, sides] = await db
+const [bowls, drinks, sides, snacks, desserts] = await db
   .insert(menuCategories)
   .values([
     { name: "Bowls", sortOrder: 1 },
     { name: "Drinks", sortOrder: 2 },
-    { name: "Sides", sortOrder: 3 }
+    { name: "Sides", sortOrder: 3 },
+    { name: "Snacks", sortOrder: 4 },
+    { name: "Desserts", sortOrder: 5 }
   ])
   .returning();
 
-if (!bowls || !drinks || !sides) {
+if (!bowls || !drinks || !sides || !snacks || !desserts) {
   throw new Error("Failed to seed menu categories.");
 }
 
@@ -43,11 +45,27 @@ const menuImageUrls = {
   salmonPlate: "/menu-images/miso-salmon-plate.png",
   gingerTea: "/menu-images/ginger-lime-tea.png",
   espressoTonic: "/menu-images/espresso-tonic.png",
-  soup: "/menu-images/roasted-tomato-soup.png"
+  soup: "/menu-images/roasted-tomato-soup.png",
+  mushroomBao: "/menu-images/crispy-mushroom-bao.png",
+  cucumberSalad: "/menu-images/sesame-cucumber-salad.png",
+  chiliNoodles: "/menu-images/chili-garlic-noodles.png",
+  ricePudding: "/menu-images/coconut-rice-pudding.png",
+  berryShrub: "/menu-images/sparkling-berry-shrub.png"
 };
 
-const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
-  await db
+const [
+  marketBowl,
+  chickenBowl,
+  salmonPlate,
+  gingerTea,
+  espressoTonic,
+  soup,
+  mushroomBao,
+  cucumberSalad,
+  chiliNoodles,
+  ricePudding,
+  berryShrub
+] = await db
   .insert(menuItems)
   .values([
     {
@@ -103,6 +121,51 @@ const [marketBowl, chickenBowl, salmonPlate, gingerTea, espressoTonic, soup] =
       priceCents: 900,
       available: false,
       sortOrder: 1
+    },
+    {
+      categoryId: snacks.id,
+      name: "Crispy Mushroom Bao",
+      description: "Steamed buns, crispy mushrooms, pickles, chili mayo",
+      imageUrl: menuImageUrls.mushroomBao,
+      priceCents: 1250,
+      available: true,
+      sortOrder: 1
+    },
+    {
+      categoryId: sides.id,
+      name: "Sesame Cucumber Salad",
+      description: "Chilled cucumbers, sesame dressing, chili crisp",
+      imageUrl: menuImageUrls.cucumberSalad,
+      priceCents: 850,
+      available: true,
+      sortOrder: 2
+    },
+    {
+      categoryId: bowls.id,
+      name: "Chili Garlic Noodles",
+      description: "Noodles, chili oil, scallions, jammy egg",
+      imageUrl: menuImageUrls.chiliNoodles,
+      priceCents: 1550,
+      available: true,
+      sortOrder: 4
+    },
+    {
+      categoryId: desserts.id,
+      name: "Coconut Rice Pudding",
+      description: "Coconut rice pudding, mango, toasted coconut",
+      imageUrl: menuImageUrls.ricePudding,
+      priceCents: 775,
+      available: true,
+      sortOrder: 1
+    },
+    {
+      categoryId: drinks.id,
+      name: "Sparkling Berry Shrub",
+      description: "Berry shrub, citrus, mint, sparkling water",
+      imageUrl: menuImageUrls.berryShrub,
+      priceCents: 650,
+      available: true,
+      sortOrder: 3
     }
   ])
   .returning();
@@ -113,7 +176,12 @@ if (
   !salmonPlate ||
   !gingerTea ||
   !espressoTonic ||
-  !soup
+  !soup ||
+  !mushroomBao ||
+  !cucumberSalad ||
+  !chiliNoodles ||
+  !ricePudding ||
+  !berryShrub
 ) {
   throw new Error("Failed to seed menu items.");
 }
@@ -176,7 +244,8 @@ const seededOrders = [
     notes: "Pickup at 12:40.",
     items: [
       { item: chickenBowl, quantity: 2 },
-      { item: espressoTonic, quantity: 2 }
+      { item: espressoTonic, quantity: 2 },
+      { item: mushroomBao, quantity: 1 }
     ]
   },
   {
@@ -185,7 +254,8 @@ const seededOrders = [
     notes: "First-time customer.",
     items: [
       { item: salmonPlate, quantity: 1 },
-      { item: marketBowl, quantity: 1 }
+      { item: marketBowl, quantity: 1 },
+      { item: cucumberSalad, quantity: 1 }
     ]
   },
   {
@@ -194,7 +264,17 @@ const seededOrders = [
     notes: null,
     items: [
       { item: chickenBowl, quantity: 1 },
-      { item: gingerTea, quantity: 2 }
+      { item: gingerTea, quantity: 2 },
+      { item: ricePudding, quantity: 1 }
+    ]
+  },
+  {
+    customer: maya,
+    status: "ready",
+    notes: "Extra scallions.",
+    items: [
+      { item: chiliNoodles, quantity: 1 },
+      { item: berryShrub, quantity: 1 }
     ]
   }
 ];
