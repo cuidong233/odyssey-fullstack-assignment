@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Modal as NativeModal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Check, ChevronDown, LoaderCircle, X } from "lucide-react-native";
-import { tokens, type OrderStatus, statusLabels, statusTone } from "@repo/shared";
+import { tokens } from "@repo/shared";
 import { c, layout, r, s, type } from "../lib/styles";
 
 type Tone = "accent" | "success" | "warning" | "danger" | "info" | "muted";
@@ -74,10 +74,6 @@ export function Badge({ children, tone = "muted" }: { children: ReactNode; tone?
       <Text style={[ui.badgeText, { color: colors.fg }]}>{children}</Text>
     </View>
   );
-}
-
-export function StatusBadge({ status }: { status: OrderStatus }) {
-  return <Badge tone={statusTone[status]}>{statusLabels[status]}</Badge>;
 }
 
 export function Field({

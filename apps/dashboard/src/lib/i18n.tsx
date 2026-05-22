@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
-import type { OrderStatus } from "@repo/shared";
+import type { OrderStatus } from "@repo/api-client";
 
 export type Locale = "en" | "zh";
 

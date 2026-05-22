@@ -20,6 +20,8 @@ import {
   type Customer,
   type MenuItem,
   type Order,
+  type OrderStatus,
+  orderStatuses,
   useCreateOrder,
   useGetOrderingSettings,
   useGetHomeSummary,
@@ -31,7 +33,7 @@ import {
   useUpdateMenuItem,
   useUpdateOrderStatus
 } from "@repo/api-client";
-import { formatCurrency, formatMinutes, orderStatuses, type OrderStatus } from "@repo/shared";
+import { formatCurrency, formatMinutes } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Panel, SectionTitle, SelectLike, SkeletonRows, Toggle } from "./components/ui";
 import { I18nProvider, statusText, useI18n, type Locale } from "./lib/i18n";
 import { c, layout, r, s, type } from "./lib/styles";

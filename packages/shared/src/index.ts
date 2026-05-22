@@ -60,28 +60,6 @@ export const tokens = {
   }
 } as const;
 
-export const orderStatuses = ["pending", "accepted", "preparing", "ready", "completed", "cancelled"] as const;
-
-export type OrderStatus = (typeof orderStatuses)[number];
-
-export const statusLabels: Record<OrderStatus, string> = {
-  pending: "Pending",
-  accepted: "Accepted",
-  preparing: "Preparing",
-  ready: "Ready",
-  completed: "Completed",
-  cancelled: "Cancelled"
-};
-
-export const statusTone: Record<OrderStatus, "warning" | "info" | "accent" | "success" | "muted" | "danger"> = {
-  pending: "warning",
-  accepted: "info",
-  preparing: "accent",
-  ready: "success",
-  completed: "muted",
-  cancelled: "danger"
-};
-
 export function formatCurrency(cents: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
