@@ -60,6 +60,7 @@ function createRecordingStore(
     categoryId: category.id,
     name: "Market Bowl",
     description: "Grains and greens",
+    imageUrl: "/menu-images/restaurant-ops-preview.png",
     priceCents: 1400,
     available: true,
     sortOrder: 0,

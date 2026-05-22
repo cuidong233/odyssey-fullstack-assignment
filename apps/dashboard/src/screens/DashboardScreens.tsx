@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal } from "lucide-react-native";
 import {
   type MenuItem,
@@ -185,6 +185,13 @@ export function MenuScreen() {
             const category = categories.data?.find((entry) => entry.id === item.categoryId)?.name ?? "Menu";
             return (
               <Pressable key={item.id} onPress={() => startEditing(item)} style={styles.menuRow}>
+                {item.imageUrl ? (
+                  <Image
+                    accessibilityLabel=""
+                    source={{ uri: item.imageUrl }}
+                    style={styles.menuImage}
+                  />
+                ) : null}
                 <View style={{ flex: 1, gap: s[1] }}>
                   <Text style={type.body}>{item.name}</Text>
                   <Text style={type.tiny}>{category}</Text>
@@ -357,7 +364,14 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
               onPress={() => toggleItem(item.id)}
               style={[styles.menuRow, selectedItems.includes(item.id) && { backgroundColor: c.accentSoft }, !item.available && { opacity: 0.45 }]}
             >
-              <Text style={type.body}>{item.name}</Text>
+              {item.imageUrl ? (
+                <Image
+                  accessibilityLabel=""
+                  source={{ uri: item.imageUrl }}
+                  style={styles.menuImage}
+                />
+              ) : null}
+              <Text style={[type.body, { flex: 1 }]}>{item.name}</Text>
               <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
             </Pressable>
           ))}
@@ -405,6 +419,12 @@ const styles = StyleSheet.create({
   menuGrid: {
     gap: s[2],
     marginTop: s[5]
+  },
+  menuImage: {
+    backgroundColor: c.surfaceMuted,
+    borderRadius: r.sm,
+    height: 46,
+    width: 62
   },
   menuRow: {
     alignItems: "center",

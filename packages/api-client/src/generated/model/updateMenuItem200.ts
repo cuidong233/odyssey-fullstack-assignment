@@ -11,6 +11,8 @@ export type UpdateMenuItem200 = {
   name: string;
   /** @nullable */
   description: string | null;
+  /** @nullable */
+  imageUrl: string | null;
   /**
      * @minimum -2147483648
      * @maximum 2147483647

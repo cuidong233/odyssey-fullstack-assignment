@@ -281,6 +281,7 @@ export interface operations {
                         categoryId: string;
                         name: string;
                         description: string | null;
+                        imageUrl: string | null;
                         priceCents: number;
                         available: boolean;
                         sortOrder: number;
@@ -322,6 +323,7 @@ export interface operations {
                     categoryId: string;
                     name: string;
                     description?: string | null;
+                    imageUrl?: string | null;
                     priceCents: number;
                     available?: boolean;
                     sortOrder?: number;
@@ -342,6 +344,7 @@ export interface operations {
                         categoryId: string;
                         name: string;
                         description: string | null;
+                        imageUrl: string | null;
                         priceCents: number;
                         available: boolean;
                         sortOrder: number;
@@ -385,6 +388,7 @@ export interface operations {
                     categoryId?: string;
                     name?: string;
                     description?: string | null;
+                    imageUrl?: string | null;
                     priceCents?: number;
                     available?: boolean;
                     sortOrder?: number;
@@ -405,6 +409,7 @@ export interface operations {
                         categoryId: string;
                         name: string;
                         description: string | null;
+                        imageUrl: string | null;
                         priceCents: number;
                         available: boolean;
                         sortOrder: number;

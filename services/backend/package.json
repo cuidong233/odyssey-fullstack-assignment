@@ -8,6 +8,7 @@
     "deploy": "wrangler deploy",
     "gen:openapi": "tsx scripts/write-openapi.mjs",
     "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
     "seed": "tsx src/seed/run.mjs",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
@@ -27,6 +28,7 @@
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
+    "dotenv": "^16.4.7",
     "wrangler": "^4.21.2"
   }
 }

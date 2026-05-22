@@ -12,6 +12,10 @@
   A fullstack restaurant operations dashboard for menu management, order flow, customer insight, and service settings.
 </p>
 
+<p align="center">
+  <img src="docs/assets/restaurant-ops-preview.png" width="720" alt="Generated preview of the Odyssey Restaurant Ops dashboard and restaurant workflow" />
+</p>
+
 ## Product
 
 Odyssey Restaurant Ops is a compact back-office product for a modern restaurant team. It gives operators one place to watch live service, create orders, manage menu availability, review customer history, and tune ordering settings.
@@ -62,13 +66,35 @@ docs/assets           README and product preview assets
 
 ```bash
 pnpm install
+cp .env.example .env
+cp services/backend/.dev.vars.example services/backend/.dev.vars
 pnpm dev:dashboard
 pnpm dev:backend
 ```
 
+Set `DATABASE_URL` in both `.env` and `services/backend/.dev.vars` before running the backend. The Worker runtime uses the same PostgreSQL URL through the Neon serverless driver, so a Neon/PostgreSQL connection string with SSL is the expected happy path for review.
+
+## Database Setup
+
+Apply the Drizzle schema and load deterministic demo data:
+
+```bash
+pnpm db:setup
+```
+
+Equivalent individual commands:
+
+```bash
+pnpm db:push
+pnpm db:seed
+```
+
+The seed is reset-style by design: it clears restaurant operations tables, then inserts menu categories, menu items with generated image URLs, customers, settings, and several orders across different statuses. This makes Home, Orders, CRM, Menu, and Settings interesting immediately after setup.
+
 Useful root scripts:
 
 ```bash
+pnpm db:setup
 pnpm gen:contract
 pnpm lint
 pnpm typecheck
@@ -79,14 +105,15 @@ Backend package scripts:
 
 ```bash
 pnpm --filter @repo/backend db:generate
+pnpm --filter @repo/backend db:push
 pnpm --filter @repo/backend seed
 ```
 
 ## Current Build Notes
 
-Implemented pieces include the Expo web dashboard shell, shared design tokens, reusable UI primitives, Drizzle schema, backend OpenAPI generation, generated contract types, Orval-generated React Query hooks, and backend order-domain tests for order creation and status rules.
+Implemented pieces include the Expo web dashboard shell, shared design tokens, reusable UI primitives, Drizzle schema and migrations, reset-style demo seed data, backend OpenAPI generation, generated contract types, Orval-generated React Query hooks, and backend order-domain tests for order creation and status rules.
 
-Still in progress: production database seeding/persistence polish and broader frontend test coverage. The README keeps those tradeoffs visible so reviewers can quickly understand the current edge of the build.
+Tradeoff: the Worker-oriented database path is optimized for a Neon/PostgreSQL URL rather than a bundled Docker database. Frontend test coverage is intentionally focused on orchestration helpers and state rules rather than full browser automation.
 
 <p align="center">
   <a href="#english">English</a> | <a href="#simplified-chinese">简体中文</a>
@@ -100,6 +127,10 @@ Still in progress: production database seeding/persistence polish and broader fr
 
 <p align="center">
   一个用于菜单管理、订单流转、客户洞察和营业设置的全栈餐厅运营后台。
+</p>
+
+<p align="center">
+  <img src="docs/assets/restaurant-ops-preview.png" width="720" alt="Odyssey Restaurant Ops dashboard 与餐厅工作流生成预览图" />
 </p>
 
 ## 产品介绍
@@ -152,13 +183,35 @@ docs/assets           README 和产品预览资源
 
 ```bash
 pnpm install
+cp .env.example .env
+cp services/backend/.dev.vars.example services/backend/.dev.vars
 pnpm dev:dashboard
 pnpm dev:backend
 ```
 
+启动后端前，请在 `.env` 和 `services/backend/.dev.vars` 中设置 `DATABASE_URL`。Worker 运行时通过 Neon serverless driver 连接同一个 PostgreSQL URL，因此带 SSL 的 Neon/PostgreSQL 连接串是最顺畅的 review 路径。
+
+## 数据库初始化
+
+应用 Drizzle schema 并加载确定性的 demo 数据：
+
+```bash
+pnpm db:setup
+```
+
+也可以分开执行：
+
+```bash
+pnpm db:push
+pnpm db:seed
+```
+
+seed 是 reset-style：会清空餐厅运营相关表，然后写入菜单分类、带生成图片 URL 的菜品、客户、设置，以及覆盖不同状态的多笔订单。初始化后 Home、Orders、CRM、Menu、Settings 都会立刻有数据可看。
+
 常用根命令：
 
 ```bash
+pnpm db:setup
 pnpm gen:contract
 pnpm lint
 pnpm typecheck
@@ -169,11 +222,12 @@ pnpm test
 
 ```bash
 pnpm --filter @repo/backend db:generate
+pnpm --filter @repo/backend db:push
 pnpm --filter @repo/backend seed
 ```
 
 ## 当前状态
 
-已经完成的部分包括 Expo Web dashboard shell、共享 design tokens、可复用 UI primitives、Drizzle schema、后端 OpenAPI 生成、生成式契约类型、Orval 生成的 React Query hooks，以及覆盖订单创建和状态规则的后端领域测试。
+已经完成的部分包括 Expo Web dashboard shell、共享 design tokens、可复用 UI primitives、Drizzle schema 和迁移、reset-style demo seed、后端 OpenAPI 生成、生成式契约类型、Orval 生成的 React Query hooks，以及覆盖订单创建和状态规则的后端领域测试。
 
-仍在推进的部分包括生产数据库 seed/持久化细节打磨，以及更完整的前端测试覆盖。这里保留这些取舍，方便 reviewer 快速理解当前项目边界。
+取舍：数据库路径优先适配 Worker 友好的 Neon/PostgreSQL URL，而不是内置 Docker 数据库。前端测试目前聚焦 orchestration helpers 和状态规则，没有扩展到完整浏览器自动化。

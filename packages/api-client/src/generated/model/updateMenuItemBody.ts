@@ -14,6 +14,11 @@ export type UpdateMenuItemBody = {
      * @nullable
      */
   description?: string | null;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  imageUrl?: string | null;
   /** @exclusiveMinimum 0 */
   priceCents?: number;
   available?: boolean;

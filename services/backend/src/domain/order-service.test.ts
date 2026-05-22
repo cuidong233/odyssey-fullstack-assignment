@@ -50,6 +50,7 @@ class TestStore implements RestaurantStore {
       categoryId: "category-1",
       name: "Market Bowl",
       description: "Grains, greens, seasonal vegetables",
+      imageUrl: "/menu-images/restaurant-ops-preview.png",
       priceCents: 1400,
       available: true,
       sortOrder: 0,
@@ -61,6 +62,7 @@ class TestStore implements RestaurantStore {
       categoryId: "category-1",
       name: "Sold Out Soup",
       description: null,
+      imageUrl: null,
       priceCents: 900,
       available: false,
       sortOrder: 1,
@@ -119,6 +121,7 @@ class TestStore implements RestaurantStore {
     const item = {
       id: `item-${this.menuItems.length + 1}`,
       description: input.description ?? null,
+      imageUrl: input.imageUrl ?? null,
       available: input.available ?? true,
       sortOrder: input.sortOrder ?? 0,
       createdAt: now,

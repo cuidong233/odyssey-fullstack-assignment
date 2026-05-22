@@ -88,6 +88,7 @@ export const createMenuItemRequestSchema = insertMenuItemSchema
     categoryId: true,
     name: true,
     description: true,
+    imageUrl: true,
     priceCents: true,
     available: true,
     sortOrder: true
@@ -95,6 +96,7 @@ export const createMenuItemRequestSchema = insertMenuItemSchema
   .extend({
     name: z.string().min(1),
     description: z.string().max(500).nullish(),
+    imageUrl: z.string().max(1_000).nullish(),
     priceCents: z.number().int().positive()
   })
   .strict();

@@ -39,6 +39,7 @@ export const menuItems = pgTable("menu_items", {
     .references(() => menuCategories.id),
   name: text("name").notNull(),
   description: text("description"),
+  imageUrl: text("image_url"),
   priceCents: integer("price_cents").notNull(),
   available: boolean("available").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),

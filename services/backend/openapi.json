@@ -200,6 +200,10 @@
                         "type": "string",
                         "nullable": true
                       },
+                      "imageUrl": {
+                        "type": "string",
+                        "nullable": true
+                      },
                       "priceCents": {
                         "type": "integer",
                         "minimum": -2147483648,
@@ -227,6 +231,7 @@
                       "categoryId",
                       "name",
                       "description",
+                      "imageUrl",
                       "priceCents",
                       "available",
                       "sortOrder",
@@ -295,6 +300,11 @@
                     "nullable": true,
                     "maxLength": 500
                   },
+                  "imageUrl": {
+                    "type": "string",
+                    "nullable": true,
+                    "maxLength": 1000
+                  },
                   "priceCents": {
                     "type": "integer",
                     "minimum": 0,
@@ -342,6 +352,10 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "imageUrl": {
+                      "type": "string",
+                      "nullable": true
+                    },
                     "priceCents": {
                       "type": "integer",
                       "minimum": -2147483648,
@@ -369,6 +383,7 @@
                     "categoryId",
                     "name",
                     "description",
+                    "imageUrl",
                     "priceCents",
                     "available",
                     "sortOrder",
@@ -449,6 +464,11 @@
                     "nullable": true,
                     "maxLength": 500
                   },
+                  "imageUrl": {
+                    "type": "string",
+                    "nullable": true,
+                    "maxLength": 1000
+                  },
                   "priceCents": {
                     "type": "integer",
                     "minimum": 0,
@@ -491,6 +511,10 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "imageUrl": {
+                      "type": "string",
+                      "nullable": true
+                    },
                     "priceCents": {
                       "type": "integer",
                       "minimum": -2147483648,
@@ -518,6 +542,7 @@
                     "categoryId",
                     "name",
                     "description",
+                    "imageUrl",
                     "priceCents",
                     "available",
                     "sortOrder",

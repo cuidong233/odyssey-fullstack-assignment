@@ -1,10 +1,13 @@
 import { defineConfig } from "drizzle-kit";
+import "dotenv/config";
 
 export default defineConfig({
   schema: "./src/db/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: "postgres://postgres:postgres@localhost:5432/odyssey"
+    url:
+      process.env.DATABASE_URL ??
+      "postgres://postgres:postgres@localhost:5432/odyssey"
   }
 });

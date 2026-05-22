@@ -268,6 +268,7 @@ function toCreateMenuItemInput(
     ...(input.description !== undefined
       ? { description: input.description }
       : {}),
+    ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
     ...(input.available !== undefined ? { available: input.available } : {}),
     ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {})
   };
@@ -282,6 +283,7 @@ function toUpdateMenuItemInput(
     ...(input.description !== undefined
       ? { description: input.description }
       : {}),
+    ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
     ...(input.priceCents !== undefined ? { priceCents: input.priceCents } : {}),
     ...(input.available !== undefined ? { available: input.available } : {}),
     ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {})

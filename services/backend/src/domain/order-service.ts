@@ -25,6 +25,7 @@ export type CreateMenuItemInput = {
   categoryId: string;
   name: string;
   description?: string | null;
+  imageUrl?: string | null;
   priceCents: number;
   available?: boolean;
   sortOrder?: number;
