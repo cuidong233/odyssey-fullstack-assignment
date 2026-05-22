@@ -22,19 +22,16 @@ import {
   type Order,
   type OrderStatus,
   orderStatuses,
-  useCreateOrder,
   useGetOrderingSettings,
   useGetHomeSummary,
   useListCustomers,
   useListMenuCategories,
   useListMenuItems,
-  useListOrders,
-  useUpdateOrderingSettings,
-  useUpdateMenuItem,
-  useUpdateOrderStatus
+  useListOrders
 } from "@repo/api-client";
 import { formatCurrency, formatMinutes } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Panel, SectionTitle, SelectLike, SkeletonRows, Toggle } from "./components/ui";
+import { useCreateRestaurantOrder, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "./hooks/restaurantOperations";
 import { I18nProvider, statusText, useI18n, type Locale } from "./lib/i18n";
 import { c, layout, r, s, type } from "./lib/styles";
 
@@ -198,7 +195,7 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const orders = useListOrders(filter === "all" ? undefined : { status: filter });
-  const updateStatus = useUpdateOrderStatus();
+  const updateStatus = useOrderStatusAction();
   const selected = orders.data?.[0];
 
   return (
@@ -241,7 +238,7 @@ function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
                 key={nextStatus}
                 disabled={updateStatus.isPending}
                 loading={updateStatus.isPending && updateStatus.variables?.data?.nextStatus === nextStatus}
-                onPress={() => updateStatus.mutate({ id: selected.id, data: { nextStatus } }, { onSuccess: () => void queryClient.invalidateQueries() })}
+                onPress={() => updateStatus.moveOrderTo(selected.id, nextStatus)}
                 variant={nextStatus === "cancelled" ? "danger" : "secondary"}
               >
                 {t.orders.mark} {statusText(nextStatus, t)}
@@ -281,9 +278,9 @@ function MenuScreen() {
   const { t } = useI18n();
   const items = useListMenuItems();
   const categories = useListMenuCategories();
-  const updateItem = useUpdateMenuItem();
   const [editing, setEditing] = useState<MenuItem | undefined>();
   const [price, setPrice] = useState("");
+  const updateItem = useMenuItemEditor({ onSaved: () => setEditing(undefined) });
 
   function startEditing(item: MenuItem) {
     setEditing(item);
@@ -294,15 +291,10 @@ function MenuScreen() {
     if (!editing) {
       return;
     }
-    updateItem.mutate(
-      { id: editing.id, data: { available: editing.available, priceCents: Math.round(Number(price) * 100) } },
-      {
-        onSuccess: () => {
-          setEditing(undefined);
-          void queryClient.invalidateQueries();
-        }
-      }
-    );
+    updateItem.saveMenuItem(editing.id, {
+      available: editing.available,
+      priceCents: Math.round(Number(price) * 100)
+    });
   }
 
   return (
@@ -351,7 +343,7 @@ function MenuScreen() {
 function SettingsScreen() {
   const { t } = useI18n();
   const settings = useGetOrderingSettings();
-  const update = useUpdateOrderingSettings();
+  const update = useOrderingSettingsEditor();
   const data = settings.data;
 
   return (
@@ -364,8 +356,8 @@ function SettingsScreen() {
         <SectionTitle eyebrow={t.settings.ordering} title={t.settings.rules} />
         {data ? (
           <View style={styles.settingsGrid}>
-            <Toggle label={t.settings.open} value={data.serviceAvailable} onValueChange={(serviceAvailable) => update.mutate({ data: { serviceAvailable } }, { onSuccess: () => void queryClient.invalidateQueries() })} />
-            <Toggle label={t.settings.autoAccept} value={data.autoAccept} onValueChange={(autoAccept) => update.mutate({ data: { autoAccept } }, { onSuccess: () => void queryClient.invalidateQueries() })} />
+            <Toggle label={t.settings.open} value={data.serviceAvailable} onValueChange={(serviceAvailable) => update.saveSettings({ serviceAvailable })} />
+            <Toggle label={t.settings.autoAccept} value={data.autoAccept} onValueChange={(autoAccept) => update.saveSettings({ autoAccept })} />
             <SettingMetric label={t.settings.prep} value={formatMinutes(data.prepTimeMinutes)} />
             <SettingMetric label={t.settings.tax} value={`${(data.taxRateBps / 100).toFixed(2)}%`} />
             <SettingMetric label={t.settings.hours} value={data.openingHoursJson} />
@@ -424,9 +416,14 @@ function CreateOrderModal({ visible, onClose }: { visible: boolean; onClose: () 
   const { t } = useI18n();
   const customers = useListCustomers();
   const menuItems = useListMenuItems();
-  const createOrder = useCreateOrder();
   const [customerId, setCustomerId] = useState<string | undefined>();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const createOrder = useCreateRestaurantOrder({
+    onCreated: () => {
+      setSelectedItems([]);
+      onClose();
+    }
+  });
   const activeCustomerId = customerId ?? customers.data?.[0]?.id;
 
   function toggleItem(id: string) {
@@ -438,21 +435,10 @@ function CreateOrderModal({ visible, onClose }: { visible: boolean; onClose: () 
       return;
     }
 
-    createOrder.mutate(
-      {
-        data: {
-          customerId: activeCustomerId,
-          items: selectedItems.map((menuItemId) => ({ menuItemId, quantity: 1 }))
-        }
-      },
-      {
-        onSuccess: () => {
-          setSelectedItems([]);
-          void queryClient.invalidateQueries();
-          onClose();
-        }
-      }
-    );
+    createOrder.createOrder({
+      customerId: activeCustomerId,
+      menuItemIds: selectedItems
+    });
   }
 
   return (
