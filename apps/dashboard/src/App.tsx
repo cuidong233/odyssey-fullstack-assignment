@@ -51,14 +51,7 @@ function DashboardApp() {
 
         <View style={styles.nav}>
           {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = item.id === page;
-            return (
-              <Pressable key={item.id} onPress={() => setPage(item.id)} style={[styles.navItem, active && styles.navItemActive]}>
-                <Icon size={18} color={active ? c.accent : c.inkMuted} />
-                <Text style={[styles.navText, active && { color: c.ink }]}>{t.nav[item.id]}</Text>
-              </Pressable>
-            );
+            return <NavButton key={item.id} active={item.id === page} item={item} label={t.nav[item.id]} onPress={() => setPage(item.id)} />;
           })}
         </View>
 
@@ -96,6 +89,26 @@ function DashboardApp() {
 
       <CreateOrderModal visible={createOrderOpen} onClose={() => setCreateOrderOpen(false)} />
     </View>
+  );
+}
+
+function NavButton({ active, item, label, onPress }: { active: boolean; item: { id: Page; icon: typeof Home }; label: string; onPress: () => void }) {
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const Icon = item.icon;
+
+  return (
+    <Pressable
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      onPress={onPress}
+      style={({ pressed }) => [styles.navItem, active && styles.navItemActive, hovered && styles.navItemHover, focused && styles.navItemFocus, pressed && { opacity: 0.78 }]}
+    >
+      <Icon size={18} color={active ? c.accent : c.inkMuted} />
+      <Text style={[styles.navText, active && { color: c.ink }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -192,7 +205,9 @@ const styles = StyleSheet.create({
   },
   navItem: {
     alignItems: "center",
+    borderColor: "transparent",
     borderRadius: r.sm,
+    borderWidth: 1,
     flexDirection: "row",
     gap: s[3],
     minHeight: 42,
@@ -200,6 +215,12 @@ const styles = StyleSheet.create({
   },
   navItemActive: {
     backgroundColor: c.accentSoft
+  },
+  navItemFocus: {
+    borderColor: c.accent
+  },
+  navItemHover: {
+    backgroundColor: c.surfaceMuted
   },
   navText: {
     color: c.inkMuted,

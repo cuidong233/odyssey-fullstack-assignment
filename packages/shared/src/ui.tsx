@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Modal as NativeModal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Check, ChevronDown, LoaderCircle, X } from "lucide-react-native";
 import { tokens } from "./index";
@@ -78,10 +78,17 @@ export function Button({
   disabled?: boolean;
   loading?: boolean;
 }) {
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled || loading}
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
       onPress={onPress}
       style={({ pressed }) => [
         ui.button,
@@ -89,6 +96,8 @@ export function Button({
         variant === "secondary" && ui.buttonSecondary,
         variant === "ghost" && ui.buttonGhost,
         variant === "danger" && ui.buttonDanger,
+        hovered && ui.interactiveHover,
+        focused && ui.interactiveFocus,
         (pressed || loading) && { opacity: 0.78 },
         disabled && { opacity: 0.45 }
       ]}
@@ -160,8 +169,18 @@ export function Toggle({ label, value, onValueChange }: { label: string; value: 
 }
 
 export function Chip({ active, children, onPress }: { active?: boolean; children: ReactNode; onPress?: () => void }) {
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <Pressable onPress={onPress} style={[ui.chip, active && ui.chipActive]}>
+    <Pressable
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      onPress={onPress}
+      style={({ pressed }) => [ui.chip, active && ui.chipActive, hovered && ui.interactiveHover, focused && ui.interactiveFocus, pressed && { opacity: 0.78 }]}
+    >
       <Text style={[ui.chipText, active && { color: c.accent }]}>{children}</Text>
     </Pressable>
   );
@@ -246,6 +265,12 @@ const ui = StyleSheet.create({
     color: c.ink,
     fontSize: 14,
     fontWeight: "700"
+  },
+  interactiveFocus: {
+    borderColor: c.accent
+  },
+  interactiveHover: {
+    transform: [{ translateY: -1 }]
   },
   badge: {
     alignSelf: "flex-start",
