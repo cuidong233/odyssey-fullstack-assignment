@@ -69,7 +69,8 @@ const createOrderItemRequestSchema = insertOrderItemSchema
   })
   .extend({
     quantity: z.number().int().positive()
-  });
+  })
+  .strict();
 
 export const createOrderRequestSchema = insertOrderSchema
   .pick({
@@ -79,7 +80,8 @@ export const createOrderRequestSchema = insertOrderSchema
   .extend({
     items: z.array(createOrderItemRequestSchema).min(1),
     notes: z.string().max(500).nullish()
-  });
+  })
+  .strict();
 
 export const createMenuItemRequestSchema = insertMenuItemSchema
   .pick({
