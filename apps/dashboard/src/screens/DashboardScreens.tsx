@@ -431,6 +431,7 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
     }
   });
   const activeCustomerId = resolveActiveCustomerId(customerId, customerRows[0]?.id);
+  const activeCustomer = customerRows.find((customer) => customer.id === activeCustomerId);
   const selectedTotalCents = menuRows.reduce((total, item) => {
     return selectedItems.includes(item.id) ? total + item.priceCents : total;
   }, 0);
@@ -454,6 +455,7 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
     <AppModal title={t.create.title} visible={visible} onClose={onClose}>
       <View style={{ gap: s[4] }}>
         {isPreview ? <ApiPreviewNotice /> : null}
+        <SectionTitle eyebrow={t.create.customer} title={activeCustomer ? customerNameText(activeCustomer.name, locale) : t.common.none} />
         <View style={styles.chipRow}>
           {customerRows.map((customer) => (
             <Chip key={customer.id} active={customer.id === activeCustomerId} onPress={() => setCustomerId(customer.id)}>
@@ -465,6 +467,7 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
           <Text style={type.tiny}>{t.common.itemCount(selectedItems.length)}</Text>
           <Text style={styles.price}>{formatCurrency(selectedTotalCents, intlLocale(locale))}</Text>
         </View>
+        <SectionTitle eyebrow={t.create.menuItems} title={t.common.menuSection} />
         <View style={styles.menuGrid}>
           {menuRows.map((item) => (
             <Pressable
