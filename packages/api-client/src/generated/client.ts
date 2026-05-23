@@ -33,6 +33,10 @@ import type {
   CreateOrder409,
   CreateOrder422,
   CreateOrderBody,
+  DeleteMenuItem200,
+  DeleteMenuItem400,
+  DeleteMenuItem404,
+  DeleteMenuItem409,
   GetHealth200,
   GetHomeSummary200,
   GetOrder200,
@@ -583,6 +587,70 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUpdateMenuItemMutationOptions(options), queryClient);
+    }
+
+export const getDeleteMenuItemUrl = (id: string,) => {
+
+
+
+
+  return `/menu/items/${id}`
+}
+
+export const deleteMenuItem = async (id: string, options?: RequestInit): Promise<DeleteMenuItem200> => {
+
+  return apiFetch<DeleteMenuItem200>(getDeleteMenuItemUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteMenuItemMutationOptions = <TError = ErrorType<DeleteMenuItem400 | DeleteMenuItem404 | DeleteMenuItem409>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMenuItem>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteMenuItem>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteMenuItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteMenuItem>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteMenuItem(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteMenuItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMenuItem>>>
+
+    export type DeleteMenuItemMutationError = ErrorType<DeleteMenuItem400 | DeleteMenuItem404 | DeleteMenuItem409>
+
+    export const useDeleteMenuItem = <TError = ErrorType<DeleteMenuItem400 | DeleteMenuItem404 | DeleteMenuItem409>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMenuItem>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteMenuItem>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteMenuItemMutationOptions(options), queryClient);
     }
 
 export const getListOrdersUrl = (params?: ListOrdersParams,) => {

@@ -1,6 +1,6 @@
 import { useMemo, useState, type ChangeEvent, type CSSProperties } from "react";
 import { Image, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal, Upload } from "lucide-react-native";
+import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal, Trash2, Upload } from "lucide-react-native";
 import {
   type MenuItem,
   type OrderStatus,
@@ -15,7 +15,7 @@ import {
 import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
-import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
+import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemDeletion, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
 import { businessHoursText, customerNameText, orderCodeText } from "../lib/businessText";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
@@ -190,6 +190,7 @@ export function MenuScreen() {
     }
   });
   const updateItem = useMenuItemEditor({ onSaved: () => setEditing(undefined) });
+  const deleteItem = useMenuItemDeletion({ onDeleted: () => setEditing(undefined) });
 
   function startEditing(item: MenuItem) {
     setEditing(item);
@@ -204,6 +205,13 @@ export function MenuScreen() {
       available: editing.available,
       priceCents: priceInputToCents(price)
     });
+  }
+
+  function deleteEditingItem() {
+    if (!editing) {
+      return;
+    }
+    deleteItem.deleteMenuItem(editing.id);
   }
 
   function startCreating() {
@@ -292,9 +300,15 @@ export function MenuScreen() {
             {editing.description ? <Text style={type.tiny}>{menuItemDescriptionText(editing.description, locale)}</Text> : null}
             <Field keyboardType="numeric" label={t.menu.price} onChangeText={setPrice} value={price} />
             <Toggle label={t.menu.availableForOrdering} value={editing.available} onValueChange={(available) => setEditing({ ...editing, available })} />
-            <Button disabled={isPreview} loading={updateItem.isPending} onPress={saveItem}>
-              {t.menu.save}
-            </Button>
+            {deleteItem.error ? <Text style={[type.muted, { color: c.danger }]}>{deleteItem.error.message}</Text> : null}
+            <View style={styles.modalActionRow}>
+              <Button disabled={isPreview} loading={updateItem.isPending} onPress={saveItem}>
+                {t.menu.save}
+              </Button>
+              <Button disabled={isPreview} icon={<Trash2 size={16} color={c.danger} />} loading={deleteItem.isPending} onPress={deleteEditingItem} variant="danger">
+                {t.menu.delete}
+              </Button>
+            </View>
           </View>
         ) : null}
       </AppModal>
@@ -646,6 +660,11 @@ const styles = StyleSheet.create({
     minHeight: 58,
     paddingHorizontal: s[4],
     paddingVertical: s[3]
+  },
+  modalActionRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: s[3]
   },
   orderDraftSummary: {
     alignItems: "center",

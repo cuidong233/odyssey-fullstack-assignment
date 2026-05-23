@@ -10,6 +10,7 @@ import type {
 } from "../db/schema";
 import {
   createOrder,
+  deleteMenuItem,
   type CreateMenuItemInput,
   type CustomerWithStats,
   type OrderSummary,
@@ -142,6 +143,24 @@ class TestStore implements RestaurantStore {
     }
     Object.assign(item, input, { updatedAt: now });
     return item;
+  }
+
+  async menuItemHasOrders(id: string): Promise<boolean> {
+    return this.orders.some((order) =>
+      order.items.some((item) => item.menuItemId === id)
+    );
+  }
+
+  async deleteMenuItem(id: string): Promise<MenuItem> {
+    const index = this.menuItems.findIndex((item) => item.id === id);
+    if (index === -1) {
+      throw new Error("Missing test menu item");
+    }
+    const [deleted] = this.menuItems.splice(index, 1);
+    if (!deleted) {
+      throw new Error("Missing deleted test menu item");
+    }
+    return deleted;
   }
 
   async createOrder(input: PersistOrderInput): Promise<OrderWithItems> {
@@ -294,6 +313,28 @@ describe("order service", () => {
       updateOrderStatus(store, order.id, "completed")
     ).rejects.toMatchObject({
       code: "INVALID_STATUS_TRANSITION",
+      status: 409
+    });
+  });
+
+  it("deletes menu items that have not appeared in orders", async () => {
+    const store = new TestStore();
+
+    const deleted = await deleteMenuItem(store, "item-2");
+
+    expect(deleted.name).toBe("Sold Out Soup");
+    expect(store.menuItems.map((item) => item.id)).toEqual(["item-1"]);
+  });
+
+  it("rejects deleting menu items with historical order usage", async () => {
+    const store = new TestStore();
+    await createOrder(store, {
+      customerId: "customer-1",
+      items: [{ menuItemId: "item-1", quantity: 1 }]
+    });
+
+    await expect(deleteMenuItem(store, "item-1")).rejects.toMatchObject({
+      code: "MENU_ITEM_HAS_ORDERS",
       status: 409
     });
   });

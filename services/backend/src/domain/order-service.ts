@@ -92,6 +92,8 @@ export type RestaurantStore = {
   findMenuItemsByIds(ids: string[]): Promise<MenuItem[]>;
   createMenuItem(input: CreateMenuItemInput): Promise<MenuItem>;
   updateMenuItem(id: string, input: UpdateMenuItemInput): Promise<MenuItem>;
+  menuItemHasOrders(id: string): Promise<boolean>;
+  deleteMenuItem(id: string): Promise<MenuItem>;
   createOrder(input: PersistOrderInput): Promise<OrderWithItems>;
   listOrders(filters: {
     status?: OrderStatus;
@@ -210,4 +212,20 @@ export async function updateOrderStatus(
 
   assertValidStatusTransition(order.status, nextStatus);
   return store.updateOrderStatus(orderId, nextStatus);
+}
+
+export async function deleteMenuItem(
+  store: RestaurantStore,
+  menuItemId: string
+): Promise<MenuItem> {
+  const hasOrders = await store.menuItemHasOrders(menuItemId);
+  if (hasOrders) {
+    throw new DomainError(
+      "MENU_ITEM_HAS_ORDERS",
+      "Menu items used by orders can only be paused, not deleted.",
+      409
+    );
+  }
+
+  return store.deleteMenuItem(menuItemId);
 }

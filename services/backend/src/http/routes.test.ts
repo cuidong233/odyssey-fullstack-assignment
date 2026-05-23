@@ -142,6 +142,12 @@ function createRecordingStore(
     ): Promise<MenuItem> {
       return menuItem;
     },
+    async menuItemHasOrders(): Promise<boolean> {
+      return false;
+    },
+    async deleteMenuItem(): Promise<MenuItem> {
+      return menuItem;
+    },
     async createOrder(_input: PersistOrderInput): Promise<OrderWithItems> {
       return orderWithItems;
     },

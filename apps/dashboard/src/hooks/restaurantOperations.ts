@@ -4,6 +4,7 @@ import {
   type CreateMenuItemBody,
   type CreateOrder201,
   type CreateOrderBody,
+  type DeleteMenuItem200,
   type MenuItem,
   type OrderStatus,
   type UpdateMenuItem200,
@@ -12,6 +13,7 @@ import {
   type UpdateOrderingSettingsBody,
   useCreateMenuItem,
   useCreateOrder,
+  useDeleteMenuItem,
   useUpdateMenuItem,
   useUpdateOrderingSettings,
   useUpdateOrderStatus
@@ -109,6 +111,25 @@ export function useMenuItemCreator(options?: {
     ...mutation,
     createMenuItem: (data: CreateMenuItemBody) =>
       mutation.mutate({ data })
+  };
+}
+
+export function useMenuItemDeletion(options?: {
+  onDeleted?: (item: DeleteMenuItem200) => void;
+}) {
+  const queryClient = useQueryClient();
+  const mutation = useDeleteMenuItem({
+    mutation: {
+      onSuccess: (item) => {
+        void queryClient.invalidateQueries();
+        options?.onDeleted?.(item);
+      }
+    }
+  });
+
+  return {
+    ...mutation,
+    deleteMenuItem: (id: MenuItem["id"]) => mutation.mutate({ id })
   };
 }
 

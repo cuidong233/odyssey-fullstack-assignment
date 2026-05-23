@@ -3,6 +3,7 @@ import { z } from "zod/v4";
 import { DomainError } from "../domain/errors";
 import {
   createOrder,
+  deleteMenuItem,
   type CreateMenuItemInput,
   type CreateOrderInput,
   type RestaurantStore,
@@ -127,6 +128,22 @@ export const updateMenuItemRoute = createRoute({
     200: jsonContent(menuItemResponseSchema, "Updated menu item"),
     400: jsonContent(errorResponseSchema, "Validation error"),
     404: jsonContent(errorResponseSchema, "Menu item not found")
+  }
+});
+
+export const deleteMenuItemRoute = createRoute({
+  operationId: "deleteMenuItem",
+  tags: ["menu"],
+  method: "delete",
+  path: "/menu/items/{id}",
+  request: {
+    params: idParamSchema
+  },
+  responses: {
+    200: jsonContent(menuItemResponseSchema, "Deleted menu item"),
+    400: jsonContent(errorResponseSchema, "Validation error"),
+    404: jsonContent(errorResponseSchema, "Menu item not found"),
+    409: jsonContent(errorResponseSchema, "Menu item is used by orders")
   }
 });
 
@@ -337,6 +354,8 @@ export const handlers = {
     id: string,
     input: z.infer<typeof updateMenuItemRequestSchema>
   ) => serializeMenuItem(await store.updateMenuItem(id, toUpdateMenuItemInput(input))),
+  deleteMenuItem: async (store: RestaurantStore, id: string) =>
+    serializeMenuItem(await deleteMenuItem(store, id)),
   listOrders: async (
     store: RestaurantStore,
     filters: z.infer<typeof orderStatusQuerySchema>

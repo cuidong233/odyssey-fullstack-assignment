@@ -205,6 +205,25 @@ class MemoryRestaurantStore implements RestaurantStore {
     return item;
   }
 
+  async menuItemHasOrders(id: string): Promise<boolean> {
+    return this.orders.some((order) =>
+      order.items.some((item) => item.menuItemId === id)
+    );
+  }
+
+  async deleteMenuItem(id: string): Promise<MenuItem> {
+    const itemIndex = this.menuItems.findIndex((candidate) => candidate.id === id);
+    if (itemIndex === -1) {
+      throw new DomainError("MENU_ITEM_NOT_FOUND", "Menu item was not found.", 404);
+    }
+
+    const [deleted] = this.menuItems.splice(itemIndex, 1);
+    if (!deleted) {
+      throw new Error("Deleted menu item could not be loaded.");
+    }
+    return deleted;
+  }
+
   async createOrder(input: PersistOrderInput): Promise<OrderWithItems> {
     const customer = await this.findCustomerById(input.customerId);
     if (!customer) {

@@ -153,6 +153,26 @@ export class DrizzleRestaurantStore implements RestaurantStore {
     return item;
   }
 
+  async menuItemHasOrders(id: string): Promise<boolean> {
+    const [orderItem] = await this.db
+      .select({ id: orderItems.id })
+      .from(orderItems)
+      .where(eq(orderItems.menuItemId, id))
+      .limit(1);
+    return Boolean(orderItem);
+  }
+
+  async deleteMenuItem(id: string): Promise<MenuItem> {
+    const [item] = await this.db
+      .delete(menuItems)
+      .where(eq(menuItems.id, id))
+      .returning();
+    if (!item) {
+      throw new DomainError("MENU_ITEM_NOT_FOUND", "Menu item was not found.", 404);
+    }
+    return item;
+  }
+
   async createOrder(input: PersistOrderInput): Promise<OrderWithItems> {
     const [order] = await this.db
       .insert(orders)
