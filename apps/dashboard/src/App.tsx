@@ -98,7 +98,7 @@ function DashboardApp() {
         </View>
 
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>
-          {page === "home" ? <HomeScreen onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
+          {page === "home" ? <HomeScreen /> : null}
           {page === "orders" ? <OrdersScreen onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
           {page === "crm" ? <CrmScreen /> : null}
           {page === "menu" ? <MenuScreen /> : null}

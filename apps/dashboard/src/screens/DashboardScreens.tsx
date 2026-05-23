@@ -23,7 +23,7 @@ import { c, layout, r, s, type } from "../lib/styles";
 import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
 import { demoCategories, demoCustomers, demoHomeSummary, demoMenuItems, demoOrders, demoOrdersForStatus, demoSettings } from "./demoData";
 
-export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
+export function HomeScreen() {
   const { locale, t } = useI18n();
   const { width } = useWindowDimensions();
   const compact = width < 900;
@@ -44,9 +44,6 @@ export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
           <Text style={type.eyebrow}>{t.home.eyebrow}</Text>
           <Text style={type.h1}>{t.home.title}</Text>
         </View>
-        <Button icon={<Plus size={16} color={c.surface} />} onPress={onCreateOrder}>
-          {t.home.newOrder}
-        </Button>
       </View>
 
       {summary.isLoading ? (
