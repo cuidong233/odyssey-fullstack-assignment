@@ -13,7 +13,7 @@ import {
   useListOrders
 } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
-import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SelectLike, SkeletonRows, Toggle } from "@repo/shared/ui";
+import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
 import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
@@ -160,7 +160,7 @@ export function CrmScreen() {
       </View>
       <Panel>
         {isPreview ? <ApiPreviewNotice /> : null}
-        <SectionTitle eyebrow={t.crm.customers} title={t.crm.stats} action={<SelectLike label={t.crm.sort} />} />
+        <SectionTitle eyebrow={t.crm.customers} title={t.crm.stats} />
         <View style={styles.customerList}>
           {customerRows.map((customer) => (
             <CustomerRow key={customer.id} customer={customer} />
