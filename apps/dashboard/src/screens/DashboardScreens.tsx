@@ -214,6 +214,7 @@ export function MenuScreen() {
     }
     updateItem.saveMenuItem(editing.id, {
       available: editing.available,
+      imageUrl: editing.imageUrl?.trim() || null,
       priceCents: priceInputToCents(price)
     });
   }
@@ -309,6 +310,7 @@ export function MenuScreen() {
           <View style={{ gap: s[4] }}>
             <Text style={type.body}>{menuItemNameText(editing.name, locale)}</Text>
             {editing.description ? <Text style={type.tiny}>{menuItemDescriptionText(editing.description, locale)}</Text> : null}
+            <MenuImagePicker imageUrl={editing.imageUrl ?? ""} onImageUrlChange={(imageUrl) => setEditing({ ...editing, imageUrl })} />
             <Field keyboardType="numeric" label={t.menu.price} onChangeText={setPrice} value={price} />
             <Toggle label={t.menu.availableForOrdering} value={editing.available} onValueChange={(available) => setEditing({ ...editing, available })} />
             {deleteItem.error ? <Text style={[type.muted, { color: c.danger }]}>{deleteItem.error.message}</Text> : null}
