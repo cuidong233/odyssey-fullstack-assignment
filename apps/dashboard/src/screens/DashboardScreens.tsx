@@ -1,5 +1,5 @@
 import { useMemo, useState, type ChangeEvent, type CSSProperties } from "react";
-import { Image, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal, Trash2, Upload } from "lucide-react-native";
 import {
   type MenuItem,
@@ -70,9 +70,11 @@ export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
       </View>
 
       <View style={[styles.homeGrid, compact && styles.homeGridCompact]}>
-        <Panel style={{ flex: 1.35 }}>
+        <Panel style={[styles.homeOrdersPanel, compact && styles.homeOrdersPanelCompact]}>
           <SectionTitle eyebrow={t.home.queue} title={t.home.recentOrders} />
-          <OrderTable orders={orderRows} selectedOrderId={selectedOrder?.id} onSelect={setSelectedOrderId} />
+          <ScrollView style={styles.homeOrdersScroll} contentContainerStyle={styles.homeOrdersScrollContent} showsVerticalScrollIndicator>
+            <OrderTable orders={orderRows} selectedOrderId={selectedOrder?.id} onSelect={setSelectedOrderId} />
+          </ScrollView>
         </Panel>
         <View style={[styles.sideStack, compact && styles.sideStackCompact]}>
           <PopularItemsPanel items={summaryData?.popularItems ?? []} />
@@ -600,6 +602,21 @@ const styles = StyleSheet.create({
   },
   homeGridCompact: {
     flexDirection: "column"
+  },
+  homeOrdersPanel: {
+    flex: 1.35,
+    height: 560
+  },
+  homeOrdersPanelCompact: {
+    height: 480,
+    width: "100%"
+  },
+  homeOrdersScroll: {
+    flex: 1,
+    marginTop: s[5]
+  },
+  homeOrdersScrollContent: {
+    paddingBottom: s[2]
   },
   headerCompact: {
     alignItems: "flex-start",
