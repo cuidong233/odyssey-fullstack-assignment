@@ -1,5 +1,11 @@
 const DEFAULT_API_BASE_URL = "http://localhost:8787";
 
+declare const process: {
+  env: {
+    EXPO_PUBLIC_API_URL?: string;
+  };
+};
+
 let runtimeApiBaseUrl: string | undefined;
 
 export type ApiErrorBody = {
@@ -35,7 +41,7 @@ export function getApiBaseUrl() {
     return runtimeApiBaseUrl;
   }
 
-  const expoPublicUrl = getProcessEnvValue("EXPO_PUBLIC_API_URL");
+  const expoPublicUrl = process.env.EXPO_PUBLIC_API_URL;
   if (expoPublicUrl) {
     return expoPublicUrl.replace(/\/$/, "");
   }
@@ -96,13 +102,4 @@ function getErrorMessage(body: unknown): string {
   }
 
   return "API request failed.";
-}
-
-function getProcessEnvValue(key: string): string | undefined {
-  const maybeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
-  if (!maybeProcess) {
-    return undefined;
-  }
-
-  return maybeProcess.env?.[key];
 }
