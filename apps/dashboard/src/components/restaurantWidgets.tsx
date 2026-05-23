@@ -5,6 +5,7 @@ import Svg, { Circle, Line, Path, Rect } from "react-native-svg";
 import type { Customer, Order, OrderStatus } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
 import { Badge, Panel, SectionTitle } from "@repo/shared/ui";
+import { customerNameText } from "../lib/businessText";
 import { formatLocalizedDateTime, intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
@@ -125,7 +126,7 @@ export function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Orde
             <Text style={type.tiny}>{formatLocalizedDateTime(order.createdAt, locale)}</Text>
           </View>
           <View style={{ flex: 1.1 }}>
-            <Text style={type.body}>{order.customer.name}</Text>
+            <Text style={type.body}>{customerNameText(order.customer.name, locale)}</Text>
             <Text style={type.tiny}>{t.common.itemCount(order.items.length)}</Text>
           </View>
           <View style={{ flex: 1 }}>
@@ -166,7 +167,7 @@ export function OrderInspector({ order }: { order: Order }) {
     <Panel>
       <SectionTitle eyebrow={t.common.detail} title={order.id} action={<LocalizedStatusBadge status={order.status} />} />
       <View style={{ gap: s[3] }}>
-        <Text style={type.body}>{order.customer.name}</Text>
+        <Text style={type.body}>{customerNameText(order.customer.name, locale)}</Text>
         {order.items.map((item) => (
           <View key={item.id} style={layout.between}>
             <Text style={type.muted}>
@@ -193,7 +194,7 @@ export function CustomerRow({ customer }: { customer: Customer }) {
         <Text style={styles.avatarText}>{customer.name.slice(0, 1)}</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={type.body}>{customer.name}</Text>
+        <Text style={type.body}>{customerNameText(customer.name, locale)}</Text>
         <Text style={type.tiny}>
           {customer.email ?? t.common.noEmail} · {customer.phone ?? t.common.noPhone}
         </Text>

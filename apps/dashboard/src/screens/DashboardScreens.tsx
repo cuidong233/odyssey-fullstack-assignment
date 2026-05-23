@@ -16,6 +16,7 @@ import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
 import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
+import { businessHoursText, customerNameText } from "../lib/businessText";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
@@ -302,7 +303,7 @@ export function MenuScreen() {
 }
 
 export function SettingsScreen() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const settings = useGetOrderingSettings();
   const update = useOrderingSettingsEditor();
   const isPreview = isApiPreview(settings);
@@ -323,7 +324,7 @@ export function SettingsScreen() {
             <Toggle label={t.settings.autoAccept} value={data.autoAccept} onValueChange={(autoAccept) => update.saveSettings({ autoAccept })} />
             <SettingMetric label={t.settings.prep} value={t.common.minutes(data.prepTimeMinutes)} />
             <SettingMetric label={t.settings.tax} value={`${(data.taxRateBps / 100).toFixed(2)}%`} />
-            <SettingMetric label={t.settings.hours} value={data.openingHoursJson} />
+            <SettingMetric label={t.settings.hours} value={businessHoursText(data.openingHoursJson, locale)} />
           </View>
         ) : (
           <SkeletonRows />
@@ -442,7 +443,7 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
         <View style={styles.chipRow}>
           {customerRows.map((customer) => (
             <Chip key={customer.id} active={customer.id === activeCustomerId} onPress={() => setCustomerId(customer.id)}>
-              {customer.name}
+              {customerNameText(customer.name, locale)}
             </Chip>
           ))}
         </View>
