@@ -39,6 +39,7 @@ import type {
   DeleteMenuItem409,
   GetHealth200,
   GetHomeSummary200,
+  GetHomeSummaryParams,
   GetOrder200,
   GetOrder400,
   GetOrder404,
@@ -168,17 +169,24 @@ export function useGetHealth<TData = Awaited<ReturnType<typeof getHealth>>, TErr
 
 
 
-export const getGetHomeSummaryUrl = () => {
+export const getGetHomeSummaryUrl = (params?: GetHomeSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/home/summary`
+  return stringifiedParams.length > 0 ? `/home/summary?${stringifiedParams}` : `/home/summary`
 }
 
-export const getHomeSummary = async ( options?: RequestInit): Promise<GetHomeSummary200> => {
+export const getHomeSummary = async (params?: GetHomeSummaryParams, options?: RequestInit): Promise<GetHomeSummary200> => {
 
-  return apiFetch<GetHomeSummary200>(getGetHomeSummaryUrl(),
+  return apiFetch<GetHomeSummary200>(getGetHomeSummaryUrl(params),
   {
     ...options,
     method: 'GET'
@@ -191,23 +199,23 @@ export const getHomeSummary = async ( options?: RequestInit): Promise<GetHomeSum
 
 
 
-export const getGetHomeSummaryQueryKey = () => {
+export const getGetHomeSummaryQueryKey = (params?: GetHomeSummaryParams,) => {
     return [
-    `/home/summary`
+    `/home/summary`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetHomeSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getHomeSummary>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+export const getGetHomeSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getHomeSummary>>, TError = ErrorType<unknown>>(params?: GetHomeSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetHomeSummaryQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetHomeSummaryQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHomeSummary>>> = ({ signal }) => getHomeSummary({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHomeSummary>>> = ({ signal }) => getHomeSummary(params, { signal, ...requestOptions });
 
 
 
@@ -221,7 +229,7 @@ export type GetHomeSummaryQueryError = ErrorType<unknown>
 
 
 export function useGetHomeSummary<TData = Awaited<ReturnType<typeof getHomeSummary>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>> & Pick<
+ params: undefined |  GetHomeSummaryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getHomeSummary>>,
           TError,
@@ -231,7 +239,7 @@ export function useGetHomeSummary<TData = Awaited<ReturnType<typeof getHomeSumma
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetHomeSummary<TData = Awaited<ReturnType<typeof getHomeSummary>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>> & Pick<
+ params?: GetHomeSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getHomeSummary>>,
           TError,
@@ -241,16 +249,16 @@ export function useGetHomeSummary<TData = Awaited<ReturnType<typeof getHomeSumma
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetHomeSummary<TData = Awaited<ReturnType<typeof getHomeSummary>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: GetHomeSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetHomeSummary<TData = Awaited<ReturnType<typeof getHomeSummary>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: GetHomeSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSummary>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetHomeSummaryQueryOptions(options)
+  const queryOptions = getGetHomeSummaryQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

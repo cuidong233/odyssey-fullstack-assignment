@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, type SQL } from "drizzle-orm";
 import type { AppDb } from "./client";
 import {
   customers,
@@ -206,28 +206,23 @@ export class DrizzleRestaurantStore implements RestaurantStore {
   async listOrders(filters: {
     status?: OrderStatus;
     limit?: number;
+    createdAtFrom?: Date;
   }): Promise<OrderWithItems[]> {
+    const conditions: SQL[] = [];
+    if (filters.status) {
+      conditions.push(eq(orders.status, filters.status));
+    }
+    if (filters.createdAtFrom) {
+      conditions.push(gte(orders.createdAt, filters.createdAtFrom));
+    }
+
+    const query = this.db
+      .select()
+      .from(orders)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(orders.createdAt));
     const orderRows =
-      filters.status && filters.limit !== undefined
-        ? await this.db
-            .select()
-            .from(orders)
-            .where(eq(orders.status, filters.status))
-            .orderBy(desc(orders.createdAt))
-            .limit(filters.limit)
-        : filters.status
-          ? await this.db
-              .select()
-              .from(orders)
-              .where(eq(orders.status, filters.status))
-              .orderBy(desc(orders.createdAt))
-          : filters.limit !== undefined
-            ? await this.db
-                .select()
-                .from(orders)
-                .orderBy(desc(orders.createdAt))
-                .limit(filters.limit)
-            : await this.db.select().from(orders).orderBy(desc(orders.createdAt));
+      filters.limit !== undefined ? await query.limit(filters.limit) : await query;
 
     return this.hydrateOrders(orderRows);
   }
@@ -266,8 +261,8 @@ export class DrizzleRestaurantStore implements RestaurantStore {
     return hydrated;
   }
 
-  async getHomeSummary(): Promise<OrderSummary> {
-    const allOrders = await this.listOrders({});
+  async getHomeSummary(filters: { createdAtFrom?: Date } = {}): Promise<OrderSummary> {
+    const allOrders = await this.listOrders(filters);
     const completedOrders = allOrders.filter(
       (order) => order.status !== "cancelled"
     );

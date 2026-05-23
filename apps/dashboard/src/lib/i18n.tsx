@@ -10,6 +10,7 @@ export const dictionaries = {
     brand: { restaurantOps: "Restaurant Ops" },
     nav: { home: "Home", orders: "Orders", crm: "CRM", menu: "Menu", settings: "Settings", library: "UI Library" },
     topbar: { search: "Search orders, guests, menu items", today: "Today", createOrder: "Create order" },
+    range: { today: "Today", week: "This week", month: "This month" },
     service: { label: "Service", open: "Open", note: "Average prep time holds at 14 minutes." },
     home: {
       eyebrow: "Live operations",
@@ -59,6 +60,7 @@ export const dictionaries = {
     brand: { restaurantOps: "餐厅运营" },
     nav: { home: "首页", orders: "订单", crm: "客户", menu: "菜单", settings: "设置", library: "组件库" },
     topbar: { search: "搜索订单、客户、菜单项", today: "今日", createOrder: "新建订单" },
+    range: { today: "今日", week: "本周", month: "本月" },
     service: { label: "服务状态", open: "营业中", note: "当前平均备餐时间保持在 14 分钟。" },
     home: {
       eyebrow: "实时运营",

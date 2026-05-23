@@ -201,7 +201,9 @@ export interface operations {
     };
     getHomeSummary: {
         parameters: {
-            query?: never;
+            query?: {
+                range?: "today" | "week" | "month";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -532,6 +534,7 @@ export interface operations {
     listOrders: {
         parameters: {
             query?: {
+                range?: "today" | "week" | "month";
                 status?: "pending" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
                 limit?: number;
             };

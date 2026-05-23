@@ -256,10 +256,16 @@ class MemoryRestaurantStore implements RestaurantStore {
     return created;
   }
 
-  async listOrders(filters: { status?: OrderStatus; limit?: number }): Promise<OrderWithItems[]> {
-    const orders = filters.status
-      ? this.orders.filter((order) => order.status === filters.status)
-      : this.orders;
+  async listOrders(filters: { status?: OrderStatus; limit?: number; createdAtFrom?: Date }): Promise<OrderWithItems[]> {
+    const orders = this.orders.filter((order) => {
+      if (filters.status && order.status !== filters.status) {
+        return false;
+      }
+      if (filters.createdAtFrom && order.createdAt < filters.createdAtFrom) {
+        return false;
+      }
+      return true;
+    });
     return [...orders]
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
       .slice(0, filters.limit);
@@ -280,8 +286,9 @@ class MemoryRestaurantStore implements RestaurantStore {
     return order;
   }
 
-  async getHomeSummary(): Promise<OrderSummary> {
-    const revenueOrders = this.orders.filter((order) => order.status !== "cancelled");
+  async getHomeSummary(filters: { createdAtFrom?: Date } = {}): Promise<OrderSummary> {
+    const orders = await this.listOrders(filters);
+    const revenueOrders = orders.filter((order) => order.status !== "cancelled");
     const itemQuantities = new Map<string, { menuItemId: string; name: string; quantity: number }>();
 
     for (const order of revenueOrders) {
@@ -297,9 +304,9 @@ class MemoryRestaurantStore implements RestaurantStore {
     }
 
     return {
-      totalOrders: this.orders.length,
+      totalOrders: orders.length,
       revenueCents: revenueOrders.reduce((total, order) => total + order.totalCents, 0),
-      pendingOrders: this.orders.filter((order) => order.status === "pending").length,
+      pendingOrders: orders.filter((order) => order.status === "pending").length,
       popularItems: [...itemQuantities.values()]
         .sort((left, right) => right.quantity - left.quantity)
         .slice(0, 5)
@@ -422,14 +429,26 @@ function makeSeedOrderSpecs(): SeedOrderSpec[] {
     [{ menuItemId: ids.itemChiliNoodles }, { menuItemId: ids.itemBerryShrub }]
   ];
 
-  return itemSets.map((items, index) => ({
-    id: `44444444-4444-4444-8444-44444444${String(1100 + index).padStart(4, "0")}`,
-    customerId: customersByIndex[index % customersByIndex.length]!,
-    status: statuses[index]!,
-    items,
-    createdAt: new Date(`2026-05-22T${String(10 + Math.floor(index / 4)).padStart(2, "0")}:${String((index % 4) * 14 + 3).padStart(2, "0")}:00.000Z`),
-    notes: index % 6 === 0 ? "Guest asked for utensils." : null
-  }));
+  return Array.from({ length: 90 }, (_, index) => {
+    const items = itemSets[index % itemSets.length]!;
+    return {
+      id: `44444444-4444-4444-8444-44444444${String(1100 + index).padStart(4, "0")}`,
+      customerId: customersByIndex[index % customersByIndex.length]!,
+      status: statuses[index % statuses.length]!,
+      items,
+      createdAt: seededOrderDate(index),
+      notes: index % 6 === 0 ? "Guest asked for utensils." : null
+    };
+  });
+}
+
+function seededOrderDate(index: number) {
+  const date = new Date();
+  date.setUTCHours(10 + (index % 8), (index % 4) * 14 + 3, 0, 0);
+  if (index >= 12) {
+    date.setUTCDate(date.getUTCDate() - (1 + Math.floor((index - 12) / 3)));
+  }
+  return date;
 }
 
 function makeCategory(id: string, name: string, sortOrder: number): MenuCategory {

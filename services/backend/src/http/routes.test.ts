@@ -26,12 +26,19 @@ describe("route handlers", () => {
     const store = createRecordingStore(calls);
 
     await handlers.listMenu(store, { limit: 7 });
-    await handlers.listOrders(store, { status: "accepted", limit: 12 });
+    await handlers.listOrders(store, { status: "accepted", limit: 12, range: "week" });
     await handlers.listCustomers(store, { limit: 5 });
 
     expect(calls).toEqual([
       { name: "listMenuItems", filters: { limit: 7 } },
-      { name: "listOrders", filters: { status: "accepted", limit: 12 } },
+      {
+        name: "listOrders",
+        filters: {
+          status: "accepted",
+          limit: 12,
+          createdAtFrom: expect.any(Date)
+        }
+      },
       { name: "listCustomers", filters: { limit: 5 } }
     ]);
   });
@@ -154,6 +161,7 @@ function createRecordingStore(
     async listOrders(filters: {
       status?: Order["status"];
       limit?: number;
+      createdAtFrom?: Date;
     }): Promise<OrderWithItems[]> {
       calls.push({ name: "listOrders", filters });
       return [orderWithItems];

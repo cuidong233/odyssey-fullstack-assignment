@@ -98,10 +98,11 @@ export type RestaurantStore = {
   listOrders(filters: {
     status?: OrderStatus;
     limit?: number;
+    createdAtFrom?: Date;
   }): Promise<OrderWithItems[]>;
   findOrderById(id: string): Promise<OrderWithItems | null>;
   updateOrderStatus(id: string, status: OrderStatus): Promise<OrderWithItems>;
-  getHomeSummary(): Promise<OrderSummary>;
+  getHomeSummary(filters?: { createdAtFrom?: Date }): Promise<OrderSummary>;
 };
 
 export async function createOrder(

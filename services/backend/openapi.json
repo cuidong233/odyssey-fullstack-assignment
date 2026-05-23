@@ -47,6 +47,22 @@
         "tags": [
           "home"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month"
+              ],
+              "default": "today"
+            },
+            "required": false,
+            "name": "range",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Dashboard summary",
@@ -796,6 +812,20 @@
           "orders"
         ],
         "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month"
+              ],
+              "default": "today"
+            },
+            "required": false,
+            "name": "range",
+            "in": "query"
+          },
           {
             "schema": {
               "type": "string",

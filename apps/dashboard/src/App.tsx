@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { setApiBaseUrl } from "@repo/api-client";
+import { setApiBaseUrl, timeRanges, type TimeRange } from "@repo/api-client";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Home, Library, Menu as MenuIcon, Plus, Search, Settings, ShoppingBag, Users } from "lucide-react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
@@ -54,6 +54,7 @@ function DashboardApp() {
   const { width } = useWindowDimensions();
   const compact = width < 760;
   const [page, setPage] = useState<Page>("home");
+  const [timeRange, setTimeRange] = useState<TimeRange>("today");
   const [createOrderOpen, setCreateOrderOpen] = useState(false);
 
   return (
@@ -90,7 +91,7 @@ function DashboardApp() {
           </View>
           <View style={[layout.row, compact && styles.topbarActionsCompact, { gap: s[3] }]}>
             <LanguageToggle />
-            <SelectLike label={t.topbar.today} />
+            <TimeRangeSelect value={timeRange} onChange={setTimeRange} />
             <Button icon={<Plus size={16} color={c.surface} />} onPress={() => setCreateOrderOpen(true)}>
               {t.topbar.createOrder}
             </Button>
@@ -98,8 +99,8 @@ function DashboardApp() {
         </View>
 
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>
-          {page === "home" ? <HomeScreen /> : null}
-          {page === "orders" ? <OrdersScreen onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
+          {page === "home" ? <HomeScreen timeRange={timeRange} /> : null}
+          {page === "orders" ? <OrdersScreen timeRange={timeRange} onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
           {page === "crm" ? <CrmScreen /> : null}
           {page === "menu" ? <MenuScreen /> : null}
           {page === "settings" ? <SettingsScreen /> : null}
@@ -158,6 +159,33 @@ function LanguageToggle() {
           <Text style={[styles.languageText, locale === option.id && { color: c.accent }]}>{option.label}</Text>
         </Pressable>
       ))}
+    </View>
+  );
+}
+
+function TimeRangeSelect({ value, onChange }: { value: TimeRange; onChange: (value: TimeRange) => void }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <View style={styles.rangePicker}>
+      <SelectLike label={t.range[value]} onPress={() => setOpen((current) => !current)} />
+      {open ? (
+        <View style={styles.rangeMenu}>
+          {timeRanges.map((range) => (
+            <Pressable
+              key={range}
+              onPress={() => {
+                onChange(range);
+                setOpen(false);
+              }}
+              style={[styles.rangeOption, range === value && styles.rangeOptionActive]}
+            >
+              <Text style={[styles.rangeOptionText, range === value && { color: c.accent }]}>{t.range[range]}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -222,6 +250,36 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     minHeight: 38,
     overflow: "hidden"
+  },
+  rangeMenu: {
+    backgroundColor: c.surface,
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    boxShadow: "0 10px 24px rgba(38, 45, 38, 0.12)",
+    minWidth: 128,
+    padding: s[1],
+    position: "absolute",
+    right: 0,
+    top: 44,
+    zIndex: 20
+  },
+  rangeOption: {
+    borderRadius: r.sm,
+    paddingHorizontal: s[3],
+    paddingVertical: s[2]
+  },
+  rangeOptionActive: {
+    backgroundColor: c.accentSoft
+  },
+  rangeOptionText: {
+    color: c.inkMuted,
+    fontSize: 13,
+    fontWeight: "700"
+  },
+  rangePicker: {
+    position: "relative",
+    zIndex: 10
   },
   main: {
     flex: 1

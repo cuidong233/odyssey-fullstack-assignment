@@ -186,12 +186,13 @@ export function Chip({ active, children, onPress }: { active?: boolean; children
   );
 }
 
-export function SelectLike({ label }: { label: string }) {
+export function SelectLike({ label, onPress }: { label: string; onPress?: () => void }) {
+  const Container = onPress ? Pressable : View;
   return (
-    <View style={ui.selectLike}>
+    <Container accessibilityRole={onPress ? "button" : undefined} onPress={onPress} style={ui.selectLike}>
       <Text style={ui.selectText}>{label}</Text>
       <ChevronDown size={15} color={c.inkMuted} />
-    </View>
+    </Container>
   );
 }
 

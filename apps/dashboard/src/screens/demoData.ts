@@ -1,6 +1,6 @@
-import type { BusinessSettings, Customer, HomeSummary, MenuCategory, MenuItem, Order, OrderStatus } from "@repo/api-client";
+import type { BusinessSettings, Customer, HomeSummary, MenuCategory, MenuItem, Order, OrderStatus, TimeRange } from "@repo/api-client";
 
-const now = "2026-05-22T13:20:00.000Z";
+const now = new Date().toISOString();
 
 export const demoCategories = [
   { id: "cat-signatures", name: "Signatures", sortOrder: 1, createdAt: now, updatedAt: now },
@@ -60,16 +60,23 @@ export const demoMenuItems = [
 ] satisfies MenuItem[];
 
 export const demoOrders = [
-  makeOrder("ORD-1048", "cust-1", "Maya Chen", "pending", ["accepted", "cancelled"], 4890, "2026-05-22T12:58:00.000Z", [
+  makeOrder("ORD-1048", "cust-1", "Maya Chen", "pending", ["accepted", "cancelled"], 4890, demoOrderDate(0), [
     ["line-1", "Charred Citrus Salmon", 1, 2450],
     ["line-2", "Market Grain Bowl", 1, 1680]
   ]),
-  makeOrder("ORD-1047", "cust-2", "Noah Patel", "preparing", ["ready", "cancelled"], 3630, "2026-05-22T12:42:00.000Z", [
+  makeOrder("ORD-1047", "cust-2", "Noah Patel", "preparing", ["ready", "cancelled"], 3630, demoOrderDate(1), [
     ["line-3", "Smoked Short Rib Plate", 1, 2860]
   ]),
-  makeOrder("ORD-1046", "cust-3", "Ava Johnson", "ready", ["completed"], 2592, "2026-05-22T12:18:00.000Z", [
+  makeOrder("ORD-1046", "cust-3", "Ava Johnson", "ready", ["completed"], 2592, demoOrderDate(3), [
     ["line-4", "Market Grain Bowl", 1, 1680],
     ["line-5", "Yuzu Mint Spritz", 1, 760]
+  ]),
+  makeOrder("ORD-1038", "cust-1", "Maya Chen", "completed", [], 3210, demoOrderDate(9), [
+    ["line-6", "Market Grain Bowl", 1, 1680],
+    ["line-7", "Yuzu Mint Spritz", 2, 760]
+  ]),
+  makeOrder("ORD-1022", "cust-2", "Noah Patel", "completed", [], 2860, demoOrderDate(18), [
+    ["line-8", "Smoked Short Rib Plate", 1, 2860]
   ])
 ] satisfies Order[];
 
@@ -109,17 +116,6 @@ export const demoCustomers = [
   }
 ] satisfies Customer[];
 
-export const demoHomeSummary = {
-  totalOrders: 38,
-  revenueCents: 89420,
-  pendingOrders: 4,
-  popularItems: [
-    { menuItemId: "item-1", name: "Charred Citrus Salmon", quantity: 14 },
-    { menuItemId: "item-2", name: "Market Grain Bowl", quantity: 11 },
-    { menuItemId: "item-3", name: "Smoked Short Rib Plate", quantity: 8 }
-  ]
-} satisfies HomeSummary;
-
 export const demoSettings = {
   id: "settings-demo",
   prepTimeMinutes: 14,
@@ -130,8 +126,37 @@ export const demoSettings = {
   updatedAt: now
 } satisfies BusinessSettings;
 
-export function demoOrdersForStatus(status: OrderStatus | "all") {
-  return status === "all" ? demoOrders : demoOrders.filter((order) => order.status === status);
+export function demoOrdersForRange(range: TimeRange) {
+  const start = rangeStart(range);
+  return demoOrders.filter((order) => new Date(order.createdAt) >= start);
+}
+
+export function demoOrdersForStatus(status: OrderStatus | "all", range: TimeRange = "today") {
+  const scopedOrders = demoOrdersForRange(range);
+  return status === "all" ? scopedOrders : scopedOrders.filter((order) => order.status === status);
+}
+
+export function demoHomeSummaryForRange(range: TimeRange): HomeSummary {
+  const scopedOrders = demoOrdersForRange(range);
+  const revenueOrders = scopedOrders.filter((order) => order.status !== "cancelled");
+  const popularItems = new Map<string, { menuItemId: string; name: string; quantity: number }>();
+  for (const order of revenueOrders) {
+    for (const item of order.items) {
+      const existing = popularItems.get(item.menuItemId);
+      popularItems.set(item.menuItemId, {
+        menuItemId: item.menuItemId,
+        name: item.menuItemName,
+        quantity: (existing?.quantity ?? 0) + item.quantity
+      });
+    }
+  }
+
+  return {
+    totalOrders: scopedOrders.length,
+    revenueCents: revenueOrders.reduce((total, order) => total + order.totalCents, 0),
+    pendingOrders: scopedOrders.filter((order) => order.status === "pending").length,
+    popularItems: [...popularItems.values()].sort((left, right) => right.quantity - left.quantity).slice(0, 5)
+  };
 }
 
 function makeOrder(
@@ -181,4 +206,23 @@ function toRecentOrder(order: Order): Customer["recentOrders"][number] {
     createdAt: order.createdAt,
     updatedAt: order.updatedAt
   };
+}
+
+function demoOrderDate(daysAgo: number) {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - daysAgo);
+  date.setUTCHours(12, 42 - Math.min(daysAgo, 20), 0, 0);
+  return date.toISOString();
+}
+
+function rangeStart(range: TimeRange) {
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  if (range === "week") {
+    start.setUTCDate(start.getUTCDate() - 6);
+  }
+  if (range === "month") {
+    start.setUTCDate(start.getUTCDate() - 29);
+  }
+  return start;
 }

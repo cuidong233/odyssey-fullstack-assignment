@@ -368,14 +368,26 @@ function buildSeededOrders({ customers, items }) {
     [{ item: items.chiliNoodles }, { item: items.berryShrub }]
   ];
 
-  return itemSets.map((lines, index) => ({
-    customer: customers[index % customers.length],
-    status: statuses[index],
-    notes: index % 6 === 0 ? "Guest asked for utensils." : null,
-    createdAt: new Date(`2026-05-22T${String(10 + Math.floor(index / 4)).padStart(2, "0")}:${String((index % 4) * 14 + 3).padStart(2, "0")}:00.000Z`),
-    items: lines.map((line) => ({
-      item: line.item,
-      quantity: line.quantity ?? 1
-    }))
-  }));
+  return Array.from({ length: 90 }, (_, index) => {
+    const lines = itemSets[index % itemSets.length];
+    return {
+      customer: customers[index % customers.length],
+      status: statuses[index % statuses.length],
+      notes: index % 6 === 0 ? "Guest asked for utensils." : null,
+      createdAt: seededOrderDate(index),
+      items: lines.map((line) => ({
+        item: line.item,
+        quantity: line.quantity ?? 1
+      }))
+    };
+  });
+}
+
+function seededOrderDate(index) {
+  const date = new Date();
+  date.setUTCHours(10 + (index % 8), (index % 4) * 14 + 3, 0, 0);
+  if (index >= 12) {
+    date.setUTCDate(date.getUTCDate() - (1 + Math.floor((index - 12) / 3)));
+  }
+  return date;
 }

@@ -23,6 +23,7 @@ import {
   orderingSettingsResponseSchema,
   orderResponseSchema,
   orderStatusQuerySchema,
+  timeRangeQuerySchema,
   updateMenuItemRequestSchema,
   updateOrderingSettingsRequestSchema,
   updateOrderStatusRequestSchema
@@ -72,6 +73,9 @@ export const homeSummaryRoute = createRoute({
   tags: ["home"],
   method: "get",
   path: "/home/summary",
+  request: {
+    query: timeRangeQuerySchema
+  },
   responses: {
     200: jsonContent(homeSummaryResponseSchema, "Dashboard summary")
   }
@@ -337,8 +341,13 @@ function toOrderingSettingsInput(
 
 export const handlers = {
   health: () => ({ ok: true, service: "odyssey-restaurant-backend" }),
-  homeSummary: async (store: RestaurantStore) =>
-    serializeHomeSummary(await store.getHomeSummary()),
+  homeSummary: async (
+    store: RestaurantStore,
+    query: z.infer<typeof timeRangeQuerySchema>
+  ) =>
+    serializeHomeSummary(
+      await store.getHomeSummary({ createdAtFrom: rangeStart(query.range) })
+    ),
   listMenuCategories: async (store: RestaurantStore) =>
     (await store.listMenuCategories()).map(serializeMenuCategory),
   listMenu: async (
@@ -362,8 +371,12 @@ export const handlers = {
   ) =>
     (await store.listOrders(
       filters.status !== undefined
-        ? { status: filters.status, limit: filters.limit }
-        : { limit: filters.limit }
+        ? {
+            status: filters.status,
+            limit: filters.limit,
+            createdAtFrom: rangeStart(filters.range)
+          }
+        : { limit: filters.limit, createdAtFrom: rangeStart(filters.range) }
     )).map(serializeOrderWithItems),
   createOrder: async (
     store: RestaurantStore,
@@ -393,5 +406,21 @@ export const handlers = {
   ) =>
     serializeOrderingSettings(
       await store.updateOrderingSettings(toOrderingSettingsInput(input))
-    )
+  )
 };
+
+function rangeStart(range: z.infer<typeof timeRangeQuerySchema>["range"]) {
+  const now = new Date();
+  const start = new Date(now);
+  start.setUTCHours(0, 0, 0, 0);
+
+  if (range === "week") {
+    start.setUTCDate(start.getUTCDate() - 6);
+  }
+
+  if (range === "month") {
+    start.setUTCDate(start.getUTCDate() - 29);
+  }
+
+  return start;
+}

@@ -4,6 +4,7 @@ import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal,
 import {
   type MenuItem,
   type OrderStatus,
+  type TimeRange,
   orderStatuses,
   useGetOrderingSettings,
   useGetHomeSummary,
@@ -21,17 +22,17 @@ import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
 import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
-import { demoCategories, demoCustomers, demoHomeSummary, demoMenuItems, demoOrders, demoOrdersForStatus, demoSettings } from "./demoData";
+import { demoCategories, demoCustomers, demoHomeSummaryForRange, demoMenuItems, demoOrdersForRange, demoOrdersForStatus, demoSettings } from "./demoData";
 
-export function HomeScreen() {
+export function HomeScreen({ timeRange }: { timeRange: TimeRange }) {
   const { locale, t } = useI18n();
   const { width } = useWindowDimensions();
   const compact = width < 900;
-  const summary = useGetHomeSummary();
-  const orders = useListOrders();
+  const summary = useGetHomeSummary({ range: timeRange });
+  const orders = useListOrders({ range: timeRange });
   const isPreview = isApiPreview(summary) || isApiPreview(orders);
-  const summaryData = summary.data ?? (isApiPreview(summary) ? demoHomeSummary : undefined);
-  const orderRows = orders.data ?? (isApiPreview(orders) ? demoOrders : []);
+  const summaryData = summary.data ?? (isApiPreview(summary) ? demoHomeSummaryForRange(timeRange) : undefined);
+  const orderRows = orders.data ?? (isApiPreview(orders) ? demoOrdersForRange(timeRange) : []);
   const [selectedOrderId, setSelectedOrderId] = useState<string | undefined>();
   const selectedOrder = useMemo(() => {
     return resolveSelectedOrder(orderRows, selectedOrderId);
@@ -82,13 +83,13 @@ export function HomeScreen() {
   );
 }
 
-export function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
+export function OrdersScreen({ timeRange, onCreateOrder }: { timeRange: TimeRange; onCreateOrder: () => void }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
-  const orders = useListOrders(filter === "all" ? undefined : { status: filter });
+  const orders = useListOrders(filter === "all" ? { range: timeRange } : { range: timeRange, status: filter });
   const updateStatus = useOrderStatusAction();
   const isPreview = isApiPreview(orders);
-  const orderRows = orders.data ?? (isPreview ? demoOrdersForStatus(filter) : []);
+  const orderRows = orders.data ?? (isPreview ? demoOrdersForStatus(filter, timeRange) : []);
   const selected = orderRows[0];
 
   return (

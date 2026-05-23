@@ -102,7 +102,10 @@ export function createApp(options: CreateAppOptions = {}) {
   app.openapi(healthRoute, (c) => c.json(handlers.health(), 200));
 
   app.openapi(homeSummaryRoute, async (c) =>
-    c.json(await handlers.homeSummary(c.get("store")), 200)
+    c.json(
+      await handlers.homeSummary(c.get("store"), c.req.valid("query")),
+      200
+    )
   );
 
   app.openapi(listMenuCategoriesRoute, async (c) =>

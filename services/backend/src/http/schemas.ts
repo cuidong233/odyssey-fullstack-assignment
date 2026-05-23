@@ -136,7 +136,13 @@ export const homeSummaryResponseSchema = z.object({
   )
 });
 
-export const orderStatusQuerySchema = z.object({
+export const timeRangeSchema = z.enum(["today", "week", "month"]);
+
+export const timeRangeQuerySchema = z.object({
+  range: timeRangeSchema.default("today")
+});
+
+export const orderStatusQuerySchema = timeRangeQuerySchema.extend({
   status: orderStatusSchema.optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50)
 });
