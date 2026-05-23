@@ -153,6 +153,16 @@ Vercel settings:
 
 The dashboard must be built with `EXPO_PUBLIC_API_URL` set. Otherwise the generated web bundle falls back to `http://localhost:8787`, which only works for local development.
 
+GitHub Actions CI/CD:
+
+- `.github/workflows/ci.yml` runs contract generation, generated-artifact drift checks, typecheck, tests, lint, and the dashboard web build on pull requests and `main`.
+- `.github/workflows/vercel.yml` validates first, then deploys Vercel preview builds for pull requests and production builds for pushes to `main` or manual dispatches.
+- Required GitHub repository secrets:
+  - `VERCEL_TOKEN`
+  - `VERCEL_ORG_ID`
+  - `VERCEL_PROJECT_ID`
+- Vercel project environment variables still need `EXPO_PUBLIC_API_URL` configured for Preview and Production.
+
 ## Current Build Notes
 
 Implemented pieces include the Expo web dashboard shell, shared design tokens, reusable UI primitives, Drizzle schema and migrations, reset-style demo seed data, backend OpenAPI generation, generated contract types, Orval-generated React Query hooks, and backend order-domain tests for order creation and status rules.
@@ -313,6 +323,16 @@ Vercel 配置：
 - Environment variable：`EXPO_PUBLIC_API_URL=https://odyssey-restaurant-backend.cuidong111.workers.dev`
 
 前端构建时必须设置 `EXPO_PUBLIC_API_URL`。否则 web bundle 会回退到 `http://localhost:8787`，这个地址只适合本地开发。
+
+GitHub Actions CI/CD：
+
+- `.github/workflows/ci.yml` 会在 PR 和 `main` 上运行合约生成、生成物漂移检查、类型检查、测试、lint、dashboard web 构建。
+- `.github/workflows/vercel.yml` 会先验证，再在 PR 上部署 Vercel Preview，在 push 到 `main` 或手动触发后部署 Production。
+- GitHub 仓库需要配置 secrets：
+  - `VERCEL_TOKEN`
+  - `VERCEL_ORG_ID`
+  - `VERCEL_PROJECT_ID`
+- Vercel 项目的 Preview 和 Production 环境仍需要配置 `EXPO_PUBLIC_API_URL`。
 
 ## 当前状态
 
