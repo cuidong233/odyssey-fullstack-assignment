@@ -4,8 +4,10 @@
   "private": true,
   "packageManager": "pnpm@10.11.0",
   "scripts": {
+    "build:dashboard": "pnpm --filter @repo/dashboard build",
     "dev:backend": "pnpm --filter @repo/backend dev",
     "dev:dashboard": "pnpm --filter @repo/dashboard dev",
+    "deploy:backend": "pnpm --filter @repo/backend deploy",
     "db:push": "pnpm --filter @repo/backend db:push",
     "db:seed": "pnpm --filter @repo/backend seed",
     "db:setup": "pnpm db:push && pnpm db:seed",

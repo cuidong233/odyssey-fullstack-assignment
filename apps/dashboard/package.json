@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.ts",
   "scripts": {
+    "build": "expo export -p web",
     "dev": "expo start --web",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",

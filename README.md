@@ -90,14 +90,16 @@ pnpm db:push
 pnpm db:seed
 ```
 
-The seed is reset-style by design: it clears restaurant operations tables, then inserts menu categories, menu items with generated dish image URLs, customers, settings, and several orders across different statuses. This makes Home, Orders, CRM, Menu, and Settings interesting immediately after setup.
+The seed is reset-style by design: it clears restaurant operations tables, then inserts menu categories, menu items with generated dish image URLs, customers, settings, and 30 orders across different statuses and service hours. This makes Home, Orders, CRM, Menu, and Settings interesting immediately after setup.
 
 All 11 generated menu photos are available in `docs/assets/menu-images` and served by the dashboard from `apps/dashboard/public/menu-images`.
 
 Useful root scripts:
 
 ```bash
+pnpm build:dashboard
 pnpm db:setup
+pnpm deploy:backend
 pnpm gen:contract
 pnpm lint
 pnpm typecheck
@@ -111,6 +113,37 @@ pnpm --filter @repo/backend db:generate
 pnpm --filter @repo/backend db:push
 pnpm --filter @repo/backend seed
 ```
+
+## Deployment
+
+Recommended reviewer-friendly deployment:
+
+- Dashboard: Cloudflare Pages
+- API: Cloudflare Workers
+- Database: Neon Postgres
+
+Backend setup:
+
+```bash
+pnpm db:push
+pnpm db:seed
+pnpm --filter @repo/backend wrangler secret put DATABASE_URL
+pnpm deploy:backend
+```
+
+Use the Neon pooled PostgreSQL connection string with SSL for `DATABASE_URL`. Do not commit `.env` or `.dev.vars`.
+
+Frontend setup for Cloudflare Pages:
+
+```bash
+pnpm build:dashboard
+```
+
+Cloudflare Pages settings:
+
+- Build command: `pnpm build:dashboard`
+- Build output directory: `apps/dashboard/dist`
+- Environment variable: `EXPO_PUBLIC_API_URL=https://<your-worker-name>.<your-subdomain>.workers.dev`
 
 ## Current Build Notes
 
@@ -210,14 +243,16 @@ pnpm db:push
 pnpm db:seed
 ```
 
-seed 是 reset-style：会清空餐厅运营相关表，然后写入菜单分类、带生成菜品图片 URL 的菜品、客户、设置，以及覆盖不同状态的多笔订单。初始化后 Home、Orders、CRM、Menu、Settings 都会立刻有数据可看。
+seed 是 reset-style：会清空餐厅运营相关表，然后写入菜单分类、带生成菜品图片 URL 的菜品、客户、设置，以及覆盖不同状态和营业时段的 30 笔订单。初始化后 Home、Orders、CRM、Menu、Settings 都会立刻有数据可看。
 
 11 张生成菜品图都在 `docs/assets/menu-images`，dashboard 运行时从 `apps/dashboard/public/menu-images` 提供这些图片。
 
 常用根命令：
 
 ```bash
+pnpm build:dashboard
 pnpm db:setup
+pnpm deploy:backend
 pnpm gen:contract
 pnpm lint
 pnpm typecheck
@@ -231,6 +266,37 @@ pnpm --filter @repo/backend db:generate
 pnpm --filter @repo/backend db:push
 pnpm --filter @repo/backend seed
 ```
+
+## 部署
+
+推荐的 review 部署组合：
+
+- Dashboard：Cloudflare Pages
+- API：Cloudflare Workers
+- Database：Neon Postgres
+
+后端部署：
+
+```bash
+pnpm db:push
+pnpm db:seed
+pnpm --filter @repo/backend wrangler secret put DATABASE_URL
+pnpm deploy:backend
+```
+
+`DATABASE_URL` 使用 Neon 带 SSL 的 pooled PostgreSQL 连接串。不要提交 `.env` 或 `.dev.vars`。
+
+Cloudflare Pages 前端设置：
+
+```bash
+pnpm build:dashboard
+```
+
+Pages 配置：
+
+- Build command：`pnpm build:dashboard`
+- Build output directory：`apps/dashboard/dist`
+- Environment variable：`EXPO_PUBLIC_API_URL=https://<your-worker-name>.<your-subdomain>.workers.dev`
 
 ## 当前状态
 
