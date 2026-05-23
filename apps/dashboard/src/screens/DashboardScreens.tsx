@@ -1,6 +1,6 @@
 import { useMemo, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal, Trash2, Upload } from "lucide-react-native";
+import { BadgeDollarSign, ChefHat, Clock3, Plus, Search, ShoppingBag, SlidersHorizontal, Trash2, Upload } from "lucide-react-native";
 import {
   type MenuItem,
   type OrderStatus,
@@ -113,6 +113,11 @@ export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { range
             {t.topbar.createOrder}
           </Button>
         </View>
+      </View>
+
+      <View style={styles.ordersSearchBox}>
+        <Search size={18} color={c.inkSubtle} />
+        <Text style={styles.ordersSearchText}>{t.topbar.search}</Text>
       </View>
 
       <Panel>
@@ -752,6 +757,24 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: s[4],
     paddingVertical: s[3]
+  },
+  ordersSearchBox: {
+    alignItems: "center",
+    backgroundColor: c.surface,
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: s[3],
+    maxWidth: 520,
+    minHeight: 42,
+    paddingHorizontal: s[3],
+    width: "100%"
+  },
+  ordersSearchText: {
+    color: c.inkSubtle,
+    fontSize: 14,
+    fontWeight: "600"
   },
   price: {
     color: c.ink,

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { setApiBaseUrl, timeRanges, type TimeRange } from "@repo/api-client";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { Home, Library, Menu as MenuIcon, Search, Settings, ShoppingBag, Users } from "lucide-react-native";
+import { Home, Library, Menu as MenuIcon, Settings, ShoppingBag, Users } from "lucide-react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Panel, SelectLike } from "@repo/shared/ui";
 import { CreateOrderModal, CrmScreen, HomeScreen, LibraryScreen, MenuScreen, OrdersScreen, SettingsScreen } from "./screens/DashboardScreens";
@@ -85,10 +85,6 @@ function DashboardApp() {
 
       <View style={styles.main}>
         <View style={[styles.topbar, compact && styles.topbarCompact]}>
-          <View style={[styles.searchBox, compact && styles.searchBoxCompact]}>
-            <Search size={18} color={c.inkSubtle} />
-            <Text style={styles.searchText}>{t.topbar.search}</Text>
-          </View>
           <View style={[layout.row, compact && styles.topbarActionsCompact, { gap: s[3] }]}>
             <LanguageToggle />
           </View>
@@ -317,28 +313,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700"
   },
-  searchBox: {
-    alignItems: "center",
-    backgroundColor: c.surface,
-    borderColor: c.line,
-    borderRadius: r.sm,
-    borderWidth: 1,
-    flex: 1,
-    flexDirection: "row",
-    gap: s[3],
-    maxWidth: 520,
-    minHeight: 42,
-    paddingHorizontal: s[3]
-  },
-  searchText: {
-    color: c.inkSubtle,
-    fontSize: 14,
-    fontWeight: "600"
-  },
-  searchBoxCompact: {
-    maxWidth: "100%",
-    width: "100%"
-  },
   sidebar: {
     backgroundColor: "#fbfcf7",
     borderRightColor: c.line,
@@ -373,7 +347,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: "row",
     gap: s[4],
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     paddingHorizontal: s[6],
     paddingVertical: s[4],
     position: "relative",
