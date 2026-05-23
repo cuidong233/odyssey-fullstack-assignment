@@ -14,13 +14,21 @@ describe("localized business text", () => {
 
   it("formats JSON opening hours into readable day ranges", () => {
     const hours = JSON.stringify({
-      monday: [["10:00", "21:00"]],
-      tuesday: [["10:00", "21:00"]],
-      sunday: [["11:00", "20:00"]]
+      monday: ["10:00", "21:00"],
+      tuesday: ["10:00", "21:00"],
+      sunday: ["11:00", "20:00"]
     });
 
     expect(businessHoursText(hours, "en")).toBe("Mon 10:00-21:00 · Tue 10:00-21:00 · Sun 11:00-20:00");
     expect(businessHoursText(hours, "zh")).toBe("周一 10:00-21:00 · 周二 10:00-21:00 · 周日 11:00-20:00");
+  });
+
+  it("also accepts nested opening-hour ranges", () => {
+    const hours = JSON.stringify({
+      monday: [["10:00", "21:00"]]
+    });
+
+    expect(businessHoursText(hours, "en")).toBe("Mon 10:00-21:00");
   });
 
   it("falls back to source text for new backend data", () => {

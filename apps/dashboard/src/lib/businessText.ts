@@ -63,7 +63,7 @@ function formatBusinessHoursJson(hours: string, locale: Locale) {
         if (!Array.isArray(ranges) || ranges.length === 0) {
           return undefined;
         }
-        const firstRange = ranges[0];
+        const firstRange = typeof ranges[0] === "string" ? ranges : ranges[0];
         if (!Array.isArray(firstRange) || firstRange.length < 2 || typeof firstRange[0] !== "string" || typeof firstRange[1] !== "string") {
           return undefined;
         }
