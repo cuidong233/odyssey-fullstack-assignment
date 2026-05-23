@@ -20,19 +20,42 @@ import { DomainError } from "../domain/errors";
 
 const now = new Date("2026-05-22T13:20:00.000Z");
 const ids = {
-  categorySignatures: "11111111-1111-4111-8111-111111111111",
-  categoryBowls: "11111111-1111-4111-8111-111111111112",
-  categoryDrinks: "11111111-1111-4111-8111-111111111113",
+  categoryBowls: "11111111-1111-4111-8111-111111111111",
+  categoryDrinks: "11111111-1111-4111-8111-111111111112",
+  categorySides: "11111111-1111-4111-8111-111111111113",
+  categorySnacks: "11111111-1111-4111-8111-111111111114",
+  categoryDesserts: "11111111-1111-4111-8111-111111111115",
   customerMaya: "22222222-2222-4222-8222-222222222221",
   customerNoah: "22222222-2222-4222-8222-222222222222",
   customerAva: "22222222-2222-4222-8222-222222222223",
-  itemSalmon: "33333333-3333-4333-8333-333333333331",
-  itemBowl: "33333333-3333-4333-8333-333333333332",
-  itemShortRib: "33333333-3333-4333-8333-333333333333",
-  itemSpritz: "33333333-3333-4333-8333-333333333334",
+  itemMarketBowl: "33333333-3333-4333-8333-333333333331",
+  itemChickenBowl: "33333333-3333-4333-8333-333333333332",
+  itemSalmonPlate: "33333333-3333-4333-8333-333333333333",
+  itemGingerTea: "33333333-3333-4333-8333-333333333334",
+  itemEspressoTonic: "33333333-3333-4333-8333-333333333335",
+  itemSoup: "33333333-3333-4333-8333-333333333336",
+  itemMushroomBao: "33333333-3333-4333-8333-333333333337",
+  itemCucumberSalad: "33333333-3333-4333-8333-333333333338",
+  itemChiliNoodles: "33333333-3333-4333-8333-333333333339",
+  itemRicePudding: "33333333-3333-4333-8333-333333333340",
+  itemBerryShrub: "33333333-3333-4333-8333-333333333341",
   order1048: "44444444-4444-4444-8444-444444441048",
   order1047: "44444444-4444-4444-8444-444444441047",
   order1046: "44444444-4444-4444-8444-444444441046"
+} as const;
+
+const menuImageUrls = {
+  marketBowl: "/menu-images/market-bowl.png",
+  chickenBowl: "/menu-images/charred-chicken-bowl.png",
+  salmonPlate: "/menu-images/miso-salmon-plate.png",
+  gingerTea: "/menu-images/ginger-lime-tea.png",
+  espressoTonic: "/menu-images/espresso-tonic.png",
+  soup: "/menu-images/roasted-tomato-soup.png",
+  mushroomBao: "/menu-images/crispy-mushroom-bao.png",
+  cucumberSalad: "/menu-images/sesame-cucumber-salad.png",
+  chiliNoodles: "/menu-images/chili-garlic-noodles.png",
+  ricePudding: "/menu-images/coconut-rice-pudding.png",
+  berryShrub: "/menu-images/sparkling-berry-shrub.png"
 } as const;
 
 export function createSeededMemoryStore() {
@@ -59,9 +82,11 @@ class MemoryRestaurantStore implements RestaurantStore {
 
   seed() {
     this.categories = [
-      makeCategory(ids.categorySignatures, "Signatures", 1),
-      makeCategory(ids.categoryBowls, "Bowls", 2),
-      makeCategory(ids.categoryDrinks, "Drinks", 3)
+      makeCategory(ids.categoryBowls, "Bowls", 1),
+      makeCategory(ids.categoryDrinks, "Drinks", 2),
+      makeCategory(ids.categorySides, "Sides", 3),
+      makeCategory(ids.categorySnacks, "Snacks", 4),
+      makeCategory(ids.categoryDesserts, "Desserts", 5)
     ];
 
     this.customers = [
@@ -71,16 +96,23 @@ class MemoryRestaurantStore implements RestaurantStore {
     ];
 
     this.menuItems = [
-      makeMenuItem(ids.itemSalmon, ids.categorySignatures, "Charred Citrus Salmon", 2450, true, 1),
-      makeMenuItem(ids.itemBowl, ids.categoryBowls, "Market Grain Bowl", 1680, true, 2),
-      makeMenuItem(ids.itemShortRib, ids.categorySignatures, "Smoked Short Rib Plate", 2860, true, 3),
-      makeMenuItem(ids.itemSpritz, ids.categoryDrinks, "Yuzu Mint Spritz", 760, false, 4)
+      makeMenuItem(ids.itemMarketBowl, ids.categoryBowls, "Market Bowl", "Grains, greens, seasonal vegetables", menuImageUrls.marketBowl, 1400, true, 1),
+      makeMenuItem(ids.itemChickenBowl, ids.categoryBowls, "Charred Chicken Bowl", "Chicken, rice, pickled vegetables, herb sauce", menuImageUrls.chickenBowl, 1650, true, 2),
+      makeMenuItem(ids.itemSalmonPlate, ids.categoryBowls, "Miso Salmon Plate", "Salmon, cucumber salad, brown rice, sesame", menuImageUrls.salmonPlate, 1950, true, 3),
+      makeMenuItem(ids.itemGingerTea, ids.categoryDrinks, "Ginger Lime Tea", "House brewed tea with lime", menuImageUrls.gingerTea, 450, true, 1),
+      makeMenuItem(ids.itemEspressoTonic, ids.categoryDrinks, "Espresso Tonic", "Sparkling tonic with a double espresso", menuImageUrls.espressoTonic, 575, true, 2),
+      makeMenuItem(ids.itemSoup, ids.categorySides, "Roasted Tomato Soup", "Currently sold out", menuImageUrls.soup, 900, false, 1),
+      makeMenuItem(ids.itemMushroomBao, ids.categorySnacks, "Crispy Mushroom Bao", "Steamed buns, crispy mushrooms, pickles, chili mayo", menuImageUrls.mushroomBao, 1250, true, 1),
+      makeMenuItem(ids.itemCucumberSalad, ids.categorySides, "Sesame Cucumber Salad", "Chilled cucumbers, sesame dressing, chili crisp", menuImageUrls.cucumberSalad, 850, true, 2),
+      makeMenuItem(ids.itemChiliNoodles, ids.categoryBowls, "Chili Garlic Noodles", "Noodles, chili oil, scallions, jammy egg", menuImageUrls.chiliNoodles, 1550, true, 4),
+      makeMenuItem(ids.itemRicePudding, ids.categoryDesserts, "Coconut Rice Pudding", "Coconut rice pudding, mango, toasted coconut", menuImageUrls.ricePudding, 775, true, 1),
+      makeMenuItem(ids.itemBerryShrub, ids.categoryDrinks, "Sparkling Berry Shrub", "Berry shrub, citrus, mint, sparkling water", menuImageUrls.berryShrub, 650, true, 3)
     ];
 
     this.orders = [
-      this.makeOrder(ids.order1048, ids.customerMaya, "pending", [ids.itemSalmon, ids.itemBowl], new Date("2026-05-22T12:58:00.000Z")),
-      this.makeOrder(ids.order1047, ids.customerNoah, "preparing", [ids.itemShortRib], new Date("2026-05-22T12:42:00.000Z")),
-      this.makeOrder(ids.order1046, ids.customerAva, "ready", [ids.itemBowl, ids.itemSpritz], new Date("2026-05-22T12:18:00.000Z"))
+      this.makeOrder(ids.order1048, ids.customerMaya, "pending", [ids.itemSalmonPlate, ids.itemMarketBowl], new Date("2026-05-22T12:58:00.000Z")),
+      this.makeOrder(ids.order1047, ids.customerNoah, "preparing", [ids.itemMushroomBao, ids.itemBerryShrub], new Date("2026-05-22T12:42:00.000Z")),
+      this.makeOrder(ids.order1046, ids.customerAva, "ready", [ids.itemChiliNoodles, ids.itemGingerTea], new Date("2026-05-22T12:18:00.000Z"))
     ];
   }
 
@@ -296,6 +328,8 @@ function makeMenuItem(
   id: string,
   categoryId: string,
   name: string,
+  description: string,
+  imageUrl: string,
   priceCents: number,
   available: boolean,
   sortOrder: number
@@ -304,8 +338,8 @@ function makeMenuItem(
     id,
     categoryId,
     name,
-    description: null,
-    imageUrl: null,
+    description,
+    imageUrl,
     priceCents,
     available,
     sortOrder,
