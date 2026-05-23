@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     top: 44,
-    zIndex: 20
+    zIndex: 1000
   },
   rangeOption: {
     borderRadius: r.sm,
@@ -379,7 +379,9 @@ const styles = StyleSheet.create({
     gap: s[4],
     justifyContent: "space-between",
     paddingHorizontal: s[6],
-    paddingVertical: s[4]
+    paddingVertical: s[4],
+    position: "relative",
+    zIndex: 100
   },
   topbarActionsCompact: {
     alignItems: "flex-start",
