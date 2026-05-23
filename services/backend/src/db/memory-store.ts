@@ -25,9 +25,13 @@ const ids = {
   categorySides: "11111111-1111-4111-8111-111111111113",
   categorySnacks: "11111111-1111-4111-8111-111111111114",
   categoryDesserts: "11111111-1111-4111-8111-111111111115",
+  customerAri: "22222222-2222-4222-8222-222222222220",
   customerMaya: "22222222-2222-4222-8222-222222222221",
   customerNoah: "22222222-2222-4222-8222-222222222222",
   customerAva: "22222222-2222-4222-8222-222222222223",
+  customerTheo: "22222222-2222-4222-8222-222222222224",
+  customerJordan: "22222222-2222-4222-8222-222222222225",
+  customerLina: "22222222-2222-4222-8222-222222222226",
   itemMarketBowl: "33333333-3333-4333-8333-333333333331",
   itemChickenBowl: "33333333-3333-4333-8333-333333333332",
   itemSalmonPlate: "33333333-3333-4333-8333-333333333333",
@@ -38,10 +42,7 @@ const ids = {
   itemCucumberSalad: "33333333-3333-4333-8333-333333333338",
   itemChiliNoodles: "33333333-3333-4333-8333-333333333339",
   itemRicePudding: "33333333-3333-4333-8333-333333333340",
-  itemBerryShrub: "33333333-3333-4333-8333-333333333341",
-  order1048: "44444444-4444-4444-8444-444444441048",
-  order1047: "44444444-4444-4444-8444-444444441047",
-  order1046: "44444444-4444-4444-8444-444444441046"
+  itemBerryShrub: "33333333-3333-4333-8333-333333333341"
 } as const;
 
 const menuImageUrls = {
@@ -57,6 +58,20 @@ const menuImageUrls = {
   ricePudding: "/menu-images/coconut-rice-pudding.png",
   berryShrub: "/menu-images/sparkling-berry-shrub.png"
 } as const;
+
+type SeedOrderLine = {
+  menuItemId: string;
+  quantity?: number;
+};
+
+type SeedOrderSpec = {
+  id: string;
+  customerId: string;
+  status: OrderStatus;
+  items: SeedOrderLine[];
+  createdAt: Date;
+  notes?: string | null;
+};
 
 export function createSeededMemoryStore() {
   const store = new MemoryRestaurantStore();
@@ -90,9 +105,13 @@ class MemoryRestaurantStore implements RestaurantStore {
     ];
 
     this.customers = [
-      makeCustomer(ids.customerMaya, "Maya Chen", "maya@example.test", "(555) 010-1188"),
+      makeCustomer(ids.customerAri, "Ari Chen", "ari@example.test", "(555) 010-1010"),
+      makeCustomer(ids.customerMaya, "Maya Patel", "maya@example.test", "(555) 010-1188"),
       makeCustomer(ids.customerNoah, "Noah Patel", "noah@example.test", "(555) 010-2234"),
-      makeCustomer(ids.customerAva, "Ava Johnson", "ava@example.test", "(555) 010-7731")
+      makeCustomer(ids.customerAva, "Ava Johnson", "ava@example.test", "(555) 010-7731"),
+      makeCustomer(ids.customerTheo, "Theo Morgan", "theo@example.test", "(555) 010-0199"),
+      makeCustomer(ids.customerJordan, "Jordan Lee", "jordan@example.test", "(555) 010-7744"),
+      makeCustomer(ids.customerLina, "Lina Park", "lina@example.test", "(555) 010-6652")
     ];
 
     this.menuItems = [
@@ -109,11 +128,7 @@ class MemoryRestaurantStore implements RestaurantStore {
       makeMenuItem(ids.itemBerryShrub, ids.categoryDrinks, "Sparkling Berry Shrub", "Berry shrub, citrus, mint, sparkling water", menuImageUrls.berryShrub, 650, true, 3)
     ];
 
-    this.orders = [
-      this.makeOrder(ids.order1048, ids.customerMaya, "pending", [ids.itemSalmonPlate, ids.itemMarketBowl], new Date("2026-05-22T12:58:00.000Z")),
-      this.makeOrder(ids.order1047, ids.customerNoah, "preparing", [ids.itemMushroomBao, ids.itemBerryShrub], new Date("2026-05-22T12:42:00.000Z")),
-      this.makeOrder(ids.order1046, ids.customerAva, "ready", [ids.itemChiliNoodles, ids.itemGingerTea], new Date("2026-05-22T12:18:00.000Z"))
-    ];
+    this.orders = makeSeedOrderSpecs().map((spec) => this.makeOrder(spec));
   }
 
   async getOrderingSettings(): Promise<OrderingSettings> {
@@ -226,7 +241,9 @@ class MemoryRestaurantStore implements RestaurantStore {
     const orders = filters.status
       ? this.orders.filter((order) => order.status === filters.status)
       : this.orders;
-    return orders.slice(0, filters.limit);
+    return [...orders]
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+      .slice(0, filters.limit);
   }
 
   async findOrderById(id: string): Promise<OrderWithItems | null> {
@@ -270,50 +287,130 @@ class MemoryRestaurantStore implements RestaurantStore {
     };
   }
 
-  private makeOrder(
-    id: string,
-    customerId: string,
-    status: OrderStatus,
-    menuItemIds: string[],
-    createdAt: Date
-  ): OrderWithItems {
-    const customer = this.customers.find((candidate) => candidate.id === customerId);
+  private makeOrder(spec: SeedOrderSpec): OrderWithItems {
+    const customer = this.customers.find((candidate) => candidate.id === spec.customerId);
     if (!customer) {
-      throw new Error(`Seed customer ${customerId} is missing.`);
+      throw new Error(`Seed customer ${spec.customerId} is missing.`);
     }
 
-    const items = menuItemIds.map((menuItemId, index) => {
-      const menuItem = this.menuItems.find((candidate) => candidate.id === menuItemId);
+    const items = spec.items.map((line, index) => {
+      const menuItem = this.menuItems.find((candidate) => candidate.id === line.menuItemId);
       if (!menuItem) {
-        throw new Error(`Seed menu item ${menuItemId} is missing.`);
+        throw new Error(`Seed menu item ${line.menuItemId} is missing.`);
       }
+      const quantity = line.quantity ?? 1;
       return {
-        id: `${id}-item-${index + 1}`,
-        orderId: id,
-        menuItemId,
+        id: `${spec.id}-item-${index + 1}`,
+        orderId: spec.id,
+        menuItemId: line.menuItemId,
         menuItemName: menuItem.name,
-        quantity: 1,
+        quantity,
         unitPriceCents: menuItem.priceCents,
-        lineTotalCents: menuItem.priceCents
+        lineTotalCents: menuItem.priceCents * quantity
       };
     });
     const subtotalCents = items.reduce((total, item) => total + item.lineTotalCents, 0);
     const taxCents = Math.round((subtotalCents * this.settings.taxRateBps) / 10_000);
 
     return {
-      id,
-      customerId,
-      status,
+      id: spec.id,
+      customerId: spec.customerId,
+      status: spec.status,
       subtotalCents,
       taxCents,
       totalCents: subtotalCents + taxCents,
-      notes: null,
-      createdAt,
-      updatedAt: createdAt,
+      notes: spec.notes ?? null,
+      createdAt: spec.createdAt,
+      updatedAt: spec.createdAt,
       customer,
       items
     };
   }
+}
+
+function makeSeedOrderSpecs(): SeedOrderSpec[] {
+  const customersByIndex = [
+    ids.customerAri,
+    ids.customerMaya,
+    ids.customerNoah,
+    ids.customerAva,
+    ids.customerTheo,
+    ids.customerJordan,
+    ids.customerLina
+  ];
+  const statuses: OrderStatus[] = [
+    "completed",
+    "completed",
+    "completed",
+    "ready",
+    "preparing",
+    "accepted",
+    "pending",
+    "completed",
+    "preparing",
+    "ready",
+    "accepted",
+    "pending",
+    "completed",
+    "completed",
+    "cancelled",
+    "preparing",
+    "ready",
+    "accepted",
+    "pending",
+    "completed",
+    "completed",
+    "preparing",
+    "ready",
+    "completed",
+    "accepted",
+    "pending",
+    "completed",
+    "completed",
+    "preparing",
+    "ready"
+  ];
+  const itemSets: SeedOrderLine[][] = [
+    [{ menuItemId: ids.itemMarketBowl }, { menuItemId: ids.itemGingerTea }],
+    [{ menuItemId: ids.itemChickenBowl, quantity: 2 }, { menuItemId: ids.itemBerryShrub }],
+    [{ menuItemId: ids.itemSalmonPlate }, { menuItemId: ids.itemCucumberSalad }],
+    [{ menuItemId: ids.itemChiliNoodles }, { menuItemId: ids.itemEspressoTonic }],
+    [{ menuItemId: ids.itemMushroomBao }, { menuItemId: ids.itemGingerTea, quantity: 2 }],
+    [{ menuItemId: ids.itemRicePudding, quantity: 2 }, { menuItemId: ids.itemBerryShrub }],
+    [{ menuItemId: ids.itemMarketBowl }, { menuItemId: ids.itemMushroomBao }],
+    [{ menuItemId: ids.itemChickenBowl }, { menuItemId: ids.itemCucumberSalad }, { menuItemId: ids.itemGingerTea }],
+    [{ menuItemId: ids.itemSalmonPlate }, { menuItemId: ids.itemEspressoTonic }],
+    [{ menuItemId: ids.itemChiliNoodles, quantity: 2 }],
+    [{ menuItemId: ids.itemMushroomBao }, { menuItemId: ids.itemRicePudding }],
+    [{ menuItemId: ids.itemMarketBowl }, { menuItemId: ids.itemBerryShrub }],
+    [{ menuItemId: ids.itemChickenBowl }, { menuItemId: ids.itemGingerTea }],
+    [{ menuItemId: ids.itemSalmonPlate }, { menuItemId: ids.itemMushroomBao }],
+    [{ menuItemId: ids.itemCucumberSalad }, { menuItemId: ids.itemBerryShrub }],
+    [{ menuItemId: ids.itemChiliNoodles }, { menuItemId: ids.itemRicePudding }],
+    [{ menuItemId: ids.itemMarketBowl, quantity: 2 }, { menuItemId: ids.itemEspressoTonic }],
+    [{ menuItemId: ids.itemChickenBowl }, { menuItemId: ids.itemMushroomBao }],
+    [{ menuItemId: ids.itemSalmonPlate }, { menuItemId: ids.itemGingerTea }],
+    [{ menuItemId: ids.itemChiliNoodles }, { menuItemId: ids.itemCucumberSalad }],
+    [{ menuItemId: ids.itemMushroomBao, quantity: 2 }, { menuItemId: ids.itemBerryShrub }],
+    [{ menuItemId: ids.itemMarketBowl }, { menuItemId: ids.itemRicePudding }],
+    [{ menuItemId: ids.itemChickenBowl }, { menuItemId: ids.itemEspressoTonic }],
+    [{ menuItemId: ids.itemSalmonPlate }, { menuItemId: ids.itemBerryShrub }],
+    [{ menuItemId: ids.itemChiliNoodles }, { menuItemId: ids.itemGingerTea }],
+    [{ menuItemId: ids.itemMarketBowl }, { menuItemId: ids.itemCucumberSalad }],
+    [{ menuItemId: ids.itemChickenBowl, quantity: 2 }, { menuItemId: ids.itemRicePudding }],
+    [{ menuItemId: ids.itemMushroomBao }, { menuItemId: ids.itemEspressoTonic }],
+    [{ menuItemId: ids.itemSalmonPlate }, { menuItemId: ids.itemGingerTea, quantity: 2 }],
+    [{ menuItemId: ids.itemChiliNoodles }, { menuItemId: ids.itemBerryShrub }]
+  ];
+
+  return itemSets.map((items, index) => ({
+    id: `44444444-4444-4444-8444-44444444${String(1100 + index).padStart(4, "0")}`,
+    customerId: customersByIndex[index % customersByIndex.length]!,
+    status: statuses[index]!,
+    items,
+    createdAt: new Date(`2026-05-22T${String(10 + Math.floor(index / 4)).padStart(2, "0")}:${String((index % 4) * 14 + 3).padStart(2, "0")}:00.000Z`),
+    notes: index % 6 === 0 ? "Guest asked for utensils." : null
+  }));
 }
 
 function makeCategory(id: string, name: string, sortOrder: number): MenuCategory {

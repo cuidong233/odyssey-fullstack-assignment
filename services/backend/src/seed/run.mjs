@@ -186,7 +186,7 @@ if (
   throw new Error("Failed to seed menu items.");
 }
 
-const [ari, maya, theo] = await db
+const [ari, maya, noah, ava, theo, jordan, lina] = await db
   .insert(customers)
   .values([
     {
@@ -200,14 +200,34 @@ const [ari, maya, theo] = await db
       phone: "555-0118"
     },
     {
+      name: "Noah Patel",
+      email: "noah@example.com",
+      phone: "555-0223"
+    },
+    {
+      name: "Ava Johnson",
+      email: "ava@example.com",
+      phone: "555-0773"
+    },
+    {
       name: "Theo Morgan",
       email: "theo@example.com",
       phone: "555-0199"
+    },
+    {
+      name: "Jordan Lee",
+      email: "jordan@example.com",
+      phone: "555-7744"
+    },
+    {
+      name: "Lina Park",
+      email: "lina@example.com",
+      phone: "555-6652"
     }
   ])
   .returning();
 
-if (!ari || !maya || !theo) {
+if (!ari || !maya || !noah || !ava || !theo || !jordan || !lina) {
   throw new Error("Failed to seed customers.");
 }
 
@@ -228,56 +248,21 @@ await db.insert(orderingSettings).values({
   })
 });
 
-const seededOrders = [
-  {
-    customer: ari,
-    status: "accepted",
-    notes: "No cilantro.",
-    items: [
-      { item: marketBowl, quantity: 1 },
-      { item: gingerTea, quantity: 1 }
-    ]
-  },
-  {
-    customer: maya,
-    status: "preparing",
-    notes: "Pickup at 12:40.",
-    items: [
-      { item: chickenBowl, quantity: 2 },
-      { item: espressoTonic, quantity: 2 },
-      { item: mushroomBao, quantity: 1 }
-    ]
-  },
-  {
-    customer: theo,
-    status: "pending",
-    notes: "First-time customer.",
-    items: [
-      { item: salmonPlate, quantity: 1 },
-      { item: marketBowl, quantity: 1 },
-      { item: cucumberSalad, quantity: 1 }
-    ]
-  },
-  {
-    customer: ari,
-    status: "completed",
-    notes: null,
-    items: [
-      { item: chickenBowl, quantity: 1 },
-      { item: gingerTea, quantity: 2 },
-      { item: ricePudding, quantity: 1 }
-    ]
-  },
-  {
-    customer: maya,
-    status: "ready",
-    notes: "Extra scallions.",
-    items: [
-      { item: chiliNoodles, quantity: 1 },
-      { item: berryShrub, quantity: 1 }
-    ]
+const seededOrders = buildSeededOrders({
+  customers: [ari, maya, noah, ava, theo, jordan, lina],
+  items: {
+    marketBowl,
+    chickenBowl,
+    salmonPlate,
+    gingerTea,
+    espressoTonic,
+    mushroomBao,
+    cucumberSalad,
+    chiliNoodles,
+    ricePudding,
+    berryShrub
   }
-];
+});
 
 for (const seededOrder of seededOrders) {
   const subtotalCents = seededOrder.items.reduce(
@@ -293,7 +278,9 @@ for (const seededOrder of seededOrders) {
       subtotalCents,
       taxCents,
       totalCents: subtotalCents + taxCents,
-      notes: seededOrder.notes
+      notes: seededOrder.notes,
+      createdAt: seededOrder.createdAt,
+      updatedAt: seededOrder.createdAt
     })
     .returning();
 
@@ -314,3 +301,81 @@ for (const seededOrder of seededOrders) {
 }
 
 console.log("Seeded restaurant operations data.");
+
+function buildSeededOrders({ customers, items }) {
+  const statuses = [
+    "completed",
+    "completed",
+    "completed",
+    "ready",
+    "preparing",
+    "accepted",
+    "pending",
+    "completed",
+    "preparing",
+    "ready",
+    "accepted",
+    "pending",
+    "completed",
+    "completed",
+    "cancelled",
+    "preparing",
+    "ready",
+    "accepted",
+    "pending",
+    "completed",
+    "completed",
+    "preparing",
+    "ready",
+    "completed",
+    "accepted",
+    "pending",
+    "completed",
+    "completed",
+    "preparing",
+    "ready"
+  ];
+  const itemSets = [
+    [{ item: items.marketBowl }, { item: items.gingerTea }],
+    [{ item: items.chickenBowl, quantity: 2 }, { item: items.berryShrub }],
+    [{ item: items.salmonPlate }, { item: items.cucumberSalad }],
+    [{ item: items.chiliNoodles }, { item: items.espressoTonic }],
+    [{ item: items.mushroomBao }, { item: items.gingerTea, quantity: 2 }],
+    [{ item: items.ricePudding, quantity: 2 }, { item: items.berryShrub }],
+    [{ item: items.marketBowl }, { item: items.mushroomBao }],
+    [{ item: items.chickenBowl }, { item: items.cucumberSalad }, { item: items.gingerTea }],
+    [{ item: items.salmonPlate }, { item: items.espressoTonic }],
+    [{ item: items.chiliNoodles, quantity: 2 }],
+    [{ item: items.mushroomBao }, { item: items.ricePudding }],
+    [{ item: items.marketBowl }, { item: items.berryShrub }],
+    [{ item: items.chickenBowl }, { item: items.gingerTea }],
+    [{ item: items.salmonPlate }, { item: items.mushroomBao }],
+    [{ item: items.cucumberSalad }, { item: items.berryShrub }],
+    [{ item: items.chiliNoodles }, { item: items.ricePudding }],
+    [{ item: items.marketBowl, quantity: 2 }, { item: items.espressoTonic }],
+    [{ item: items.chickenBowl }, { item: items.mushroomBao }],
+    [{ item: items.salmonPlate }, { item: items.gingerTea }],
+    [{ item: items.chiliNoodles }, { item: items.cucumberSalad }],
+    [{ item: items.mushroomBao, quantity: 2 }, { item: items.berryShrub }],
+    [{ item: items.marketBowl }, { item: items.ricePudding }],
+    [{ item: items.chickenBowl }, { item: items.espressoTonic }],
+    [{ item: items.salmonPlate }, { item: items.berryShrub }],
+    [{ item: items.chiliNoodles }, { item: items.gingerTea }],
+    [{ item: items.marketBowl }, { item: items.cucumberSalad }],
+    [{ item: items.chickenBowl, quantity: 2 }, { item: items.ricePudding }],
+    [{ item: items.mushroomBao }, { item: items.espressoTonic }],
+    [{ item: items.salmonPlate }, { item: items.gingerTea, quantity: 2 }],
+    [{ item: items.chiliNoodles }, { item: items.berryShrub }]
+  ];
+
+  return itemSets.map((lines, index) => ({
+    customer: customers[index % customers.length],
+    status: statuses[index],
+    notes: index % 6 === 0 ? "Guest asked for utensils." : null,
+    createdAt: new Date(`2026-05-22T${String(10 + Math.floor(index / 4)).padStart(2, "0")}:${String((index % 4) * 14 + 3).padStart(2, "0")}:00.000Z`),
+    items: lines.map((line) => ({
+      item: line.item,
+      quantity: line.quantity ?? 1
+    }))
+  }));
+}
