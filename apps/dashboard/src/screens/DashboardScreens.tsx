@@ -70,7 +70,7 @@ export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
 
       <View style={[styles.homeGrid, compact && styles.homeGridCompact]}>
         <Panel style={{ flex: 1.35 }}>
-          <SectionTitle eyebrow={t.home.queue} title={t.home.recentOrders} action={<SelectLike label={t.home.allChannels} />} />
+          <SectionTitle eyebrow={t.home.queue} title={t.home.recentOrders} />
           <OrderTable orders={orderRows} selectedOrderId={selectedOrder?.id} onSelect={setSelectedOrderId} />
         </Panel>
         <View style={[styles.sideStack, compact && styles.sideStackCompact]}>
