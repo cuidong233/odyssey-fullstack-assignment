@@ -63,7 +63,8 @@ export const tokens = {
 export function formatCurrency(cents: number, locale = "en-US"): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "USD"
+    currency: "USD",
+    currencyDisplay: "narrowSymbol"
   }).format(cents / 100);
 }
 
