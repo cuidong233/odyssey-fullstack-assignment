@@ -2,9 +2,9 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { setApiBaseUrl, timeRanges, type TimeRange } from "@repo/api-client";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { Home, Library, Menu as MenuIcon, Plus, Search, Settings, ShoppingBag, Users } from "lucide-react-native";
+import { Home, Library, Menu as MenuIcon, Search, Settings, ShoppingBag, Users } from "lucide-react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
-import { Button, Panel, SelectLike } from "@repo/shared/ui";
+import { Panel, SelectLike } from "@repo/shared/ui";
 import { CreateOrderModal, CrmScreen, HomeScreen, LibraryScreen, MenuScreen, OrdersScreen, SettingsScreen } from "./screens/DashboardScreens";
 import { I18nProvider, useI18n, type Locale } from "./lib/i18n";
 import { c, layout, r, s, type } from "./lib/styles";
@@ -91,16 +91,12 @@ function DashboardApp() {
           </View>
           <View style={[layout.row, compact && styles.topbarActionsCompact, { gap: s[3] }]}>
             <LanguageToggle />
-            <TimeRangeSelect value={timeRange} onChange={setTimeRange} />
-            <Button icon={<Plus size={16} color={c.surface} />} onPress={() => setCreateOrderOpen(true)}>
-              {t.topbar.createOrder}
-            </Button>
           </View>
         </View>
 
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>
-          {page === "home" ? <HomeScreen timeRange={timeRange} /> : null}
-          {page === "orders" ? <OrdersScreen timeRange={timeRange} onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
+          {page === "home" ? <HomeScreen rangeControl={<TimeRangeSelect value={timeRange} onChange={setTimeRange} />} timeRange={timeRange} onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
+          {page === "orders" ? <OrdersScreen rangeControl={<TimeRangeSelect value={timeRange} onChange={setTimeRange} />} timeRange={timeRange} onCreateOrder={() => setCreateOrderOpen(true)} /> : null}
           {page === "crm" ? <CrmScreen /> : null}
           {page === "menu" ? <MenuScreen /> : null}
           {page === "settings" ? <SettingsScreen /> : null}

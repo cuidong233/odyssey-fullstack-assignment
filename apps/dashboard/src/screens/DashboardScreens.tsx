@@ -1,4 +1,4 @@
-import { useMemo, useState, type ChangeEvent, type CSSProperties } from "react";
+import { useMemo, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { BadgeDollarSign, ChefHat, Clock3, Plus, ShoppingBag, SlidersHorizontal, Trash2, Upload } from "lucide-react-native";
 import {
@@ -24,7 +24,7 @@ import { c, layout, r, s, type } from "../lib/styles";
 import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
 import { demoCategories, demoCustomers, demoHomeSummaryForRange, demoMenuItems, demoOrdersForRange, demoOrdersForStatus, demoSettings } from "./demoData";
 
-export function HomeScreen({ timeRange }: { timeRange: TimeRange }) {
+export function HomeScreen({ rangeControl, timeRange, onCreateOrder }: { rangeControl: ReactNode; timeRange: TimeRange; onCreateOrder: () => void }) {
   const { locale, t } = useI18n();
   const { width } = useWindowDimensions();
   const compact = width < 900;
@@ -44,6 +44,12 @@ export function HomeScreen({ timeRange }: { timeRange: TimeRange }) {
         <View>
           <Text style={type.eyebrow}>{t.home.eyebrow}</Text>
           <Text style={type.h1}>{t.home.title}</Text>
+        </View>
+        <View style={styles.headerActions}>
+          {rangeControl}
+          <Button icon={<Plus size={16} color={c.surface} />} onPress={onCreateOrder}>
+            {t.topbar.createOrder}
+          </Button>
         </View>
       </View>
 
@@ -83,8 +89,10 @@ export function HomeScreen({ timeRange }: { timeRange: TimeRange }) {
   );
 }
 
-export function OrdersScreen({ timeRange, onCreateOrder }: { timeRange: TimeRange; onCreateOrder: () => void }) {
+export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { rangeControl: ReactNode; timeRange: TimeRange; onCreateOrder: () => void }) {
   const { t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 900;
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const orders = useListOrders(filter === "all" ? { range: timeRange } : { range: timeRange, status: filter });
   const updateStatus = useOrderStatusAction();
@@ -94,14 +102,17 @@ export function OrdersScreen({ timeRange, onCreateOrder }: { timeRange: TimeRang
 
   return (
     <View style={styles.screenStack}>
-      <View style={layout.between}>
+      <View style={[layout.between, compact && styles.headerCompact]}>
         <View>
           <Text style={type.eyebrow}>{t.orders.eyebrow}</Text>
           <Text style={type.h1}>{t.orders.title}</Text>
         </View>
-        <Button icon={<Plus size={16} color={c.surface} />} onPress={onCreateOrder}>
-          {t.topbar.createOrder}
-        </Button>
+        <View style={styles.headerActions}>
+          {rangeControl}
+          <Button icon={<Plus size={16} color={c.surface} />} onPress={onCreateOrder}>
+            {t.topbar.createOrder}
+          </Button>
+        </View>
       </View>
 
       <Panel>
@@ -622,6 +633,12 @@ const styles = StyleSheet.create({
   headerCompact: {
     alignItems: "flex-start",
     flexDirection: "column",
+    gap: s[3]
+  },
+  headerActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: s[3]
   },
   kpiGrid: {
