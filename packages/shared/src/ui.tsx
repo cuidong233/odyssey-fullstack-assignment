@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Modal as NativeModal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Modal as NativeModal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Check, ChevronDown, LoaderCircle, X } from "lucide-react-native";
 import { tokens } from "./index";
 
@@ -200,13 +200,15 @@ export function AppModal({ title, visible, onClose, children }: { title: string;
     <NativeModal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
       <View style={ui.modalBackdrop}>
         <View style={ui.modalCard}>
-          <View style={layout.between}>
+          <View style={ui.modalHeader}>
             <Text style={type.h2}>{title}</Text>
             <Pressable onPress={onClose} style={ui.iconButton}>
               <X size={18} color={c.inkMuted} />
             </Pressable>
           </View>
-          {children}
+          <ScrollView contentContainerStyle={ui.modalBodyContent} keyboardShouldPersistTaps="handled" style={ui.modalBody}>
+            {children}
+          </ScrollView>
         </View>
       </View>
     </NativeModal>
@@ -382,10 +384,26 @@ const ui = StyleSheet.create({
     borderColor: c.line,
     borderRadius: r.lg,
     borderWidth: 1,
-    gap: s[5],
-    maxWidth: 560,
+    maxHeight: "88%",
+    maxWidth: 620,
     padding: s[6],
     width: "100%"
+  },
+  modalHeader: {
+    alignItems: "center",
+    borderBottomColor: c.line,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: s[4],
+    justifyContent: "space-between",
+    marginBottom: s[5],
+    paddingBottom: s[4]
+  },
+  modalBody: {
+    flexShrink: 1
+  },
+  modalBodyContent: {
+    paddingBottom: s[1]
   },
   iconButton: {
     alignItems: "center",

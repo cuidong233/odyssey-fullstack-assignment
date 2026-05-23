@@ -416,6 +416,9 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
     }
   });
   const activeCustomerId = resolveActiveCustomerId(customerId, customerRows[0]?.id);
+  const selectedTotalCents = menuRows.reduce((total, item) => {
+    return selectedItems.includes(item.id) ? total + item.priceCents : total;
+  }, 0);
 
   function toggleItem(id: string) {
     setSelectedItems((items) => toggleSelectedId(items, id));
@@ -442,6 +445,10 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
               {customer.name}
             </Chip>
           ))}
+        </View>
+        <View style={styles.orderDraftSummary}>
+          <Text style={type.tiny}>{t.common.itemCount(selectedItems.length)}</Text>
+          <Text style={styles.price}>{formatCurrency(selectedTotalCents, intlLocale(locale))}</Text>
         </View>
         <View style={styles.menuGrid}>
           {menuRows.map((item) => (
@@ -599,7 +606,7 @@ const styles = StyleSheet.create({
   },
   menuGrid: {
     gap: s[2],
-    marginTop: s[5]
+    marginTop: s[2]
   },
   menuImage: {
     backgroundColor: c.surfaceMuted,
@@ -636,6 +643,17 @@ const styles = StyleSheet.create({
     gap: s[4],
     justifyContent: "space-between",
     minHeight: 58,
+    paddingHorizontal: s[4],
+    paddingVertical: s[3]
+  },
+  orderDraftSummary: {
+    alignItems: "center",
+    backgroundColor: c.surfaceMuted,
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: s[4],
     paddingVertical: s[3]
   },
