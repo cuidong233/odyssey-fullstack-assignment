@@ -5,6 +5,7 @@ import type { Customer, Order, OrderStatus } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
 import { Badge, Panel, SectionTitle } from "@repo/shared/ui";
 import { formatLocalizedDateTime, intlLocale, statusText, useI18n } from "../lib/i18n";
+import { menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
 
 export function Kpi({ icon, label, note, value }: { icon: ReactNode; label: string; note: string; value: string }) {
@@ -58,7 +59,7 @@ export function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Orde
 }
 
 export function PopularItemsPanel({ items }: { items: Array<{ name: string; quantity: number }> }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   return (
     <Panel>
       <SectionTitle eyebrow={t.common.menuSection} title={t.common.popularItems} />
@@ -66,7 +67,7 @@ export function PopularItemsPanel({ items }: { items: Array<{ name: string; quan
         {items.map((item) => (
           <View key={item.name} style={layout.between}>
             <View>
-              <Text style={type.body}>{item.name}</Text>
+              <Text style={type.body}>{menuItemNameText(item.name, locale)}</Text>
               <Text style={type.tiny}>
                 {item.quantity} {t.common.soldToday}
               </Text>
@@ -89,7 +90,7 @@ export function OrderInspector({ order }: { order: Order }) {
         {order.items.map((item) => (
           <View key={item.id} style={layout.between}>
             <Text style={type.muted}>
-              {item.quantity} x {item.menuItemName}
+              {item.quantity} x {menuItemNameText(item.menuItemName, locale)}
             </Text>
             <Text style={styles.price}>{formatCurrency(item.unitPriceCents, intlLocale(locale))}</Text>
           </View>

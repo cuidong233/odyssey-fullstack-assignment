@@ -17,6 +17,7 @@ import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, Sele
 import { CustomerRow, Kpi, OrderInspector, OrderTable, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
 import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
+import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
 import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
 import { demoCategories, demoCustomers, demoHomeSummary, demoMenuItems, demoOrders, demoOrdersForStatus, demoSettings } from "./demoData";
@@ -233,7 +234,8 @@ export function MenuScreen() {
         <SectionTitle eyebrow={t.menu.items} title={t.menu.availability} action={<Button disabled={categoryRows.length === 0} onPress={startCreating} variant="secondary">{t.menu.add}</Button>} />
         <View style={styles.menuGrid}>
           {itemRows.map((item) => {
-            const category = categoryRows.find((entry) => entry.id === item.categoryId)?.name ?? t.common.menuFallback;
+            const categoryName = categoryRows.find((entry) => entry.id === item.categoryId)?.name;
+            const category = categoryName ? menuCategoryNameText(categoryName, locale) : t.common.menuFallback;
             return (
               <Pressable key={item.id} onPress={() => startEditing(item)} style={styles.menuRow}>
                 <Image
@@ -242,7 +244,7 @@ export function MenuScreen() {
                   style={styles.menuImage}
                 />
                 <View style={{ flex: 1, gap: s[1] }}>
-                  <Text style={type.body}>{item.name}</Text>
+                  <Text style={type.body}>{menuItemNameText(item.name, locale)}</Text>
                   <Text style={type.tiny}>{category}</Text>
                 </View>
                 <Text style={styles.price}>{formatCurrency(item.priceCents, intlLocale(locale))}</Text>
@@ -262,7 +264,7 @@ export function MenuScreen() {
           <View style={styles.chipRow}>
             {categoryRows.map((category) => (
               <Chip key={category.id} active={category.id === draft.categoryId} onPress={() => updateDraft({ categoryId: category.id })}>
-                {category.name}
+                {menuCategoryNameText(category.name, locale)}
               </Chip>
             ))}
           </View>
@@ -278,7 +280,8 @@ export function MenuScreen() {
       <AppModal title={t.menu.edit} visible={Boolean(editing)} onClose={() => setEditing(undefined)}>
         {editing ? (
           <View style={{ gap: s[4] }}>
-            <Text style={type.body}>{editing.name}</Text>
+            <Text style={type.body}>{menuItemNameText(editing.name, locale)}</Text>
+            {editing.description ? <Text style={type.tiny}>{menuItemDescriptionText(editing.description, locale)}</Text> : null}
             <Field keyboardType="numeric" label={t.menu.price} onChangeText={setPrice} value={price} />
             <Toggle label={t.menu.availableForOrdering} value={editing.available} onValueChange={(available) => setEditing({ ...editing, available })} />
             <Button disabled={isPreview} loading={updateItem.isPending} onPress={saveItem}>
@@ -446,7 +449,7 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
                 source={{ uri: resolveMenuImageUrl(item.imageUrl) }}
                 style={styles.menuImage}
               />
-              <Text style={[type.body, { flex: 1 }]}>{item.name}</Text>
+              <Text style={[type.body, { flex: 1 }]}>{menuItemNameText(item.name, locale)}</Text>
               <Text style={styles.price}>{formatCurrency(item.priceCents, intlLocale(locale))}</Text>
             </Pressable>
           ))}
