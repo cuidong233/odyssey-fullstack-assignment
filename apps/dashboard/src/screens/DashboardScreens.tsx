@@ -95,12 +95,15 @@ export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { range
   const compact = width < 900;
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
+  const [selectedOrderId, setSelectedOrderId] = useState<string | undefined>();
   const orders = useListOrders(filter === "all" ? { range: timeRange } : { range: timeRange, status: filter });
   const updateStatus = useOrderStatusAction();
   const isPreview = isApiPreview(orders);
   const orderRows = orders.data ?? (isPreview ? demoOrdersForStatus(filter, timeRange) : []);
   const visibleOrders = useMemo(() => filterOrdersBySearch(orderRows, search, locale), [locale, orderRows, search]);
-  const selected = visibleOrders[0];
+  const selected = useMemo(() => {
+    return resolveSelectedOrder(visibleOrders, selectedOrderId);
+  }, [selectedOrderId, visibleOrders]);
 
   return (
     <View style={styles.screenStack}>
@@ -151,7 +154,7 @@ export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { range
             {t.orders.filters}
           </Button>
         </View>
-        {orders.isLoading ? <SkeletonRows count={5} /> : <OrderTable orders={visibleOrders} />}
+        {orders.isLoading ? <SkeletonRows count={5} /> : <OrderTable orders={visibleOrders} selectedOrderId={selected?.id} onSelect={setSelectedOrderId} />}
       </Panel>
 
       {selected ? (
