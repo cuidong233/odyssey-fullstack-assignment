@@ -118,9 +118,15 @@ pnpm --filter @repo/backend seed
 
 Recommended reviewer-friendly deployment:
 
-- Dashboard: Cloudflare Pages
+- Dashboard: Vercel
 - API: Cloudflare Workers
 - Database: Neon Postgres
+
+Live review URLs:
+
+- Dashboard: https://dist-alane-3620s-projects.vercel.app
+- API: https://odyssey-restaurant-backend.cuidong111.workers.dev
+- API health check: https://odyssey-restaurant-backend.cuidong111.workers.dev/health
 
 Backend setup:
 
@@ -133,17 +139,19 @@ pnpm deploy:backend
 
 Use the Neon pooled PostgreSQL connection string with SSL for `DATABASE_URL`. Do not commit `.env` or `.dev.vars`.
 
-Frontend setup for Cloudflare Pages:
+Frontend setup for Vercel:
 
 ```bash
 pnpm build:dashboard
 ```
 
-Cloudflare Pages settings:
+Vercel settings:
 
 - Build command: `pnpm build:dashboard`
 - Build output directory: `apps/dashboard/dist`
-- Environment variable: `EXPO_PUBLIC_API_URL=https://<your-worker-name>.<your-subdomain>.workers.dev`
+- Environment variable: `EXPO_PUBLIC_API_URL=https://odyssey-restaurant-backend.cuidong111.workers.dev`
+
+The dashboard must be built with `EXPO_PUBLIC_API_URL` set. Otherwise the generated web bundle falls back to `http://localhost:8787`, which only works for local development.
 
 ## Current Build Notes
 
@@ -271,9 +279,15 @@ pnpm --filter @repo/backend seed
 
 推荐的 review 部署组合：
 
-- Dashboard：Cloudflare Pages
+- Dashboard：Vercel
 - API：Cloudflare Workers
 - Database：Neon Postgres
+
+线上 review 地址：
+
+- Dashboard：https://dist-alane-3620s-projects.vercel.app
+- API：https://odyssey-restaurant-backend.cuidong111.workers.dev
+- API health check：https://odyssey-restaurant-backend.cuidong111.workers.dev/health
 
 后端部署：
 
@@ -286,17 +300,19 @@ pnpm deploy:backend
 
 `DATABASE_URL` 使用 Neon 带 SSL 的 pooled PostgreSQL 连接串。不要提交 `.env` 或 `.dev.vars`。
 
-Cloudflare Pages 前端设置：
+Vercel 前端设置：
 
 ```bash
 pnpm build:dashboard
 ```
 
-Pages 配置：
+Vercel 配置：
 
 - Build command：`pnpm build:dashboard`
 - Build output directory：`apps/dashboard/dist`
-- Environment variable：`EXPO_PUBLIC_API_URL=https://<your-worker-name>.<your-subdomain>.workers.dev`
+- Environment variable：`EXPO_PUBLIC_API_URL=https://odyssey-restaurant-backend.cuidong111.workers.dev`
+
+前端构建时必须设置 `EXPO_PUBLIC_API_URL`。否则 web bundle 会回退到 `http://localhost:8787`，这个地址只适合本地开发。
 
 ## 当前状态
 
