@@ -215,7 +215,7 @@ export function SettingMetric({ label, value }: { label: string; value: string }
   return (
     <View style={styles.metricMini}>
       <Text style={type.tiny}>{label}</Text>
-      <Text style={styles.metricValue}>{value}</Text>
+      <Text numberOfLines={3} style={styles.metricValue}>{value}</Text>
     </View>
   );
 }
@@ -301,7 +301,12 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   metricMini: {
+    backgroundColor: c.surfaceMuted,
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
     gap: s[1],
+    padding: s[3],
     minWidth: 96
   },
   metricValue: {
