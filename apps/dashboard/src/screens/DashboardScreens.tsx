@@ -14,7 +14,7 @@ import {
 } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SelectLike, SkeletonRows, Toggle } from "@repo/shared/ui";
-import { CustomerRow, Kpi, OrderInspector, OrderTable, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
+import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
 import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
@@ -60,6 +60,13 @@ export function HomeScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
       )}
 
       {isPreview ? <ApiPreviewNotice /> : null}
+
+      <View style={[styles.visualizationGrid, compact && styles.visualizationGridCompact]}>
+        <OrderTrendChart orders={orderRows} />
+        <View style={[styles.statusMixColumn, compact && styles.statusMixColumnCompact]}>
+          <OrderStatusMix orders={orderRows} />
+        </View>
+      </View>
 
       <View style={[styles.homeGrid, compact && styles.homeGridCompact]}>
         <Panel style={{ flex: 1.35 }}>
@@ -699,8 +706,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: s[5]
   },
+  statusMixColumn: {
+    flex: 0.48,
+    minWidth: 280
+  },
+  statusMixColumnCompact: {
+    flex: undefined,
+    minWidth: 0,
+    width: "100%"
+  },
   typeScale: {
     gap: s[3],
     marginTop: s[5]
+  },
+  visualizationGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    gap: s[4]
+  },
+  visualizationGridCompact: {
+    flexDirection: "column"
   }
 });

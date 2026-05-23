@@ -23,6 +23,9 @@ export const dictionaries = {
       pendingNote: "Needs action",
       popularItems: "Popular items",
       popularItemsNote: "Tracked from completed orders",
+      trend: "Order trend",
+      trendNote: "Today by hour",
+      statusMix: "Status mix",
       queue: "Queue",
       recentOrders: "Recent orders",
       allChannels: "All channels"
@@ -69,6 +72,9 @@ export const dictionaries = {
       pendingNote: "需要处理",
       popularItems: "热门菜品",
       popularItemsNote: "来自已完成订单",
+      trend: "订单趋势",
+      trendNote: "今日按小时",
+      statusMix: "状态分布",
       queue: "队列",
       recentOrders: "最近订单",
       allChannels: "全部渠道"
