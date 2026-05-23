@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { setApiBaseUrl } from "@repo/api-client";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Home, Library, Menu as MenuIcon, Plus, Search, Settings, ShoppingBag, Users } from "lucide-react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
@@ -9,6 +10,17 @@ import { I18nProvider, useI18n, type Locale } from "./lib/i18n";
 import { c, layout, r, s, type } from "./lib/styles";
 
 type Page = "home" | "orders" | "crm" | "menu" | "settings" | "library";
+
+declare const process: {
+  env: {
+    EXPO_PUBLIC_API_URL?: string;
+  };
+};
+
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
+if (configuredApiUrl) {
+  setApiBaseUrl(configuredApiUrl);
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
