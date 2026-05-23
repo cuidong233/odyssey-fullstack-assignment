@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import type { DimensionValue } from "react-native";
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { BookOpen } from "lucide-react-native";
 import Svg, { Circle, Line, Path, Rect } from "react-native-svg";
@@ -29,8 +30,10 @@ export function Kpi({ icon, label, note, value }: { icon: ReactNode; label: stri
 
 export function OrderTrendChart({ orders }: { orders: Order[] }) {
   const { locale, t } = useI18n();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const points = buildOrderTrend(orders);
   const maxOrders = Math.max(1, ...points.map((point) => point.orders));
+  const maxRevenue = Math.max(1, ...points.map((point) => point.revenueCents));
   const chartWidth = 520;
   const chartHeight = 190;
   const left = 34;
@@ -39,36 +42,82 @@ export function OrderTrendChart({ orders }: { orders: Order[] }) {
   const bottom = 36;
   const usableWidth = chartWidth - left - right;
   const usableHeight = chartHeight - top - bottom;
-  const path = points
+  const chartPoints = useMemo(
+    () =>
+      points.map((point, index) => {
+        const x = left + (usableWidth * index) / Math.max(1, points.length - 1);
+        const y = top + usableHeight - (point.orders / maxOrders) * usableHeight;
+        const barHeight = Math.max(3, (point.revenueCents / maxRevenue) * 42);
+        return { ...point, barHeight, x, y };
+      }),
+    [maxOrders, maxRevenue, points, usableHeight, usableWidth]
+  );
+  const path = chartPoints
     .map((point, index) => {
       const x = left + (usableWidth * index) / Math.max(1, points.length - 1);
-      const y = top + usableHeight - (point.orders / maxOrders) * usableHeight;
+      const y = point.y;
       return `${index === 0 ? "M" : "L"} ${x} ${y}`;
     })
     .join(" ");
   const totalRevenue = points.reduce((total, point) => total + point.revenueCents, 0);
+  const activePoint = hoveredIndex === null ? null : chartPoints[hoveredIndex];
+  const tooltipLeft: DimensionValue = activePoint ? `${(Math.min(chartWidth - 72, Math.max(72, activePoint.x)) / chartWidth) * 100}%` : "0%";
+  const tooltipTop = activePoint ? Math.max(0, activePoint.y - 58) : 0;
 
   return (
     <Panel style={styles.chartPanel}>
       <SectionTitle eyebrow={t.home.trendNote} title={t.home.trend} action={<Text style={styles.price}>{formatCurrency(totalRevenue, intlLocale(locale))}</Text>} />
       <View style={styles.chartFrame}>
-        <Svg width="100%" height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
-          {[0, 1, 2].map((line) => {
-            const y = top + (usableHeight * line) / 2;
-            return <Line key={line} x1={left} x2={chartWidth - right} y1={y} y2={y} stroke={c.line} strokeWidth="1" />;
-          })}
-          {points.map((point, index) => {
-            const x = left + (usableWidth * index) / Math.max(1, points.length - 1);
-            const barHeight = Math.max(3, (point.revenueCents / Math.max(1, ...points.map((entry) => entry.revenueCents))) * 42);
-            return <Rect key={point.hour} x={x - 9} y={chartHeight - bottom - barHeight} width="18" height={barHeight} rx="5" fill={c.accentSoft} />;
-          })}
-          <Path d={path} fill="none" stroke={c.accent} strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-          {points.map((point, index) => {
-            const x = left + (usableWidth * index) / Math.max(1, points.length - 1);
-            const y = top + usableHeight - (point.orders / maxOrders) * usableHeight;
-            return <Circle key={`${point.hour}-dot`} cx={x} cy={y} r="5" fill={c.surface} stroke={c.accent} strokeWidth="3" />;
-          })}
-        </Svg>
+        <View style={styles.chartCanvas}>
+          <Svg width="100%" height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
+            {[0, 1, 2].map((line) => {
+              const y = top + (usableHeight * line) / 2;
+              return <Line key={line} x1={left} x2={chartWidth - right} y1={y} y2={y} stroke={c.line} strokeWidth="1" />;
+            })}
+            {chartPoints.map((point) => (
+              <Rect key={point.hour} x={point.x - 9} y={chartHeight - bottom - point.barHeight} width="18" height={point.barHeight} rx="5" fill={c.accentSoft} />
+            ))}
+            {activePoint ? <Line x1={activePoint.x} x2={activePoint.x} y1={top} y2={chartHeight - bottom} stroke={c.lineStrong} strokeDasharray="4 5" strokeWidth="1.5" /> : null}
+            <Path d={path} fill="none" stroke={c.accent} strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
+            {activePoint ? <Circle cx={activePoint.x} cy={activePoint.y} r="6" fill={c.surface} stroke={c.accent} strokeWidth="3" /> : null}
+          </Svg>
+          <View pointerEvents="box-none" style={styles.chartHitLayer}>
+            {chartPoints.map((point, index) => {
+              const previousX = chartPoints[index - 1]?.x ?? left;
+              const nextX = chartPoints[index + 1]?.x ?? chartWidth - right;
+              const segmentLeft = index === 0 ? left : (previousX + point.x) / 2;
+              const segmentRight = index === chartPoints.length - 1 ? chartWidth - right : (point.x + nextX) / 2;
+              return (
+                <Pressable
+                  key={`${point.hour}-hit`}
+                  accessibilityLabel={`${point.hour}:00, ${point.orders} ${t.common.orders}, ${formatCurrency(point.revenueCents, intlLocale(locale))}`}
+                  onHoverIn={() => setHoveredIndex(index)}
+                  onHoverOut={() => setHoveredIndex(null)}
+                  onPressIn={() => setHoveredIndex(index)}
+                  style={[
+                    styles.chartHitArea,
+                    {
+                      left: `${(segmentLeft / chartWidth) * 100}%`,
+                      width: `${((segmentRight - segmentLeft) / chartWidth) * 100}%`
+                    }
+                  ]}
+                />
+              );
+            })}
+          </View>
+          {activePoint ? (
+            <View pointerEvents="none" style={[styles.chartTooltip, { left: tooltipLeft, top: tooltipTop }]}>
+              <Text style={styles.tooltipTime}>{`${activePoint.hour}:00`}</Text>
+              <View style={styles.tooltipRow}>
+                <View style={[styles.statusDot, { backgroundColor: c.accent }]} />
+                <Text style={styles.tooltipValue}>
+                  {activePoint.orders} {t.common.orders}
+                </Text>
+              </View>
+              <Text style={type.tiny}>{formatCurrency(activePoint.revenueCents, intlLocale(locale))}</Text>
+            </View>
+          ) : null}
+        </View>
         <View style={styles.chartAxis}>
           {points.map((point) => (
             <Text key={point.hour} style={type.tiny}>{`${point.hour}:00`}</Text>
@@ -256,12 +305,43 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: s[2]
   },
+  chartCanvas: {
+    position: "relative"
+  },
   chartFrame: {
     gap: s[1],
     marginTop: s[4]
   },
+  chartHitArea: {
+    bottom: 0,
+    position: "absolute",
+    top: 0
+  },
+  chartHitLayer: {
+    bottom: 0,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0
+  },
   chartPanel: {
     flex: 1
+  },
+  chartTooltip: {
+    backgroundColor: c.surface,
+    borderColor: c.lineStrong,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    gap: s[1],
+    marginLeft: -72,
+    minWidth: 144,
+    paddingHorizontal: s[3],
+    paddingVertical: s[2],
+    position: "absolute",
+    shadowColor: "#262d26",
+    shadowOffset: { height: 8, width: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 18
   },
   emptyState: {
     alignItems: "center",
@@ -367,6 +447,21 @@ const styles = StyleSheet.create({
     backgroundColor: c.surfaceMuted
   },
   tableStrong: {
+    color: c.ink,
+    fontSize: 14,
+    fontWeight: "800"
+  },
+  tooltipRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: s[2]
+  },
+  tooltipTime: {
+    color: c.inkMuted,
+    fontSize: 12,
+    fontWeight: "700"
+  },
+  tooltipValue: {
     color: c.ink,
     fontSize: 14,
     fontWeight: "800"
