@@ -41,6 +41,7 @@ export const dictionaries = {
     common: {
       noOrders: "No orders match this view.",
       clearFilters: "Try clearing filters or creating a new order.",
+      clearSearch: "Clear search",
       menuSection: "Menu",
       popularItems: "Popular items",
       soldToday: "sold today",
@@ -91,6 +92,7 @@ export const dictionaries = {
     common: {
       noOrders: "当前视图没有匹配订单。",
       clearFilters: "可以清除筛选或创建新订单。",
+      clearSearch: "清除搜索",
       menuSection: "菜单",
       popularItems: "热门菜品",
       soldToday: "今日售出",

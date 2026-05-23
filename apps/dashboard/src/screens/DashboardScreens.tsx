@@ -1,6 +1,6 @@
 import { useMemo, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
-import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { BadgeDollarSign, ChefHat, Clock3, Plus, Search, ShoppingBag, SlidersHorizontal, Trash2, Upload } from "lucide-react-native";
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { BadgeDollarSign, ChefHat, Clock3, Plus, Search, ShoppingBag, SlidersHorizontal, Trash2, Upload, X } from "lucide-react-native";
 import {
   type MenuItem,
   type OrderStatus,
@@ -21,7 +21,7 @@ import { businessHoursText, customerNameText, orderCodeText } from "../lib/busin
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
-import { emptyMenuItemDraft, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
+import { emptyMenuItemDraft, filterOrdersBySearch, isMenuItemDraftValid, priceInputToCents, resolveActiveCustomerId, resolveMenuImageUrl, resolveSelectedOrder, toggleSelectedId, type MenuItemDraft } from "./dashboardState";
 import { demoCategories, demoCustomers, demoHomeSummaryForRange, demoMenuItems, demoOrdersForRange, demoOrdersForStatus, demoSettings } from "./demoData";
 
 export function HomeScreen({ rangeControl, timeRange, onCreateOrder }: { rangeControl: ReactNode; timeRange: TimeRange; onCreateOrder: () => void }) {
@@ -90,15 +90,17 @@ export function HomeScreen({ rangeControl, timeRange, onCreateOrder }: { rangeCo
 }
 
 export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { rangeControl: ReactNode; timeRange: TimeRange; onCreateOrder: () => void }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { width } = useWindowDimensions();
   const compact = width < 900;
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
+  const [search, setSearch] = useState("");
   const orders = useListOrders(filter === "all" ? { range: timeRange } : { range: timeRange, status: filter });
   const updateStatus = useOrderStatusAction();
   const isPreview = isApiPreview(orders);
   const orderRows = orders.data ?? (isPreview ? demoOrdersForStatus(filter, timeRange) : []);
-  const selected = orderRows[0];
+  const visibleOrders = useMemo(() => filterOrdersBySearch(orderRows, search, locale), [locale, orderRows, search]);
+  const selected = visibleOrders[0];
 
   return (
     <View style={styles.screenStack}>
@@ -117,7 +119,19 @@ export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { range
 
       <View style={styles.ordersSearchBox}>
         <Search size={18} color={c.inkSubtle} />
-        <Text style={styles.ordersSearchText}>{t.topbar.search}</Text>
+        <TextInput
+          accessibilityLabel={t.topbar.search}
+          onChangeText={setSearch}
+          placeholder={t.topbar.search}
+          placeholderTextColor={c.inkSubtle}
+          style={styles.ordersSearchInput}
+          value={search}
+        />
+        {search ? (
+          <Pressable accessibilityLabel={t.common.clearSearch} onPress={() => setSearch("")} style={styles.searchClearButton}>
+            <X size={16} color={c.inkMuted} />
+          </Pressable>
+        ) : null}
       </View>
 
       <Panel>
@@ -137,7 +151,7 @@ export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { range
             {t.orders.filters}
           </Button>
         </View>
-        {orders.isLoading ? <SkeletonRows count={5} /> : <OrderTable orders={orderRows} />}
+        {orders.isLoading ? <SkeletonRows count={5} /> : <OrderTable orders={visibleOrders} />}
       </Panel>
 
       {selected ? (
@@ -771,10 +785,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: s[3],
     width: "100%"
   },
-  ordersSearchText: {
-    color: c.inkSubtle,
+  ordersSearchInput: {
+    color: c.ink,
+    flex: 1,
     fontSize: 14,
-    fontWeight: "600"
+    fontWeight: "600",
+    minHeight: 38,
+    padding: 0
+  },
+  searchClearButton: {
+    alignItems: "center",
+    borderRadius: r.full,
+    height: 28,
+    justifyContent: "center",
+    width: 28
   },
   price: {
     color: c.ink,
