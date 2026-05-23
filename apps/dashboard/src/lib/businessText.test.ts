@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { businessHoursText, customerNameText } from "./businessText";
+import { businessHoursText, customerNameText, orderCodeText } from "./businessText";
 
 describe("localized business text", () => {
   it("keeps source business labels for English", () => {
@@ -15,5 +15,10 @@ describe("localized business text", () => {
   it("falls back to source text for new backend data", () => {
     expect(customerNameText("Walk-in Guest", "zh")).toBe("Walk-in Guest");
     expect(businessHoursText("Weekends 10:00-20:00", "zh")).toBe("Weekends 10:00-20:00");
+  });
+
+  it("formats backend ids as operator-friendly order codes", () => {
+    expect(orderCodeText("ORD-1048")).toBe("#1048");
+    expect(orderCodeText("44444444-4444-4444-8444-444444441048")).toBe("#1048");
   });
 });

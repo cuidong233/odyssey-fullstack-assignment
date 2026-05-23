@@ -18,3 +18,17 @@ export function customerNameText(name: string, locale: Locale) {
 export function businessHoursText(hours: string, locale: Locale) {
   return locale === "zh" ? zhBusinessHours[hours] ?? hours : hours;
 }
+
+export function orderCodeText(id: string) {
+  const explicitOrderNumber = id.match(/(?:^|-)ORD-?(\d+)$/i)?.[1];
+  if (explicitOrderNumber) {
+    return `#${explicitOrderNumber}`;
+  }
+
+  const uuidTail = id.match(/([a-f0-9]{4})$/i)?.[1];
+  if (uuidTail) {
+    return `#${uuidTail.toUpperCase()}`;
+  }
+
+  return `#${id.slice(-6).toUpperCase()}`;
+}

@@ -5,7 +5,7 @@ import Svg, { Circle, Line, Path, Rect } from "react-native-svg";
 import type { Customer, Order, OrderStatus } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
 import { Badge, Panel, SectionTitle } from "@repo/shared/ui";
-import { customerNameText } from "../lib/businessText";
+import { customerNameText, orderCodeText } from "../lib/businessText";
 import { formatLocalizedDateTime, intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
@@ -122,7 +122,7 @@ export function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Orde
       {orders.map((order) => (
         <Pressable key={order.id} onPress={() => onSelect?.(order.id)} style={[styles.tableRow, selectedOrderId === order.id && styles.tableRowActive]}>
           <View style={{ flex: 0.8 }}>
-            <Text style={styles.tableStrong}>{order.id}</Text>
+            <Text style={styles.tableStrong}>{orderCodeText(order.id)}</Text>
             <Text style={type.tiny}>{formatLocalizedDateTime(order.createdAt, locale)}</Text>
           </View>
           <View style={{ flex: 1.1 }}>
@@ -165,7 +165,7 @@ export function OrderInspector({ order }: { order: Order }) {
   const { locale, t } = useI18n();
   return (
     <Panel>
-      <SectionTitle eyebrow={t.common.detail} title={order.id} action={<LocalizedStatusBadge status={order.status} />} />
+      <SectionTitle eyebrow={t.common.detail} title={orderCodeText(order.id)} action={<LocalizedStatusBadge status={order.status} />} />
       <View style={{ gap: s[3] }}>
         <Text style={type.body}>{customerNameText(order.customer.name, locale)}</Text>
         {order.items.map((item) => (

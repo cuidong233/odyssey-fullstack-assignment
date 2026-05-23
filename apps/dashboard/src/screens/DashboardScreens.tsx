@@ -16,7 +16,7 @@ import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
 import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
-import { businessHoursText, customerNameText } from "../lib/businessText";
+import { businessHoursText, customerNameText, orderCodeText } from "../lib/businessText";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
@@ -126,7 +126,7 @@ export function OrdersScreen({ onCreateOrder }: { onCreateOrder: () => void }) {
 
       {selected ? (
         <Panel>
-          <SectionTitle eyebrow={t.orders.actions} title={`${selected.id} ${t.orders.nextSteps}`} />
+          <SectionTitle eyebrow={t.orders.actions} title={`${orderCodeText(selected.id)} ${t.orders.nextSteps}`} />
           <View style={styles.actionStrip}>
             {selected.nextStatuses.map((nextStatus) => (
               <Button
