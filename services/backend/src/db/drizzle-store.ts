@@ -16,6 +16,7 @@ import {
 } from "./schema";
 import { DomainError } from "../domain/errors";
 import type {
+  CreateCustomerInput,
   CreateMenuItemInput,
   CustomerWithStats,
   OrderSummary,
@@ -105,6 +106,21 @@ export class DrizzleRestaurantStore implements RestaurantStore {
         recentOrders: customerOrders.slice(0, 5)
       };
     });
+  }
+
+  async createCustomer(input: CreateCustomerInput): Promise<Customer> {
+    const [customer] = await this.db
+      .insert(customers)
+      .values({
+        name: input.name,
+        email: input.email ?? null,
+        phone: input.phone ?? null
+      })
+      .returning();
+    if (!customer) {
+      throw new Error("Failed to create customer.");
+    }
+    return customer;
   }
 
   async listMenuCategories() {

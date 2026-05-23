@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCreateOrderBody } from "./restaurantOperations";
+import { buildCreateCustomerBody, buildCreateOrderBody } from "./restaurantOperations";
 
 describe("buildCreateOrderBody", () => {
   it("maps selected menu items to the generated create-order contract", () => {
@@ -14,6 +14,22 @@ describe("buildCreateOrderBody", () => {
         { menuItemId: "menu-item-1", quantity: 1 },
         { menuItemId: "menu-item-2", quantity: 1 }
       ]
+    });
+  });
+});
+
+describe("buildCreateCustomerBody", () => {
+  it("trims required names and normalizes optional contact fields", () => {
+    expect(
+      buildCreateCustomerBody({
+        name: "  New Guest  ",
+        email: " ",
+        phone: " 555-0199 "
+      })
+    ).toEqual({
+      name: "New Guest",
+      email: null,
+      phone: "555-0199"
     });
   });
 });

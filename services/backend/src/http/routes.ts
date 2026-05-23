@@ -4,6 +4,7 @@ import { DomainError } from "../domain/errors";
 import {
   createOrder,
   deleteMenuItem,
+  type CreateCustomerInput,
   type CreateMenuItemInput,
   type CreateOrderInput,
   type RestaurantStore,
@@ -11,8 +12,10 @@ import {
   updateOrderStatus
 } from "../domain/order-service";
 import {
+  createCustomerRequestSchema,
   createMenuItemRequestSchema,
   createOrderRequestSchema,
+  customerResponseSchema,
   customerWithStatsResponseSchema,
   errorResponseSchema,
   homeSummaryResponseSchema,
@@ -29,6 +32,7 @@ import {
   updateOrderStatusRequestSchema
 } from "./schemas";
 import {
+  serializeCustomer,
   serializeCustomerWithStats,
   serializeHomeSummary,
   serializeMenuCategory,
@@ -231,6 +235,20 @@ export const listCustomersRoute = createRoute({
   }
 });
 
+export const createCustomerRoute = createRoute({
+  operationId: "createCustomer",
+  tags: ["customers"],
+  method: "post",
+  path: "/customers",
+  request: {
+    body: jsonContent(createCustomerRequestSchema, "Customer payload")
+  },
+  responses: {
+    201: jsonContent(customerResponseSchema, "Created customer"),
+    400: jsonContent(errorResponseSchema, "Validation error")
+  }
+});
+
 export const getSettingsRoute = createRoute({
   operationId: "getOrderingSettings",
   tags: ["settings"],
@@ -292,6 +310,16 @@ function toCreateMenuItemInput(
     ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
     ...(input.available !== undefined ? { available: input.available } : {}),
     ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {})
+  };
+}
+
+function toCreateCustomerInput(
+  input: z.infer<typeof createCustomerRequestSchema>
+): CreateCustomerInput {
+  return {
+    name: input.name,
+    ...(input.email !== undefined ? { email: input.email } : {}),
+    ...(input.phone !== undefined ? { phone: input.phone } : {})
   };
 }
 
@@ -358,6 +386,10 @@ export const handlers = {
     store: RestaurantStore,
     input: z.infer<typeof createMenuItemRequestSchema>
   ) => serializeMenuItem(await store.createMenuItem(toCreateMenuItemInput(input))),
+  createCustomer: async (
+    store: RestaurantStore,
+    input: z.infer<typeof createCustomerRequestSchema>
+  ) => serializeCustomer(await store.createCustomer(toCreateCustomerInput(input))),
   updateMenuItem: async (
     store: RestaurantStore,
     id: string,

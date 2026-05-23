@@ -9,6 +9,7 @@ import type {
 } from "../db/schema";
 import type {
   CreateMenuItemInput,
+  CreateCustomerInput,
   CustomerWithStats,
   OrderSummary,
   OrderWithItems,
@@ -41,6 +42,31 @@ describe("route handlers", () => {
       },
       { name: "listCustomers", filters: { limit: 5 } }
     ]);
+  });
+
+  it("creates customers through the store layer", async () => {
+    const calls: Array<{ name: string; filters: unknown }> = [];
+    const store = createRecordingStore(calls);
+
+    const customer = await handlers.createCustomer(store, {
+      name: "New Guest",
+      email: null,
+      phone: "555-0199"
+    });
+
+    expect(customer).toMatchObject({
+      name: "New Guest",
+      email: null,
+      phone: "555-0199"
+    });
+    expect(calls).toContainEqual({
+      name: "createCustomer",
+      filters: {
+        name: "New Guest",
+        email: null,
+        phone: "555-0199"
+      }
+    });
   });
 });
 
@@ -129,6 +155,16 @@ function createRecordingStore(
           recentOrders: [order]
         }
       ];
+    },
+    async createCustomer(input: CreateCustomerInput): Promise<Customer> {
+      calls.push({ name: "createCustomer", filters: input });
+      return {
+        ...customer,
+        id: "customer-2",
+        name: input.name,
+        email: input.email ?? null,
+        phone: input.phone ?? null
+      };
     },
     async listMenuCategories(): Promise<MenuCategory[]> {
       return [category];

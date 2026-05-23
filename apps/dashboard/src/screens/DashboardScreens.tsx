@@ -16,7 +16,7 @@ import {
 import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
-import { useCreateRestaurantOrder, useMenuItemCreator, useMenuItemDeletion, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
+import { useCreateRestaurantOrder, useCustomerCreator, useMenuItemCreator, useMenuItemDeletion, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
 import { businessHoursText, customerNameText, orderCodeText } from "../lib/businessText";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
@@ -436,7 +436,14 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
   const customerRows = customers.data ?? (isApiPreview(customers) ? demoCustomers : []);
   const menuRows = menuItems.data ?? (isApiPreview(menuItems) ? demoMenuItems : []);
   const [customerId, setCustomerId] = useState<string | undefined>();
+  const [customerDraft, setCustomerDraft] = useState({ name: "", email: "", phone: "" });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const createCustomer = useCustomerCreator({
+    onCreated: (customer) => {
+      setCustomerId(customer.id);
+      setCustomerDraft({ name: "", email: "", phone: "" });
+    }
+  });
   const createOrder = useCreateRestaurantOrder({
     onCreated: () => {
       setSelectedItems([]);
@@ -451,6 +458,19 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
 
   function toggleItem(id: string) {
     setSelectedItems((items) => toggleSelectedId(items, id));
+  }
+
+  function updateCustomerDraft(input: Partial<typeof customerDraft>) {
+    setCustomerDraft((current) => ({ ...current, ...input }));
+  }
+
+  function submitCustomer() {
+    const name = customerDraft.name.trim();
+    if (!name) {
+      return;
+    }
+
+    createCustomer.createCustomer(customerDraft);
   }
 
   function submit() {
@@ -476,6 +496,18 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
             </Chip>
           ))}
         </View>
+        <Panel style={styles.inlineFormPanel}>
+          <SectionTitle eyebrow={t.create.addCustomer} title={customerDraft.name.trim() || t.create.name} />
+          <View style={styles.inlineFieldGrid}>
+            <Field label={t.create.name} value={customerDraft.name} onChangeText={(name) => updateCustomerDraft({ name })} />
+            <Field label={t.create.email} value={customerDraft.email} onChangeText={(email) => updateCustomerDraft({ email })} />
+            <Field label={t.create.phone} value={customerDraft.phone} onChangeText={(phone) => updateCustomerDraft({ phone })} />
+          </View>
+          {createCustomer.error ? <Text style={[type.muted, { color: c.danger }]}>{createCustomer.error.message}</Text> : null}
+          <Button disabled={isPreview || !customerDraft.name.trim()} loading={createCustomer.isPending} onPress={submitCustomer} variant="secondary">
+            {t.create.saveCustomer}
+          </Button>
+        </Panel>
         <View style={styles.orderDraftSummary}>
           <Text style={type.tiny}>{t.common.itemCount(selectedItems.length)}</Text>
           <Text style={styles.price}>{formatCurrency(selectedTotalCents, intlLocale(locale))}</Text>
@@ -641,6 +673,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     flexWrap: "wrap",
+    gap: s[3]
+  },
+  inlineFieldGrid: {
+    flexDirection: "column",
+    gap: s[3]
+  },
+  inlineFormPanel: {
     gap: s[3]
   },
   kpiGrid: {

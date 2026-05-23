@@ -141,7 +141,7 @@ export interface paths {
         };
         get: operations["listCustomers"];
         put?: never;
-        post?: never;
+        post: operations["createCustomer"];
         delete?: never;
         options?: never;
         head?: never;
@@ -983,6 +983,60 @@ export interface operations {
                             updatedAt: string;
                         }[];
                     }[];
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Customer payload */
+        requestBody?: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** Format: email */
+                    email?: string | null;
+                    phone?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Created customer */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        id: string;
+                        name: string;
+                        email: string | null;
+                        phone: string | null;
+                        /** Format: date-time */
+                        createdAt: string;
+                        /** Format: date-time */
+                        updatedAt: string;
+                    };
                 };
             };
             /** @description Validation error */

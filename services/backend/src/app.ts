@@ -6,6 +6,7 @@ import { createSeededMemoryStore } from "./db/memory-store";
 import type { RestaurantStore } from "./domain/order-service";
 import {
   createMenuItemRoute,
+  createCustomerRoute,
   deleteMenuItemRoute,
   createOrderRoute,
   getOrderRoute,
@@ -180,6 +181,16 @@ export function createApp(options: CreateAppOptions = {}) {
     c.json(
       await handlers.listCustomers(c.get("store"), c.req.valid("query")),
       200
+    )
+  );
+
+  app.openapi(createCustomerRoute, async (c) =>
+    c.json(
+      await handlers.createCustomer(
+        c.get("store"),
+        c.req.valid("json") as Parameters<typeof handlers.createCustomer>[1]
+      ),
+      201
     )
   );
 

@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import {
+  insertCustomerSchema,
   insertMenuItemSchema,
   insertOrderItemSchema,
   insertOrderSchema,
@@ -98,6 +99,19 @@ export const createMenuItemRequestSchema = insertMenuItemSchema
     description: z.string().max(500).nullish(),
     imageUrl: z.string().max(1_500_000).nullish(),
     priceCents: z.number().int().positive()
+  })
+  .strict();
+
+export const createCustomerRequestSchema = insertCustomerSchema
+  .pick({
+    name: true,
+    email: true,
+    phone: true
+  })
+  .extend({
+    name: z.string().trim().min(1).max(120),
+    email: z.string().trim().email().max(240).nullish(),
+    phone: z.string().trim().max(40).nullish()
   })
   .strict();
 

@@ -2,6 +2,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   type CreateMenuItem201,
   type CreateMenuItemBody,
+  type CreateCustomer201,
+  type CreateCustomerBody,
   type CreateOrder201,
   type CreateOrderBody,
   type DeleteMenuItem200,
@@ -12,6 +14,7 @@ import {
   type UpdateOrderingSettings200,
   type UpdateOrderingSettingsBody,
   useCreateMenuItem,
+  useCreateCustomer,
   useCreateOrder,
   useDeleteMenuItem,
   useUpdateMenuItem,
@@ -29,6 +32,18 @@ export function buildCreateOrderBody(input: {
       menuItemId,
       quantity: 1
     }))
+  };
+}
+
+export function buildCreateCustomerBody(input: {
+  name: string;
+  email: string;
+  phone: string;
+}): CreateCustomerBody {
+  return {
+    name: input.name.trim(),
+    email: input.email.trim() || null,
+    phone: input.phone.trim() || null
   };
 }
 
@@ -111,6 +126,26 @@ export function useMenuItemCreator(options?: {
     ...mutation,
     createMenuItem: (data: CreateMenuItemBody) =>
       mutation.mutate({ data })
+  };
+}
+
+export function useCustomerCreator(options?: {
+  onCreated?: (customer: CreateCustomer201) => void;
+}) {
+  const queryClient = useQueryClient();
+  const mutation = useCreateCustomer({
+    mutation: {
+      onSuccess: (customer) => {
+        void queryClient.invalidateQueries();
+        options?.onCreated?.(customer);
+      }
+    }
+  });
+
+  return {
+    ...mutation,
+    createCustomer: (input: { name: string; email: string; phone: string }) =>
+      mutation.mutate({ data: buildCreateCustomerBody(input) })
   };
 }
 

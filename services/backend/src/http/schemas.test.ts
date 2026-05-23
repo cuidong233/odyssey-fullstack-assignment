@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createMenuItemRequestSchema,
+  createCustomerRequestSchema,
   createOrderRequestSchema,
   idParamSchema,
   updateOrderingSettingsRequestSchema,
@@ -60,6 +61,13 @@ describe("request schemas", () => {
       updateOrderStatusRequestSchema.safeParse({
         nextStatus: "accepted",
         status: "completed"
+      }).success
+    ).toBe(false);
+
+    expect(
+      createCustomerRequestSchema.safeParse({
+        name: "Guest",
+        spendCents: 1000
       }).success
     ).toBe(false);
 

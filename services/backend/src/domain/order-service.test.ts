@@ -98,6 +98,19 @@ class TestStore implements RestaurantStore {
     }));
   }
 
+  async createCustomer(input: { name: string; email?: string | null; phone?: string | null }): Promise<Customer> {
+    const customer: Customer = {
+      id: `customer-${this.customers.length + 1}`,
+      name: input.name,
+      email: input.email ?? null,
+      phone: input.phone ?? null,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.customers.push(customer);
+    return customer;
+  }
+
   async listMenuCategories(): Promise<MenuCategory[]> {
     return [
       {

@@ -36,7 +36,7 @@ export const dictionaries = {
     menu: { eyebrow: "Catalog", title: "Menu", items: "Items", availability: "Availability and pricing", add: "Add item", create: "Add menu item", available: "Available", paused: "Paused", edit: "Edit menu item", name: "Name", description: "Description", category: "Category", price: "Price", image: "Image", uploadImage: "Upload image", defaultImage: "Default image", availableForOrdering: "Available for ordering", save: "Save item", delete: "Delete item", createSave: "Create item", validation: "Add a name, category, and price greater than zero." },
     settings: { eyebrow: "Business controls", title: "Settings", ordering: "Ordering", rules: "Service rules", open: "Ordering is open", autoAccept: "Auto-accept new orders", prep: "Default prep time", tax: "Tax rate", hours: "Opening hours" },
     library: { eyebrow: "Design system", title: "UI Library", tokens: "Tokens", colorSpacing: "Color and spacing", typography: "Typography", typeScale: "Type scale", surfaces: "Surfaces", elevation: "Elevation", feedback: "Feedback", toast: "Toast pattern", toastBody: "Menu item saved and ordering surfaces refreshed.", components: "Components", states: "States", primary: "Primary", secondary: "Secondary", disabled: "Disabled", success: "Success", warning: "Warning", error: "Error", info: "Info" },
-    create: { title: "Create order", customer: "Customer", menuItems: "Menu items", submit: "Submit order" },
+    create: { title: "Create order", customer: "Customer", menuItems: "Menu items", addCustomer: "New customer", name: "Name", email: "Email", phone: "Phone", saveCustomer: "Save customer", submit: "Submit order" },
     preview: { title: "API offline preview", body: "Start the backend on localhost:8787 to switch these views from seeded preview data to live API data." },
     common: {
       noOrders: "No orders match this view.",
@@ -86,7 +86,7 @@ export const dictionaries = {
     menu: { eyebrow: "商品目录", title: "菜单", items: "菜品", availability: "可售状态与价格", add: "添加菜品", create: "添加菜品", available: "可售", paused: "暂停", edit: "编辑菜品", name: "名称", description: "描述", category: "分类", price: "价格", image: "图片", uploadImage: "上传图片", defaultImage: "默认图片", availableForOrdering: "开放点单", save: "保存菜品", delete: "删除菜品", createSave: "创建菜品", validation: "请填写名称、分类，并输入大于 0 的价格。" },
     settings: { eyebrow: "业务控制", title: "设置", ordering: "点单", rules: "服务规则", open: "开放点单", autoAccept: "自动接单", prep: "默认备餐时间", tax: "税率", hours: "营业时间" },
     library: { eyebrow: "设计系统", title: "组件库", tokens: "设计变量", colorSpacing: "颜色与间距", typography: "字体", typeScale: "字号层级", surfaces: "界面层级", elevation: "边框与阴影", feedback: "反馈", toast: "提示模式", toastBody: "菜品已保存，点单界面已刷新。", components: "组件", states: "状态", primary: "主按钮", secondary: "次按钮", disabled: "禁用", success: "成功", warning: "警告", error: "错误", info: "信息" },
-    create: { title: "新建订单", customer: "客户", menuItems: "菜品", submit: "提交订单" },
+    create: { title: "新建订单", customer: "客户", menuItems: "菜品", addCustomer: "新客户", name: "姓名", email: "邮箱", phone: "电话", saveCustomer: "保存客户", submit: "提交订单" },
     preview: { title: "API 离线预览", body: "启动 localhost:8787 后端后，这些页面会从预览数据切换为真实 API 数据。" },
     common: {
       noOrders: "当前视图没有匹配订单。",

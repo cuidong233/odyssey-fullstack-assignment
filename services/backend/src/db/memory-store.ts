@@ -8,6 +8,7 @@ import type {
   OrderStatus
 } from "./schema";
 import type {
+  CreateCustomerInput,
   CreateMenuItemInput,
   CustomerWithStats,
   OrderSummary,
@@ -157,6 +158,20 @@ class MemoryRestaurantStore implements RestaurantStore {
         recentOrders: customerOrders.slice(0, 3).map(({ customer: _customer, items: _items, ...order }) => order)
       };
     });
+  }
+
+  async createCustomer(input: CreateCustomerInput): Promise<Customer> {
+    const now = new Date();
+    const customer: Customer = {
+      id: crypto.randomUUID(),
+      name: input.name,
+      email: input.email ?? null,
+      phone: input.phone ?? null,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.customers.unshift(customer);
+    return customer;
   }
 
   async listMenuCategories(): Promise<MenuCategory[]> {

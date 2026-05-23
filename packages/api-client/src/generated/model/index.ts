@@ -5,6 +5,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './createCustomer201';
+export * from './createCustomer400';
+export * from './createCustomer400Error';
+export * from './createCustomerBody';
 export * from './createMenuItem201';
 export * from './createMenuItem400';
 export * from './createMenuItem400Error';

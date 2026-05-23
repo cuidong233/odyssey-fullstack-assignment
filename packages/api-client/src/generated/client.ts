@@ -24,6 +24,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CreateCustomer201,
+  CreateCustomer400,
+  CreateCustomerBody,
   CreateMenuItem201,
   CreateMenuItem400,
   CreateMenuItemBody,
@@ -1088,6 +1091,70 @@ export function useListCustomers<TData = Awaited<ReturnType<typeof listCustomers
 
 
 
+
+export const getCreateCustomerUrl = () => {
+
+
+
+
+  return `/customers`
+}
+
+export const createCustomer = async (createCustomerBody?: CreateCustomerBody, options?: RequestInit): Promise<CreateCustomer201> => {
+
+  return apiFetch<CreateCustomer201>(getCreateCustomerUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createCustomerBody)
+  }
+);}
+
+
+
+
+export const getCreateCustomerMutationOptions = <TError = ErrorType<CreateCustomer400>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCustomer>>, TError,{data?: BodyType<CreateCustomerBody>}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCustomer>>, TError,{data?: BodyType<CreateCustomerBody>}, TContext> => {
+
+const mutationKey = ['createCustomer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCustomer>>, {data?: BodyType<CreateCustomerBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCustomer(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCustomerMutationResult = NonNullable<Awaited<ReturnType<typeof createCustomer>>>
+    export type CreateCustomerMutationBody = BodyType<CreateCustomerBody> | undefined
+    export type CreateCustomerMutationError = ErrorType<CreateCustomer400>
+
+    export const useCreateCustomer = <TError = ErrorType<CreateCustomer400>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCustomer>>, TError,{data?: BodyType<CreateCustomerBody>}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createCustomer>>,
+        TError,
+        {data?: BodyType<CreateCustomerBody>},
+        TContext
+      > => {
+      return useMutation(getCreateCustomerMutationOptions(options), queryClient);
+    }
 
 export const getGetOrderingSettingsUrl = () => {
 
