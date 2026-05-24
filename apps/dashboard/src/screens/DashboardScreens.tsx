@@ -544,17 +544,20 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
   const customerRows = customers.data ?? (isApiPreview(customers) ? demoCustomers : []);
   const menuRows = menuItems.data ?? (isApiPreview(menuItems) ? demoMenuItems : []);
   const [customerId, setCustomerId] = useState<string | undefined>();
+  const [addingCustomer, setAddingCustomer] = useState(false);
   const [customerDraft, setCustomerDraft] = useState({ name: "", email: "", phone: "" });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const createCustomer = useCustomerCreator({
     onCreated: (customer) => {
       setCustomerId(customer.id);
+      setAddingCustomer(false);
       setCustomerDraft({ name: "", email: "", phone: "" });
     }
   });
   const createOrder = useCreateRestaurantOrder({
     onCreated: () => {
       setSelectedItems([]);
+      resetCustomerForm();
       onClose();
     }
   });
@@ -570,6 +573,16 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
 
   function updateCustomerDraft(input: Partial<typeof customerDraft>) {
     setCustomerDraft((current) => ({ ...current, ...input }));
+  }
+
+  function resetCustomerForm() {
+    setAddingCustomer(false);
+    setCustomerDraft({ name: "", email: "", phone: "" });
+  }
+
+  function closeModal() {
+    resetCustomerForm();
+    onClose();
   }
 
   function submitCustomer() {
@@ -593,29 +606,41 @@ export function CreateOrderModal({ visible, onClose }: { visible: boolean; onClo
   }
 
   return (
-    <AppModal title={t.create.title} visible={visible} onClose={onClose}>
+    <AppModal title={t.create.title} visible={visible} onClose={closeModal}>
       <View style={{ gap: s[4] }}>
         {isPreview ? <ApiPreviewNotice /> : null}
         <SectionTitle eyebrow={t.create.customer} title={activeCustomer ? customerNameText(activeCustomer.name, locale) : t.common.none} />
         <View style={styles.chipRow}>
+          <Chip active={addingCustomer} onPress={() => setAddingCustomer(true)}>
+            {t.create.addCustomer}
+          </Chip>
           {customerRows.map((customer) => (
-            <Chip key={customer.id} active={customer.id === activeCustomerId} onPress={() => setCustomerId(customer.id)}>
+            <Chip
+              key={customer.id}
+              active={!addingCustomer && customer.id === activeCustomerId}
+              onPress={() => {
+                setAddingCustomer(false);
+                setCustomerId(customer.id);
+              }}
+            >
               {customerNameText(customer.name, locale)}
             </Chip>
           ))}
         </View>
-        <Panel style={styles.inlineFormPanel}>
-          <SectionTitle eyebrow={t.create.addCustomer} title={customerDraft.name.trim() || t.create.name} />
-          <View style={styles.inlineFieldGrid}>
-            <Field label={t.create.name} value={customerDraft.name} onChangeText={(name) => updateCustomerDraft({ name })} />
-            <Field label={t.create.email} value={customerDraft.email} onChangeText={(email) => updateCustomerDraft({ email })} />
-            <Field label={t.create.phone} value={customerDraft.phone} onChangeText={(phone) => updateCustomerDraft({ phone })} />
-          </View>
-          {createCustomer.error ? <Text style={[type.muted, { color: c.danger }]}>{createCustomer.error.message}</Text> : null}
-          <Button disabled={isPreview || !customerDraft.name.trim()} loading={createCustomer.isPending} onPress={submitCustomer} variant="secondary">
-            {t.create.saveCustomer}
-          </Button>
-        </Panel>
+        {addingCustomer ? (
+          <Panel style={styles.inlineFormPanel}>
+            <SectionTitle eyebrow={t.create.addCustomer} title={customerDraft.name.trim() || t.create.name} />
+            <View style={styles.inlineFieldGrid}>
+              <Field label={t.create.name} value={customerDraft.name} onChangeText={(name) => updateCustomerDraft({ name })} />
+              <Field label={t.create.email} value={customerDraft.email} onChangeText={(email) => updateCustomerDraft({ email })} />
+              <Field label={t.create.phone} value={customerDraft.phone} onChangeText={(phone) => updateCustomerDraft({ phone })} />
+            </View>
+            {createCustomer.error ? <Text style={[type.muted, { color: c.danger }]}>{createCustomer.error.message}</Text> : null}
+            <Button disabled={isPreview || !customerDraft.name.trim()} loading={createCustomer.isPending} onPress={submitCustomer} variant="secondary">
+              {t.create.saveCustomer}
+            </Button>
+          </Panel>
+        ) : null}
         <View style={styles.orderDraftSummary}>
           <Text style={type.tiny}>{t.common.itemCount(selectedItems.length)}</Text>
           <Text style={styles.price}>{formatCurrency(selectedTotalCents, intlLocale(locale))}</Text>
