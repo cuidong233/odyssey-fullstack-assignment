@@ -203,7 +203,7 @@ export function AppModal({ title, visible, onClose, children }: { title: string;
         <View style={ui.modalCard}>
           <View style={ui.modalHeader}>
             <Text style={type.h2}>{title}</Text>
-            <Pressable onPress={onClose} style={ui.iconButton}>
+            <Pressable accessibilityLabel="Close" accessibilityRole="button" onPress={onClose} style={ui.iconButton}>
               <X size={18} color={c.inkMuted} />
             </Pressable>
           </View>
