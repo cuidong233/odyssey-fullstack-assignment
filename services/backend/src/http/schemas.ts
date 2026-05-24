@@ -115,6 +115,9 @@ export const createCustomerRequestSchema = insertCustomerSchema
   })
   .strict();
 
+export const updateCustomerRequestSchema =
+  createCustomerRequestSchema.partial().strict();
+
 export const updateMenuItemRequestSchema =
   createMenuItemRequestSchema.partial().strict();
 

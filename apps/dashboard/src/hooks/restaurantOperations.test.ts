@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCreateCustomerBody, buildCreateOrderBody } from "./restaurantOperations";
+import { buildCreateCustomerBody, buildCreateOrderBody, buildUpdateCustomerBody } from "./restaurantOperations";
 
 describe("buildCreateOrderBody", () => {
   it("maps selected menu items to the generated create-order contract", () => {
@@ -30,6 +30,22 @@ describe("buildCreateCustomerBody", () => {
       name: "New Guest",
       email: null,
       phone: "555-0199"
+    });
+  });
+});
+
+describe("buildUpdateCustomerBody", () => {
+  it("keeps customer contact edits on the generated update contract", () => {
+    expect(
+      buildUpdateCustomerBody({
+        name: "  Maya Patel  ",
+        email: " maya@example.test ",
+        phone: " "
+      })
+    ).toEqual({
+      name: "Maya Patel",
+      email: "maya@example.test",
+      phone: null
     });
   });
 });

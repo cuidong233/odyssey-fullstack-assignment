@@ -37,6 +37,8 @@ export type CreateCustomerInput = {
   phone?: string | null;
 };
 
+export type UpdateCustomerInput = Partial<CreateCustomerInput>;
+
 export type UpdateMenuItemInput = Partial<CreateMenuItemInput>;
 
 export type PersistOrderInput = {
@@ -94,6 +96,7 @@ export type RestaurantStore = {
   findCustomerById(id: string): Promise<Customer | null>;
   listCustomers(filters?: { limit?: number }): Promise<CustomerWithStats[]>;
   createCustomer(input: CreateCustomerInput): Promise<Customer>;
+  updateCustomer(id: string, input: UpdateCustomerInput): Promise<Customer>;
   listMenuCategories(): Promise<MenuCategory[]>;
   listMenuItems(filters?: { limit?: number }): Promise<MenuItem[]>;
   findMenuItemsByIds(ids: string[]): Promise<MenuItem[]>;

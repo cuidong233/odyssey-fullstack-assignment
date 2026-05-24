@@ -262,7 +262,7 @@ export function OrderInspector({ order }: { order: Order }) {
   );
 }
 
-export function CustomerRow({ customer }: { customer: Customer }) {
+export function CustomerRow({ customer, action }: { customer: Customer; action?: ReactNode }) {
   const { locale, t } = useI18n();
   const { width } = useWindowDimensions();
   const compact = width < 760;
@@ -284,6 +284,7 @@ export function CustomerRow({ customer }: { customer: Customer }) {
         <SettingMetric label={t.crm.spend} value={formatCurrency(customer.spendCents, intlLocale(locale))} />
         <SettingMetric label={t.crm.lastOrder} value={customer.recentOrders[0] ? formatLocalizedDateTime(customer.recentOrders[0].createdAt, locale) : t.common.none} />
       </View>
+      {action}
     </View>
   );
 }

@@ -7,8 +7,11 @@ import {
   type CreateOrder201,
   type CreateOrderBody,
   type DeleteMenuItem200,
+  type Customer,
   type MenuItem,
   type OrderStatus,
+  type UpdateCustomer200,
+  type UpdateCustomerBody,
   type UpdateMenuItem200,
   type UpdateMenuItemBody,
   type UpdateOrderingSettings200,
@@ -17,6 +20,7 @@ import {
   useCreateCustomer,
   useCreateOrder,
   useDeleteMenuItem,
+  useUpdateCustomer,
   useUpdateMenuItem,
   useUpdateOrderingSettings,
   useUpdateOrderStatus
@@ -40,6 +44,18 @@ export function buildCreateCustomerBody(input: {
   email: string;
   phone: string;
 }): CreateCustomerBody {
+  return {
+    name: input.name.trim(),
+    email: input.email.trim() || null,
+    phone: input.phone.trim() || null
+  };
+}
+
+export function buildUpdateCustomerBody(input: {
+  name: string;
+  email: string;
+  phone: string;
+}): UpdateCustomerBody {
   return {
     name: input.name.trim(),
     email: input.email.trim() || null,
@@ -146,6 +162,28 @@ export function useCustomerCreator(options?: {
     ...mutation,
     createCustomer: (input: { name: string; email: string; phone: string }) =>
       mutation.mutate({ data: buildCreateCustomerBody(input) })
+  };
+}
+
+export function useCustomerEditor(options?: {
+  onSaved?: (customer: UpdateCustomer200) => void;
+}) {
+  const queryClient = useQueryClient();
+  const mutation = useUpdateCustomer({
+    mutation: {
+      onSuccess: (customer) => {
+        void queryClient.invalidateQueries();
+        options?.onSaved?.(customer);
+      }
+    }
+  });
+
+  return {
+    ...mutation,
+    saveCustomer: (
+      id: Customer["id"],
+      input: { name: string; email: string; phone: string }
+    ) => mutation.mutate({ id, data: buildUpdateCustomerBody(input) })
   };
 }
 

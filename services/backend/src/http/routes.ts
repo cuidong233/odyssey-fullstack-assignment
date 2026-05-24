@@ -8,6 +8,7 @@ import {
   type CreateMenuItemInput,
   type CreateOrderInput,
   type RestaurantStore,
+  type UpdateCustomerInput,
   type UpdateMenuItemInput,
   updateOrderStatus
 } from "../domain/order-service";
@@ -27,6 +28,7 @@ import {
   orderResponseSchema,
   orderStatusQuerySchema,
   timeRangeQuerySchema,
+  updateCustomerRequestSchema,
   updateMenuItemRequestSchema,
   updateOrderingSettingsRequestSchema,
   updateOrderStatusRequestSchema
@@ -249,6 +251,22 @@ export const createCustomerRoute = createRoute({
   }
 });
 
+export const updateCustomerRoute = createRoute({
+  operationId: "updateCustomer",
+  tags: ["customers"],
+  method: "patch",
+  path: "/customers/{id}",
+  request: {
+    params: idParamSchema,
+    body: jsonContent(updateCustomerRequestSchema, "Customer update payload")
+  },
+  responses: {
+    200: jsonContent(customerResponseSchema, "Updated customer"),
+    400: jsonContent(errorResponseSchema, "Validation error"),
+    404: jsonContent(errorResponseSchema, "Customer not found")
+  }
+});
+
 export const getSettingsRoute = createRoute({
   operationId: "getOrderingSettings",
   tags: ["settings"],
@@ -323,6 +341,16 @@ function toCreateCustomerInput(
   };
 }
 
+function toUpdateCustomerInput(
+  input: z.infer<typeof updateCustomerRequestSchema>
+): UpdateCustomerInput {
+  return {
+    ...(input.name !== undefined ? { name: input.name } : {}),
+    ...(input.email !== undefined ? { email: input.email } : {}),
+    ...(input.phone !== undefined ? { phone: input.phone } : {})
+  };
+}
+
 function toUpdateMenuItemInput(
   input: z.infer<typeof updateMenuItemRequestSchema>
 ): UpdateMenuItemInput {
@@ -390,6 +418,12 @@ export const handlers = {
     store: RestaurantStore,
     input: z.infer<typeof createCustomerRequestSchema>
   ) => serializeCustomer(await store.createCustomer(toCreateCustomerInput(input))),
+  updateCustomer: async (
+    store: RestaurantStore,
+    id: string,
+    input: z.infer<typeof updateCustomerRequestSchema>
+  ) =>
+    serializeCustomer(await store.updateCustomer(id, toUpdateCustomerInput(input))),
   updateMenuItem: async (
     store: RestaurantStore,
     id: string,

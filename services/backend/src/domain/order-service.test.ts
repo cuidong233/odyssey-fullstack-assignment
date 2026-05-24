@@ -17,6 +17,7 @@ import {
   type OrderWithItems,
   type PersistOrderInput,
   type RestaurantStore,
+  type UpdateCustomerInput,
   type UpdateMenuItemInput,
   updateOrderStatus
 } from "./order-service";
@@ -108,6 +109,15 @@ class TestStore implements RestaurantStore {
       updatedAt: now
     };
     this.customers.push(customer);
+    return customer;
+  }
+
+  async updateCustomer(id: string, input: UpdateCustomerInput): Promise<Customer> {
+    const customer = this.customers.find((candidate) => candidate.id === id);
+    if (!customer) {
+      throw new Error("Missing test customer");
+    }
+    Object.assign(customer, input, { updatedAt: now });
     return customer;
   }
 

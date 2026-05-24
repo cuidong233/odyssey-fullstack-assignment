@@ -15,6 +15,7 @@ import type {
   OrderWithItems,
   PersistOrderInput,
   RestaurantStore,
+  UpdateCustomerInput,
   UpdateMenuItemInput
 } from "../domain/order-service";
 import { handlers } from "./routes";
@@ -65,6 +66,32 @@ describe("route handlers", () => {
         name: "New Guest",
         email: null,
         phone: "555-0199"
+      }
+    });
+  });
+
+  it("updates customer contact details through the store layer", async () => {
+    const calls: Array<{ name: string; filters: unknown }> = [];
+    const store = createRecordingStore(calls);
+
+    const customer = await handlers.updateCustomer(store, "customer-1", {
+      email: "updated@example.com",
+      phone: null
+    });
+
+    expect(customer).toMatchObject({
+      id: "customer-1",
+      email: "updated@example.com",
+      phone: null
+    });
+    expect(calls).toContainEqual({
+      name: "updateCustomer",
+      filters: {
+        id: "customer-1",
+        input: {
+          email: "updated@example.com",
+          phone: null
+        }
       }
     });
   });
@@ -164,6 +191,14 @@ function createRecordingStore(
         name: input.name,
         email: input.email ?? null,
         phone: input.phone ?? null
+      };
+    },
+    async updateCustomer(id: string, input: UpdateCustomerInput): Promise<Customer> {
+      calls.push({ name: "updateCustomer", filters: { id, input } });
+      return {
+        ...customer,
+        ...input,
+        updatedAt: now
       };
     },
     async listMenuCategories(): Promise<MenuCategory[]> {

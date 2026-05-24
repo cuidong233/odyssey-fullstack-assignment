@@ -23,6 +23,7 @@ import type {
   OrderWithItems,
   PersistOrderInput,
   RestaurantStore,
+  UpdateCustomerInput,
   UpdateMenuItemInput
 } from "../domain/order-service";
 
@@ -119,6 +120,21 @@ export class DrizzleRestaurantStore implements RestaurantStore {
       .returning();
     if (!customer) {
       throw new Error("Failed to create customer.");
+    }
+    return customer;
+  }
+
+  async updateCustomer(
+    id: string,
+    input: UpdateCustomerInput
+  ): Promise<Customer> {
+    const [customer] = await this.db
+      .update(customers)
+      .set({ ...input, updatedAt: new Date() })
+      .where(eq(customers.id, id))
+      .returning();
+    if (!customer) {
+      throw new DomainError("CUSTOMER_NOT_FOUND", "Customer was not found.", 404);
     }
     return customer;
   }

@@ -19,6 +19,7 @@ import {
   listMenuRoute,
   listOrdersRoute,
   toErrorResponse,
+  updateCustomerRoute,
   updateMenuItemRoute,
   updateOrderStatusRoute,
   updateSettingsRoute,
@@ -191,6 +192,17 @@ export function createApp(options: CreateAppOptions = {}) {
         c.req.valid("json") as Parameters<typeof handlers.createCustomer>[1]
       ),
       201
+    )
+  );
+
+  app.openapi(updateCustomerRoute, async (c) =>
+    c.json(
+      await handlers.updateCustomer(
+        c.get("store"),
+        c.req.valid("param").id,
+        c.req.valid("json") as Parameters<typeof handlers.updateCustomer>[2]
+      ),
+      200
     )
   );
 

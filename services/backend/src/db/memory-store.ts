@@ -15,6 +15,7 @@ import type {
   OrderWithItems,
   PersistOrderInput,
   RestaurantStore,
+  UpdateCustomerInput,
   UpdateMenuItemInput
 } from "../domain/order-service";
 import { DomainError } from "../domain/errors";
@@ -171,6 +172,16 @@ class MemoryRestaurantStore implements RestaurantStore {
       updatedAt: now
     };
     this.customers.unshift(customer);
+    return customer;
+  }
+
+  async updateCustomer(id: string, input: UpdateCustomerInput): Promise<Customer> {
+    const customer = this.customers.find((candidate) => candidate.id === id);
+    if (!customer) {
+      throw new DomainError("CUSTOMER_NOT_FOUND", "Customer was not found.", 404);
+    }
+
+    Object.assign(customer, input, { updatedAt: new Date() });
     return customer;
   }
 

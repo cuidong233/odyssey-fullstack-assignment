@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
-import { BadgeDollarSign, ChefHat, Clock3, Plus, Search, ShoppingBag, SlidersHorizontal, Trash2, Upload, X } from "lucide-react-native";
+import { BadgeDollarSign, ChefHat, Clock3, Edit3, Plus, Search, ShoppingBag, SlidersHorizontal, Trash2, Upload, X } from "lucide-react-native";
 import {
+  type Customer,
   type MenuItem,
   type OrderStatus,
   type BusinessSettings,
@@ -17,7 +18,7 @@ import {
 import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SkeletonRows, Toggle } from "@repo/shared/ui";
 import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel } from "../components/restaurantWidgets";
-import { useCreateRestaurantOrder, useCustomerCreator, useMenuItemCreator, useMenuItemDeletion, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
+import { useCreateRestaurantOrder, useCustomerCreator, useCustomerEditor, useMenuItemCreator, useMenuItemDeletion, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
 import { buildBusinessHoursJson, businessDayLabel, customerNameText, orderCodeText, parseBusinessHoursRows, type BusinessHoursRow } from "../lib/businessText";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
@@ -186,6 +187,36 @@ export function CrmScreen() {
   const customers = useListCustomers();
   const isPreview = isApiPreview(customers);
   const customerRows = customers.data ?? (isPreview ? demoCustomers : []);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>();
+  const [customerDraft, setCustomerDraft] = useState(emptyCustomerDraft);
+  const updateCustomer = useCustomerEditor({
+    onSaved: () => {
+      setEditingCustomer(undefined);
+      setCustomerDraft(emptyCustomerDraft);
+    }
+  });
+
+  function startEditingCustomer(customer: Customer) {
+    setEditingCustomer(customer);
+    setCustomerDraft(customerToDraft(customer));
+  }
+
+  function updateCustomerDraft(input: Partial<CustomerDraft>) {
+    setCustomerDraft((current) => ({ ...current, ...input }));
+  }
+
+  function closeCustomerEditor() {
+    setEditingCustomer(undefined);
+    setCustomerDraft(emptyCustomerDraft);
+  }
+
+  function saveCustomer() {
+    if (!editingCustomer || !customerDraft.name.trim()) {
+      return;
+    }
+
+    updateCustomer.saveCustomer(editingCustomer.id, customerDraft);
+  }
 
   return (
     <View style={styles.screenStack}>
@@ -198,10 +229,43 @@ export function CrmScreen() {
         <SectionTitle eyebrow={t.crm.customers} title={t.crm.stats} />
         <View style={styles.customerList}>
           {customerRows.map((customer) => (
-            <CustomerRow key={customer.id} customer={customer} />
+            <CustomerRow
+              key={customer.id}
+              action={
+                <Button
+                  disabled={isPreview}
+                  icon={<Edit3 size={16} color={c.inkMuted} />}
+                  onPress={() => startEditingCustomer(customer)}
+                  variant="secondary"
+                >
+                  {t.crm.edit}
+                </Button>
+              }
+              customer={customer}
+            />
           ))}
         </View>
       </Panel>
+      <AppModal title={t.crm.edit} visible={Boolean(editingCustomer)} onClose={closeCustomerEditor}>
+        <View style={{ gap: s[4] }}>
+          <SectionTitle eyebrow={t.create.customer} title={customerDraft.name.trim() || t.create.name} />
+          <View style={styles.inlineFieldGrid}>
+            <Field label={t.create.name} value={customerDraft.name} onChangeText={(name) => updateCustomerDraft({ name })} />
+            <Field label={t.create.email} value={customerDraft.email} onChangeText={(email) => updateCustomerDraft({ email })} />
+            <Field label={t.create.phone} value={customerDraft.phone} onChangeText={(phone) => updateCustomerDraft({ phone })} />
+          </View>
+          {!customerDraft.name.trim() ? <Text style={[type.muted, { color: c.warning }]}>{t.crm.validation}</Text> : null}
+          {updateCustomer.error ? <Text style={[type.muted, { color: c.danger }]}>{updateCustomer.error.message}</Text> : null}
+          <View style={styles.actionStrip}>
+            <Button disabled={isPreview || !customerDraft.name.trim()} loading={updateCustomer.isPending} onPress={saveCustomer}>
+              {t.crm.save}
+            </Button>
+            <Button onPress={closeCustomerEditor} variant="secondary">
+              {t.common.cancel}
+            </Button>
+          </View>
+        </View>
+      </AppModal>
     </View>
   );
 }
@@ -748,6 +812,22 @@ type SettingsDraft = {
   taxRatePercent: string;
   hours: BusinessHoursRow[];
 };
+
+type CustomerDraft = {
+  name: string;
+  email: string;
+  phone: string;
+};
+
+const emptyCustomerDraft: CustomerDraft = { name: "", email: "", phone: "" };
+
+function customerToDraft(customer: Customer): CustomerDraft {
+  return {
+    name: customer.name,
+    email: customer.email ?? "",
+    phone: customer.phone ?? ""
+  };
+}
 
 function settingsToDraft(settings: BusinessSettings): SettingsDraft {
   return {
