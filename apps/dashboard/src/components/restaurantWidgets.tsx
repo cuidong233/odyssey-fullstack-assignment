@@ -278,13 +278,13 @@ export function CustomerRow({ customer, action }: { customer: Customer; action?:
             {customer.email ?? t.common.noEmail} · {customer.phone ?? t.common.noPhone}
           </Text>
         </View>
+        {action}
       </View>
       <View style={[styles.customerMetrics, compact && styles.customerMetricsCompact]}>
         <SettingMetric label={t.common.orders} value={`${customer.orderCount}`} />
         <SettingMetric label={t.crm.spend} value={formatCurrency(customer.spendCents, intlLocale(locale))} />
         <SettingMetric label={t.crm.lastOrder} value={customer.recentOrders[0] ? formatLocalizedDateTime(customer.recentOrders[0].createdAt, locale) : t.common.none} />
       </View>
-      {action}
     </View>
   );
 }
