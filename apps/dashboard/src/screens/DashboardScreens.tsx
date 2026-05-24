@@ -40,7 +40,7 @@ export function HomeScreen({ rangeControl, timeRange, onCreateOrder }: { rangeCo
 
   return (
     <View style={styles.screenStack}>
-      <View style={[layout.between, compact && styles.headerCompact]}>
+      <View style={[layout.between, styles.headerLayer, compact && styles.headerCompact]}>
         <View>
           <Text style={type.eyebrow}>{t.home.eyebrow}</Text>
           <Text style={type.h1}>{t.home.title}</Text>
@@ -107,7 +107,7 @@ export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { range
 
   return (
     <View style={styles.screenStack}>
-      <View style={[layout.between, compact && styles.headerCompact]}>
+      <View style={[layout.between, styles.headerLayer, compact && styles.headerCompact]}>
         <View>
           <Text style={type.eyebrow}>{t.orders.eyebrow}</Text>
           <Text style={type.h1}>{t.orders.title}</Text>
@@ -696,6 +696,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: s[3]
+  },
+  headerLayer: {
+    position: "relative",
+    zIndex: 20
   },
   inlineFieldGrid: {
     flexDirection: "column",
