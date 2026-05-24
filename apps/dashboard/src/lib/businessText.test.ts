@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { businessHoursText, customerNameText, orderCodeText } from "./businessText";
+import { buildBusinessHoursJson, businessHoursText, customerNameText, orderCodeText, parseBusinessHoursRows } from "./businessText";
 
 describe("localized business text", () => {
   it("keeps source business labels for English", () => {
@@ -29,6 +29,19 @@ describe("localized business text", () => {
     });
 
     expect(businessHoursText(hours, "en")).toBe("Mon 10:00-21:00");
+  });
+
+  it("normalizes opening hours for the settings editor", () => {
+    const rows = parseBusinessHoursRows("Mon-Sun 11:00-22:00");
+
+    expect(rows).toHaveLength(7);
+    expect(rows[0]).toMatchObject({ day: "monday", opensAt: "11:00", closesAt: "22:00", closed: false });
+
+    const json = buildBusinessHoursJson([{ ...rows[0]!, closed: true }, ...rows.slice(1)]);
+    expect(JSON.parse(json)).toMatchObject({
+      monday: [],
+      tuesday: ["11:00", "22:00"]
+    });
   });
 
   it("falls back to source text for new backend data", () => {

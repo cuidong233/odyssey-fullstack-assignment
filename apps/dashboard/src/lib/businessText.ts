@@ -38,8 +38,23 @@ const dayLabels = {
 
 const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
 
+export type BusinessDay = (typeof dayOrder)[number];
+
+export type BusinessHoursRow = {
+  day: BusinessDay;
+  opensAt: string;
+  closesAt: string;
+  closed: boolean;
+};
+
+export const businessDayOrder = dayOrder;
+
 export function customerNameText(name: string, locale: Locale) {
   return locale === "zh" ? zhCustomerNames[name] ?? name : name;
+}
+
+export function businessDayLabel(day: BusinessDay, locale: Locale) {
+  return dayLabels[locale][day];
 }
 
 export function businessHoursText(hours: string, locale: Locale) {
@@ -75,6 +90,73 @@ function formatBusinessHoursJson(hours: string, locale: Locale) {
   } catch {
     return undefined;
   }
+}
+
+export function parseBusinessHoursRows(hours: string): BusinessHoursRow[] {
+  const defaults = businessDayOrder.map((day) => ({
+    day,
+    opensAt: "11:00",
+    closesAt: "22:00",
+    closed: false
+  }));
+
+  try {
+    const parsed = JSON.parse(hours) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return parseCompactHours(hours) ?? defaults;
+    }
+
+    return businessDayOrder.map((day) => {
+      const ranges = (parsed as Record<string, unknown>)[day];
+      const range = readFirstRange(ranges);
+      if (!range) {
+        return { day, opensAt: "11:00", closesAt: "22:00", closed: true };
+      }
+      return { day, opensAt: range[0], closesAt: range[1], closed: false };
+    });
+  } catch {
+    return parseCompactHours(hours) ?? defaults;
+  }
+}
+
+export function buildBusinessHoursJson(rows: BusinessHoursRow[]) {
+  return JSON.stringify(
+    Object.fromEntries(
+      rows.map((row) => [
+        row.day,
+        row.closed ? [] : [row.opensAt.trim() || "11:00", row.closesAt.trim() || "22:00"]
+      ])
+    )
+  );
+}
+
+function parseCompactHours(hours: string): BusinessHoursRow[] | undefined {
+  const match = hours.match(/^(?:Mon-Sun|Monday-Sunday)\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$/i);
+  if (!match) {
+    return undefined;
+  }
+  const opensAt = match[1];
+  const closesAt = match[2];
+  if (!opensAt || !closesAt) {
+    return undefined;
+  }
+  return businessDayOrder.map((day) => ({
+    day,
+    opensAt,
+    closesAt,
+    closed: false
+  }));
+}
+
+function readFirstRange(ranges: unknown): [string, string] | undefined {
+  if (!Array.isArray(ranges) || ranges.length === 0) {
+    return undefined;
+  }
+  const firstRange = typeof ranges[0] === "string" ? ranges : ranges[0];
+  if (!Array.isArray(firstRange) || firstRange.length < 2 || typeof firstRange[0] !== "string" || typeof firstRange[1] !== "string") {
+    return undefined;
+  }
+  return [firstRange[0], firstRange[1]];
 }
 
 export function orderCodeText(id: string) {

@@ -1,9 +1,10 @@
-import { useMemo, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { BadgeDollarSign, ChefHat, Clock3, Plus, Search, ShoppingBag, SlidersHorizontal, Trash2, Upload, X } from "lucide-react-native";
 import {
   type MenuItem,
   type OrderStatus,
+  type BusinessSettings,
   type TimeRange,
   orderStatuses,
   useGetOrderingSettings,
@@ -15,9 +16,9 @@ import {
 } from "@repo/api-client";
 import { formatCurrency } from "@repo/shared";
 import { AppModal, Badge, Button, Chip, Field, Notice, Panel, SectionTitle, SkeletonRows, Toggle } from "@repo/shared/ui";
-import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel, SettingMetric } from "../components/restaurantWidgets";
+import { CustomerRow, Kpi, OrderInspector, OrderStatusMix, OrderTable, OrderTrendChart, PopularItemsPanel } from "../components/restaurantWidgets";
 import { useCreateRestaurantOrder, useCustomerCreator, useMenuItemCreator, useMenuItemDeletion, useMenuItemEditor, useOrderingSettingsEditor, useOrderStatusAction } from "../hooks/restaurantOperations";
-import { businessHoursText, customerNameText, orderCodeText } from "../lib/businessText";
+import { buildBusinessHoursJson, businessDayLabel, customerNameText, orderCodeText, parseBusinessHoursRows, type BusinessHoursRow } from "../lib/businessText";
 import { intlLocale, statusText, useI18n } from "../lib/i18n";
 import { menuCategoryNameText, menuItemDescriptionText, menuItemNameText } from "../lib/menuText";
 import { c, layout, r, s, type } from "../lib/styles";
@@ -353,10 +354,37 @@ export function MenuScreen() {
 
 export function SettingsScreen() {
   const { locale, t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 820;
   const settings = useGetOrderingSettings();
   const update = useOrderingSettingsEditor();
   const isPreview = isApiPreview(settings);
   const data = settings.data ?? (isPreview ? demoSettings : undefined);
+  const [draft, setDraft] = useState<SettingsDraft | undefined>(() => (data ? settingsToDraft(data) : undefined));
+
+  useEffect(() => {
+    if (data) {
+      setDraft(settingsToDraft(data));
+    }
+  }, [data]);
+
+  const validation = draft ? validateSettingsDraft(draft) : undefined;
+  const savedDraft = data ? settingsToDraft(data) : undefined;
+  const isDirty = Boolean(draft && savedDraft && settingsDraftKey(draft) !== settingsDraftKey(savedDraft));
+
+  function saveDraft() {
+    if (!draft || !validation?.valid || isPreview) {
+      return;
+    }
+
+    update.saveSettings({
+      autoAccept: draft.autoAccept,
+      serviceAvailable: draft.serviceAvailable,
+      prepTimeMinutes: validation.prepTimeMinutes,
+      taxRateBps: validation.taxRateBps,
+      openingHoursJson: buildBusinessHoursJson(draft.hours)
+    });
+  }
 
   return (
     <View style={styles.screenStack}>
@@ -367,13 +395,71 @@ export function SettingsScreen() {
       <Panel>
         {isPreview ? <ApiPreviewNotice /> : null}
         <SectionTitle eyebrow={t.settings.ordering} title={t.settings.rules} />
-        {data ? (
-          <View style={styles.settingsGrid}>
-            <Toggle label={t.settings.open} value={data.serviceAvailable} onValueChange={(serviceAvailable) => update.saveSettings({ serviceAvailable })} />
-            <Toggle label={t.settings.autoAccept} value={data.autoAccept} onValueChange={(autoAccept) => update.saveSettings({ autoAccept })} />
-            <SettingMetric label={t.settings.prep} value={t.common.minutes(data.prepTimeMinutes)} />
-            <SettingMetric label={t.settings.tax} value={`${(data.taxRateBps / 100).toFixed(2)}%`} />
-            <SettingMetric label={t.settings.hours} value={businessHoursText(data.openingHoursJson, locale)} />
+        <Text style={[type.muted, styles.settingsLead]}>{t.settings.orderingHint}</Text>
+        {draft ? (
+          <View style={styles.settingsForm}>
+            <View style={[styles.settingsTwoColumn, compact && styles.settingsTwoColumnCompact]}>
+              <View style={styles.settingsSection}>
+                <View style={styles.settingControl}>
+                  <View style={styles.settingControlCopy}>
+                    <Text style={[type.body, styles.strongText]}>{t.settings.open}</Text>
+                    <Text style={type.tiny}>{draft.serviceAvailable ? t.service.open : t.settings.closed}</Text>
+                  </View>
+                  <SmallSwitch value={draft.serviceAvailable} onValueChange={(serviceAvailable) => setDraft({ ...draft, serviceAvailable })} />
+                </View>
+                <View style={styles.settingControl}>
+                  <View style={styles.settingControlCopy}>
+                    <Text style={[type.body, styles.strongText]}>{t.settings.autoAccept}</Text>
+                    <Text style={type.tiny}>{t.settings.autoAcceptHint}</Text>
+                  </View>
+                  <SmallSwitch value={draft.autoAccept} onValueChange={(autoAccept) => setDraft({ ...draft, autoAccept })} />
+                </View>
+              </View>
+              <View style={styles.settingsSection}>
+                <Text style={type.eyebrow}>{t.settings.pricing}</Text>
+                <View style={[styles.settingsFieldsRow, compact && styles.settingsFieldsRowCompact]}>
+                  <View style={styles.settingsField}>
+                    <Field keyboardType="numeric" label={t.settings.prep} onChangeText={(prepTimeMinutes) => setDraft({ ...draft, prepTimeMinutes })} value={draft.prepTimeMinutes} />
+                  </View>
+                  <View style={styles.settingsField}>
+                    <Field keyboardType="numeric" label={t.settings.tax} onChangeText={(taxRatePercent) => setDraft({ ...draft, taxRatePercent })} value={draft.taxRatePercent} />
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.settingsSection}>
+              <Text style={type.eyebrow}>{t.settings.hours}</Text>
+              <View style={styles.hoursList}>
+                {draft.hours.map((row) => (
+                  <BusinessHoursEditorRow
+                    key={row.day}
+                    compact={compact}
+                    label={businessDayLabel(row.day, locale)}
+                    row={row}
+                    onChange={(nextRow) =>
+                      setDraft({
+                        ...draft,
+                        hours: draft.hours.map((item) => (item.day === nextRow.day ? nextRow : item))
+                      })
+                    }
+                  />
+                ))}
+              </View>
+            </View>
+
+            {!validation?.valid ? <Notice title={t.library.error} tone="danger">{t.settings.validation}</Notice> : null}
+            {update.error ? <Notice title={t.library.error} tone="danger">{update.error.message}</Notice> : null}
+            {update.isSuccess && !isDirty ? <Notice title={t.library.success} tone="success">{t.settings.saved}</Notice> : null}
+
+            <View style={styles.settingsActions}>
+              <Button disabled={!isDirty || !validation?.valid || isPreview} loading={update.isPending} onPress={saveDraft}>
+                {t.settings.save}
+              </Button>
+              <Button disabled={!isDirty || !savedDraft} onPress={() => savedDraft && setDraft(savedDraft)} variant="secondary">
+                {t.settings.reset}
+              </Button>
+            </View>
           </View>
         ) : (
           <SkeletonRows />
@@ -624,6 +710,101 @@ function MenuImagePicker({
   );
 }
 
+type SettingsDraft = {
+  serviceAvailable: boolean;
+  autoAccept: boolean;
+  prepTimeMinutes: string;
+  taxRatePercent: string;
+  hours: BusinessHoursRow[];
+};
+
+function settingsToDraft(settings: BusinessSettings): SettingsDraft {
+  return {
+    serviceAvailable: settings.serviceAvailable,
+    autoAccept: settings.autoAccept,
+    prepTimeMinutes: String(settings.prepTimeMinutes),
+    taxRatePercent: (settings.taxRateBps / 100).toFixed(2),
+    hours: parseBusinessHoursRows(settings.openingHoursJson)
+  };
+}
+
+function settingsDraftKey(draft: SettingsDraft) {
+  return JSON.stringify({
+    serviceAvailable: draft.serviceAvailable,
+    autoAccept: draft.autoAccept,
+    prepTimeMinutes: Number.parseInt(draft.prepTimeMinutes, 10),
+    taxRatePercent: Number.parseFloat(draft.taxRatePercent),
+    openingHoursJson: buildBusinessHoursJson(draft.hours)
+  });
+}
+
+function validateSettingsDraft(draft: SettingsDraft):
+  | { valid: true; prepTimeMinutes: number; taxRateBps: number }
+  | { valid: false } {
+  const prepTimeMinutes = Number.parseInt(draft.prepTimeMinutes, 10);
+  const taxRatePercent = Number.parseFloat(draft.taxRatePercent);
+  const taxRateBps = Math.round(taxRatePercent * 100);
+  const hasValidHours = draft.hours.every((row) => row.closed || (isTimeValue(row.opensAt) && isTimeValue(row.closesAt)));
+
+  if (!Number.isInteger(prepTimeMinutes) || prepTimeMinutes < 1 || prepTimeMinutes > 240 || !Number.isFinite(taxRatePercent) || taxRateBps < 0 || taxRateBps > 2500 || !hasValidHours) {
+    return { valid: false };
+  }
+
+  return { valid: true, prepTimeMinutes, taxRateBps };
+}
+
+function isTimeValue(value: string) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value.trim());
+}
+
+function SmallSwitch({ value, onValueChange }: { value: boolean; onValueChange: (value: boolean) => void }) {
+  return (
+    <Pressable accessibilityRole="switch" accessibilityState={{ checked: value }} onPress={() => onValueChange(!value)} style={[styles.smallSwitchTrack, value && styles.smallSwitchTrackActive]}>
+      <View style={[styles.smallSwitchThumb, value && styles.smallSwitchThumbActive]} />
+    </Pressable>
+  );
+}
+
+function BusinessHoursEditorRow({
+  compact,
+  label,
+  row,
+  onChange
+}: {
+  compact: boolean;
+  label: string;
+  row: BusinessHoursRow;
+  onChange: (row: BusinessHoursRow) => void;
+}) {
+  return (
+    <View style={[styles.hoursRow, compact && styles.hoursRowCompact]}>
+      <View style={styles.hoursDay}>
+        <Text style={[type.body, styles.strongText]}>{label}</Text>
+        <SmallSwitch value={!row.closed} onValueChange={(open) => onChange({ ...row, closed: !open })} />
+      </View>
+      <View style={[styles.hoursInputs, compact && styles.hoursInputsCompact, row.closed && styles.hoursInputsDisabled]}>
+        <TextInput
+          editable={!row.closed}
+          onChangeText={(opensAt) => onChange({ ...row, opensAt })}
+          placeholder="11:00"
+          placeholderTextColor={c.inkSubtle}
+          style={styles.timeInput}
+          value={row.opensAt}
+        />
+        <Text style={type.tiny}>-</Text>
+        <TextInput
+          editable={!row.closed}
+          onChangeText={(closesAt) => onChange({ ...row, closesAt })}
+          placeholder="22:00"
+          placeholderTextColor={c.inkSubtle}
+          style={styles.timeInput}
+          value={row.closesAt}
+        />
+      </View>
+    </View>
+  );
+}
+
 function isApiPreview(query: { data?: unknown; isError: boolean }) {
   return query.isError && query.data === undefined;
 }
@@ -700,6 +881,45 @@ const styles = StyleSheet.create({
   headerLayer: {
     position: "relative",
     zIndex: 20
+  },
+  hoursDay: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    minWidth: 150
+  },
+  hoursInputs: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: s[3],
+    justifyContent: "flex-end"
+  },
+  hoursInputsCompact: {
+    justifyContent: "space-between",
+    width: "100%"
+  },
+  hoursInputsDisabled: {
+    opacity: 0.42
+  },
+  hoursList: {
+    gap: s[2]
+  },
+  hoursRow: {
+    alignItems: "center",
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: s[4],
+    justifyContent: "space-between",
+    minHeight: 54,
+    paddingHorizontal: s[4],
+    paddingVertical: s[3]
+  },
+  hoursRowCompact: {
+    alignItems: "stretch",
+    flexDirection: "column"
   },
   inlineFieldGrid: {
     flexDirection: "column",
@@ -816,9 +1036,57 @@ const styles = StyleSheet.create({
   screenStack: {
     gap: s[6]
   },
-  settingsGrid: {
+  settingControl: {
+    alignItems: "center",
+    backgroundColor: c.surfaceMuted,
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: s[4],
+    justifyContent: "space-between",
+    minHeight: 70,
+    padding: s[4]
+  },
+  settingControlCopy: {
+    flex: 1,
+    gap: s[1]
+  },
+  settingsActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: s[3]
+  },
+  settingsField: {
+    flex: 1,
+    minWidth: 160
+  },
+  settingsFieldsRow: {
+    flexDirection: "row",
+    gap: s[3]
+  },
+  settingsFieldsRowCompact: {
+    flexDirection: "column"
+  },
+  settingsForm: {
     gap: s[3],
     marginTop: s[5]
+  },
+  settingsLead: {
+    marginTop: s[2],
+    maxWidth: 760
+  },
+  settingsSection: {
+    flex: 1,
+    gap: s[3]
+  },
+  settingsTwoColumn: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    gap: s[4]
+  },
+  settingsTwoColumnCompact: {
+    flexDirection: "column"
   },
   sideStack: {
     flex: 0.78,
@@ -838,6 +1106,30 @@ const styles = StyleSheet.create({
   spacingScale: {
     gap: s[2],
     marginTop: s[5]
+  },
+  smallSwitchThumb: {
+    backgroundColor: c.surface,
+    borderRadius: r.full,
+    height: 18,
+    transform: [{ translateX: 0 }],
+    width: 18
+  },
+  smallSwitchThumbActive: {
+    transform: [{ translateX: 20 }]
+  },
+  smallSwitchTrack: {
+    backgroundColor: c.lineStrong,
+    borderRadius: r.full,
+    height: 24,
+    justifyContent: "center",
+    padding: 3,
+    width: 48
+  },
+  smallSwitchTrackActive: {
+    backgroundColor: c.success
+  },
+  strongText: {
+    fontWeight: "700"
   },
   swatch: {
     borderColor: c.line,
@@ -886,6 +1178,19 @@ const styles = StyleSheet.create({
   typeScale: {
     gap: s[3],
     marginTop: s[5]
+  },
+  timeInput: {
+    backgroundColor: c.surface,
+    borderColor: c.line,
+    borderRadius: r.sm,
+    borderWidth: 1,
+    color: c.ink,
+    fontSize: 14,
+    fontWeight: "700",
+    height: 38,
+    paddingHorizontal: s[3],
+    textAlign: "center",
+    width: 92
   },
   visualizationGrid: {
     alignItems: "stretch",
