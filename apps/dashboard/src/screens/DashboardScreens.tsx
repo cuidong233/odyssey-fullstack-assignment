@@ -188,7 +188,14 @@ export function CrmScreen() {
   const isPreview = isApiPreview(customers);
   const customerRows = customers.data ?? (isPreview ? demoCustomers : []);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>();
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
   const [customerDraft, setCustomerDraft] = useState(emptyCustomerDraft);
+  const createCustomer = useCustomerCreator({
+    onCreated: () => {
+      setCreatingCustomer(false);
+      setCustomerDraft(emptyCustomerDraft);
+    }
+  });
   const updateCustomer = useCustomerEditor({
     onSaved: () => {
       setEditingCustomer(undefined);
@@ -196,7 +203,14 @@ export function CrmScreen() {
     }
   });
 
+  function startCreatingCustomer() {
+    setEditingCustomer(undefined);
+    setCreatingCustomer(true);
+    setCustomerDraft(emptyCustomerDraft);
+  }
+
   function startEditingCustomer(customer: Customer) {
+    setCreatingCustomer(false);
     setEditingCustomer(customer);
     setCustomerDraft(customerToDraft(customer));
   }
@@ -206,16 +220,24 @@ export function CrmScreen() {
   }
 
   function closeCustomerEditor() {
+    setCreatingCustomer(false);
     setEditingCustomer(undefined);
     setCustomerDraft(emptyCustomerDraft);
   }
 
   function saveCustomer() {
-    if (!editingCustomer || !customerDraft.name.trim()) {
+    if (!customerDraft.name.trim()) {
       return;
     }
 
-    updateCustomer.saveCustomer(editingCustomer.id, customerDraft);
+    if (editingCustomer) {
+      updateCustomer.saveCustomer(editingCustomer.id, customerDraft);
+      return;
+    }
+
+    if (creatingCustomer) {
+      createCustomer.createCustomer(customerDraft);
+    }
   }
 
   return (
@@ -226,7 +248,15 @@ export function CrmScreen() {
       </View>
       <Panel>
         {isPreview ? <ApiPreviewNotice /> : null}
-        <SectionTitle eyebrow={t.crm.customers} title={t.crm.stats} />
+        <SectionTitle
+          action={
+            <Button disabled={isPreview} icon={<Plus size={16} color={c.inkMuted} />} onPress={startCreatingCustomer} variant="secondary">
+              {t.crm.add}
+            </Button>
+          }
+          eyebrow={t.crm.customers}
+          title={t.crm.stats}
+        />
         <View style={styles.customerList}>
           {customerRows.map((customer) => (
             <CustomerRow
@@ -246,7 +276,7 @@ export function CrmScreen() {
           ))}
         </View>
       </Panel>
-      <AppModal title={t.crm.edit} visible={Boolean(editingCustomer)} onClose={closeCustomerEditor}>
+      <AppModal title={editingCustomer ? t.crm.edit : t.crm.add} visible={Boolean(editingCustomer) || creatingCustomer} onClose={closeCustomerEditor}>
         <View style={{ gap: s[4] }}>
           <SectionTitle eyebrow={t.create.customer} title={customerDraft.name.trim() || t.create.name} />
           <View style={styles.inlineFieldGrid}>
@@ -255,9 +285,10 @@ export function CrmScreen() {
             <Field label={t.create.phone} value={customerDraft.phone} onChangeText={(phone) => updateCustomerDraft({ phone })} />
           </View>
           {!customerDraft.name.trim() ? <Text style={[type.muted, { color: c.warning }]}>{t.crm.validation}</Text> : null}
+          {createCustomer.error ? <Text style={[type.muted, { color: c.danger }]}>{createCustomer.error.message}</Text> : null}
           {updateCustomer.error ? <Text style={[type.muted, { color: c.danger }]}>{updateCustomer.error.message}</Text> : null}
           <View style={styles.actionStrip}>
-            <Button disabled={isPreview || !customerDraft.name.trim()} loading={updateCustomer.isPending} onPress={saveCustomer}>
+            <Button disabled={isPreview || !customerDraft.name.trim()} loading={createCustomer.isPending || updateCustomer.isPending} onPress={saveCustomer}>
               {t.crm.save}
             </Button>
             <Button onPress={closeCustomerEditor} variant="secondary">
