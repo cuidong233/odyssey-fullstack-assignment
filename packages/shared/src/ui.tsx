@@ -47,7 +47,7 @@ const toneMap: Record<Tone, { bg: string; fg: string; border: string }> = {
   muted: { bg: c.surfaceMuted, fg: c.inkMuted, border: c.line }
 };
 
-export function Panel({ children, style }: { children: ReactNode; style?: object }) {
+export function Panel({ children, style }: { children: ReactNode; style?: object | undefined }) {
   return <View style={[ui.panel, style]}>{children}</View>;
 }
 

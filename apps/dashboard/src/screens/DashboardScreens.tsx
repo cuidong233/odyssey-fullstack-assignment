@@ -140,7 +140,7 @@ export function OrdersScreen({ rangeControl, timeRange, onCreateOrder }: { range
 
       <Panel>
         {isPreview ? <ApiPreviewNotice /> : null}
-        <View style={[layout.between, { marginBottom: s[5] }]}>
+        <View style={[styles.filtersBar, compact && styles.filtersBarCompact]}>
           <View style={styles.chipRow}>
             <Chip active={filter === "all"} onPress={() => setFilter("all")}>
               {t.orders.all}
@@ -208,6 +208,8 @@ export function CrmScreen() {
 
 export function MenuScreen() {
   const { locale, t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 760;
   const items = useListMenuItems();
   const categories = useListMenuCategories();
   const isPreview = isApiPreview(items) || isApiPreview(categories);
@@ -288,18 +290,20 @@ export function MenuScreen() {
             const categoryName = categoryRows.find((entry) => entry.id === item.categoryId)?.name;
             const category = categoryName ? menuCategoryNameText(categoryName, locale) : t.common.menuFallback;
             return (
-              <Pressable key={item.id} onPress={() => startEditing(item)} style={styles.menuRow}>
+              <Pressable key={item.id} onPress={() => startEditing(item)} style={[styles.menuRow, compact && styles.menuRowCompact]}>
                 <Image
                   accessibilityLabel=""
                   source={{ uri: resolveMenuImageUrl(item.imageUrl) }}
                   style={styles.menuImage}
                 />
-                <View style={{ flex: 1, gap: s[1] }}>
-                  <Text style={type.body}>{menuItemNameText(item.name, locale)}</Text>
+                <View style={styles.menuItemCopy}>
+                  <Text numberOfLines={2} style={type.body}>{menuItemNameText(item.name, locale)}</Text>
                   <Text style={type.tiny}>{category}</Text>
                 </View>
-                <Text style={styles.price}>{formatCurrency(item.priceCents, intlLocale(locale))}</Text>
-                <Badge tone={item.available ? "success" : "danger"}>{item.available ? t.menu.available : t.menu.paused}</Badge>
+                <View style={[styles.menuItemMeta, compact && styles.menuItemMetaCompact]}>
+                  <Text style={styles.price}>{formatCurrency(item.priceCents, intlLocale(locale))}</Text>
+                  <Badge tone={item.available ? "success" : "danger"}>{item.available ? t.menu.available : t.menu.paused}</Badge>
+                </View>
               </Pressable>
             );
           })}
@@ -471,6 +475,8 @@ export function SettingsScreen() {
 
 export function LibraryScreen() {
   const { t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 760;
   return (
     <View style={styles.screenStack}>
       <View>
@@ -478,7 +484,7 @@ export function LibraryScreen() {
         <Text style={type.h1}>{t.library.title}</Text>
       </View>
       <View style={styles.libraryGrid}>
-        <Panel>
+        <Panel style={compact ? styles.libraryPanelCompact : undefined}>
           <SectionTitle eyebrow={t.library.tokens} title={t.library.colorSpacing} />
           <View style={styles.swatchGrid}>
             {[c.ink, c.accent, c.success, c.warning, c.danger, c.info, c.surfaceMuted, c.lineStrong].map((color) => (
@@ -491,7 +497,7 @@ export function LibraryScreen() {
             ))}
           </View>
         </Panel>
-        <Panel>
+        <Panel style={compact ? styles.libraryPanelCompact : undefined}>
           <SectionTitle eyebrow={t.library.typography} title={t.library.typeScale} />
           <View style={styles.typeScale}>
             <Text style={type.h1}>Aa / 34</Text>
@@ -500,14 +506,14 @@ export function LibraryScreen() {
             <Text style={type.tiny}>Aa / 12</Text>
           </View>
         </Panel>
-        <Panel>
+        <Panel style={compact ? styles.libraryPanelCompact : undefined}>
           <SectionTitle eyebrow={t.library.surfaces} title={t.library.elevation} />
           <View style={styles.surfaceStack}>
             <View style={styles.surfaceMuted} />
             <View style={styles.surfaceRaised} />
           </View>
         </Panel>
-        <Panel>
+        <Panel style={compact ? styles.libraryPanelCompact : undefined}>
           <SectionTitle eyebrow={t.library.components} title={t.library.states} />
           <View style={styles.actionStrip}>
             <Button>{t.library.primary}</Button>
@@ -522,7 +528,7 @@ export function LibraryScreen() {
           </View>
           <SkeletonRows count={2} />
         </Panel>
-        <Panel>
+        <Panel style={compact ? styles.libraryPanelCompact : undefined}>
           <SectionTitle eyebrow={t.library.feedback} title={t.library.toast} />
           <Notice title={t.library.success} tone="success">
             {t.library.toastBody}
@@ -903,6 +909,17 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: s[3]
   },
+  filtersBar: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: s[4],
+    justifyContent: "space-between",
+    marginBottom: s[5]
+  },
+  filtersBarCompact: {
+    alignItems: "flex-start",
+    flexDirection: "column"
+  },
   headerLayer: {
     position: "relative",
     zIndex: 20
@@ -966,6 +983,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: s[4]
   },
+  libraryPanelCompact: {
+    width: "100%"
+  },
   menuGrid: {
     gap: s[2],
     marginTop: s[2]
@@ -1007,6 +1027,27 @@ const styles = StyleSheet.create({
     minHeight: 58,
     paddingHorizontal: s[4],
     paddingVertical: s[3]
+  },
+  menuRowCompact: {
+    alignItems: "center",
+    gap: s[3],
+    paddingHorizontal: s[3]
+  },
+  menuItemCopy: {
+    flex: 1,
+    gap: s[1],
+    minWidth: 0
+  },
+  menuItemMeta: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: s[3]
+  },
+  menuItemMetaCompact: {
+    alignItems: "flex-end",
+    flexDirection: "column",
+    gap: s[2],
+    minWidth: 86
   },
   modalActionRow: {
     flexDirection: "row",

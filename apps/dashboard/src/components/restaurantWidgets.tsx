@@ -156,6 +156,8 @@ export function OrderStatusMix({ orders }: { orders: Order[] }) {
 
 export function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Order[]; selectedOrderId?: string | undefined; onSelect?: (id: string) => void }) {
   const { locale, t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 760;
   if (orders.length === 0) {
     return (
       <View style={styles.emptyState}>
@@ -169,19 +171,44 @@ export function OrderTable({ orders, selectedOrderId, onSelect }: { orders: Orde
   return (
     <View style={styles.table}>
       {orders.map((order) => (
-        <Pressable key={order.id} onPress={() => onSelect?.(order.id)} style={[styles.tableRow, selectedOrderId === order.id && styles.tableRowActive]}>
-          <View style={{ flex: 0.8 }}>
-            <Text style={styles.tableStrong}>{orderCodeText(order.id)}</Text>
-            <Text style={type.tiny}>{formatLocalizedDateTime(order.createdAt, locale)}</Text>
-          </View>
-          <View style={{ flex: 1.1 }}>
-            <Text style={type.body}>{customerNameText(order.customer.name, locale)}</Text>
-            <Text style={type.tiny}>{t.common.itemCount(order.items.length)}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <LocalizedStatusBadge status={order.status} />
-          </View>
-          <Text style={[styles.price, { flex: 0.7 }]}>{formatCurrency(order.totalCents, intlLocale(locale))}</Text>
+        <Pressable
+          key={order.id}
+          onPress={() => onSelect?.(order.id)}
+          style={[styles.tableRow, compact && styles.tableRowCompact, selectedOrderId === order.id && styles.tableRowActive]}
+        >
+          {compact ? (
+            <>
+              <View style={styles.tableCompactTop}>
+                <View style={styles.tableCompactCode}>
+                  <Text style={styles.tableStrong}>{orderCodeText(order.id)}</Text>
+                  <Text style={type.tiny}>{formatLocalizedDateTime(order.createdAt, locale)}</Text>
+                </View>
+                <Text style={styles.price}>{formatCurrency(order.totalCents, intlLocale(locale))}</Text>
+              </View>
+              <View style={styles.tableCompactBottom}>
+                <View style={styles.tableCompactCustomer}>
+                  <Text numberOfLines={2} style={type.body}>{customerNameText(order.customer.name, locale)}</Text>
+                  <Text style={type.tiny}>{t.common.itemCount(order.items.length)}</Text>
+                </View>
+                <LocalizedStatusBadge status={order.status} />
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={{ flex: 0.8 }}>
+                <Text style={styles.tableStrong}>{orderCodeText(order.id)}</Text>
+                <Text style={type.tiny}>{formatLocalizedDateTime(order.createdAt, locale)}</Text>
+              </View>
+              <View style={{ flex: 1.1 }}>
+                <Text style={type.body}>{customerNameText(order.customer.name, locale)}</Text>
+                <Text style={type.tiny}>{t.common.itemCount(order.items.length)}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <LocalizedStatusBadge status={order.status} />
+              </View>
+              <Text style={[styles.price, { flex: 0.7 }]}>{formatCurrency(order.totalCents, intlLocale(locale))}</Text>
+            </>
+          )}
         </Pressable>
       ))}
     </View>
@@ -237,20 +264,26 @@ export function OrderInspector({ order }: { order: Order }) {
 
 export function CustomerRow({ customer }: { customer: Customer }) {
   const { locale, t } = useI18n();
+  const { width } = useWindowDimensions();
+  const compact = width < 760;
   return (
-    <View style={styles.customerRow}>
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{customer.name.slice(0, 1)}</Text>
+    <View style={[styles.customerRow, compact && styles.customerRowCompact]}>
+      <View style={styles.customerIdentity}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{customer.name.slice(0, 1)}</Text>
+        </View>
+        <View style={styles.customerCopy}>
+          <Text numberOfLines={2} style={type.body}>{customerNameText(customer.name, locale)}</Text>
+          <Text numberOfLines={2} style={type.tiny}>
+            {customer.email ?? t.common.noEmail} · {customer.phone ?? t.common.noPhone}
+          </Text>
+        </View>
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={type.body}>{customerNameText(customer.name, locale)}</Text>
-        <Text style={type.tiny}>
-          {customer.email ?? t.common.noEmail} · {customer.phone ?? t.common.noPhone}
-        </Text>
+      <View style={[styles.customerMetrics, compact && styles.customerMetricsCompact]}>
+        <SettingMetric label={t.common.orders} value={`${customer.orderCount}`} />
+        <SettingMetric label={t.crm.spend} value={formatCurrency(customer.spendCents, intlLocale(locale))} />
+        <SettingMetric label={t.crm.lastOrder} value={customer.recentOrders[0] ? formatLocalizedDateTime(customer.recentOrders[0].createdAt, locale) : t.common.none} />
       </View>
-      <SettingMetric label={t.common.orders} value={`${customer.orderCount}`} />
-      <SettingMetric label={t.crm.spend} value={formatCurrency(customer.spendCents, intlLocale(locale))} />
-      <SettingMetric label={t.crm.lastOrder} value={customer.recentOrders[0] ? formatLocalizedDateTime(customer.recentOrders[0].createdAt, locale) : t.common.none} />
     </View>
   );
 }
@@ -299,6 +332,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: s[4],
     paddingVertical: s[4]
+  },
+  customerRowCompact: {
+    alignItems: "stretch",
+    flexDirection: "column",
+    gap: s[3]
+  },
+  customerIdentity: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: s[3],
+    minWidth: 0
+  },
+  customerCopy: {
+    flex: 1,
+    minWidth: 0
+  },
+  customerMetrics: {
+    flexDirection: "row",
+    gap: s[3]
+  },
+  customerMetricsCompact: {
+    flexWrap: "wrap"
   },
   chartAxis: {
     flexDirection: "row",
@@ -443,8 +499,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: s[3],
     paddingVertical: s[3]
   },
+  tableRowCompact: {
+    alignItems: "stretch",
+    flexDirection: "column",
+    gap: s[3],
+    paddingHorizontal: s[3],
+    paddingVertical: s[3]
+  },
   tableRowActive: {
     backgroundColor: c.surfaceMuted
+  },
+  tableCompactTop: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: s[3],
+    justifyContent: "space-between"
+  },
+  tableCompactBottom: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: s[3],
+    justifyContent: "space-between"
+  },
+  tableCompactCode: {
+    minWidth: 76
+  },
+  tableCompactCustomer: {
+    flex: 1,
+    minWidth: 0
   },
   tableStrong: {
     color: c.ink,
